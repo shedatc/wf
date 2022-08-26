@@ -1,0 +1,11 @@
+{
+    "pyxel-resource": [
+        "assets/pyxel-resources"
+    ],
+    "image": [
+        "assets/images"
+    ],
+    "sprite": [
+        "assets/sprites"
+    ]
+}

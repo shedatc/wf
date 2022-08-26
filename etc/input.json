@@ -1,0 +1,50 @@
+{
+    "default-mode": "tactical/select",
+    "modes": {
+        "strategic/select": {
+            "abbrev": "M",
+            "colors": {
+                "foreground": 0,
+                "background": 6
+            },
+            "keys": {
+                "pressed": {
+                    "KEY_Q":             "quit",
+                    "KEY_A":             "cameraLeft",
+                    "KEY_U":             "cameraUp",
+                    "KEY_I":             "cameraDown",
+                    "KEY_E":             "cameraRight",
+                    "MOUSE_BUTTON_LEFT": "cameraToMouse"
+                },
+                "released": {
+                    "KEY_O":              "arenaViewToggle",
+                    "MOUSE_BUTTON_RIGHT": "strategicMoveToMouse"
+                }
+            }
+        },
+        "tactical/select": {
+            "abbrev": "S",
+            "colors": {
+                "foreground": 0,
+                "background": 7
+            },
+            "keys": {
+                "pressed": {
+                    "KEY_F1":            "debugTileDataFromMouse",
+                    "KEY_F2":            "debugSquareCoordinatesFromMouse",
+                    "KEY_Q":             "quit",
+                    "MOUSE_BUTTON_LEFT": "regionEnable",
+                    "KEY_A":             "cameraLeft",
+                    "KEY_U":             "cameraUp",
+                    "KEY_I":             "cameraDown",
+                    "KEY_E":             "cameraRight"
+                },
+                "released": {
+                    "KEY_O":              "arenaViewToggle",
+                    "MOUSE_BUTTON_LEFT":  "regionDisable",
+                    "MOUSE_BUTTON_RIGHT": "tacticalMoveToMouse"
+                }
+            }
+        }
+    }
+}

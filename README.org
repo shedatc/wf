@@ -1,0 +1,3 @@
+* Weapon Factory
+
+My experimentations with creating an RTS game engine with [[https:/kitao/pyxel][Pyxel]].

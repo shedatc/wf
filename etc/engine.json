@@ -1,0 +1,33 @@
+{
+    "caption":    "Weapon Factory",
+    "fps":        30,
+    "mouse":      true,
+    "arena": {
+        "name": "lt-shock",
+        "obstacles": {
+            "operator": "not-in",
+            "list": [
+                "(0, 48)",
+                "(8, 48)",
+                "(16, 48)",
+                "(24, 48)",
+                "(32, 48)",
+                "(40, 48)",
+                "(48, 48)"
+            ]
+        }
+    },
+    "logs": [
+        "Arena",
+        "ArenaView",
+        "Camera",
+        "Compass",
+        "Engine",
+        "Entity",
+        "InputHandler",
+        "NavBeacon",
+        "NavPath",
+        "Region",
+        "Sprite"
+    ]
+}

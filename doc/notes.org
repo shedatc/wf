@@ -1,0 +1,37 @@
+* Angle
+
+   Angle in degrees ranging from 0 to 359. With 0 being 3 o'clock. Rotating "left" means rotating counter clockwise. And
+   rotating "right" means rotating clockwise.
+
+   The supported angles are sprite-specific.
+
+* Animation
+
+   A bunch of frames allowed to change at a given rate, i.e., frames per seconds. The FPS is computed by knowing the
+   current frame count (`pyxel.frame_count`).
+
+* Hop
+
+   An adjacent square. Each square have between 3 and 8 hops. The square itself is not one of its own hops.
+
+   | top-left hop    | top hop    | top-right hop    |
+   |-----------------|------------|------------------|
+   | left hop        | SQUARE     | right hop        |
+   |-----------------|------------|------------------|
+   | bottom-left hop | bottom hop | bottom-right hop |
+
+* Conventions
+
+** Points Coordinates vs Square Coordinates
+
+    Point's coordinates are named (x, y) and square's coordinates are named (u, v).
+
+** Arena
+
+   Arena is 256x256 tiles ⇒ 256x256 x 8x8 pixels ⇒ 2048x2048 pixels.
+   Screen is 256x256 pixels ⇒ 32x32 tiles.
+   Minimap is 64x64 pixels ⇒ 1 pixel represents 4x4 tiles ⇒ 4x4 x 8x8 ⇒ 32x32 pixels.
+
+** Input
+
+   See keymaps.json.
