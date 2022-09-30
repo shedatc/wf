@@ -1,26 +1,14 @@
 {
-    "caption":    "Weapon Factory",
+    "caption": "Weapon Factory",
     "screen": {
         "width": 256,
         "height": 256,
         "fullscreen": true
     },
-    "fps":        30,
-    "mouse":      true,
+    "fps": 30,
+    "mouse": true,
     "arena": {
-        "name": "lt-shock",
-        "obstacles": {
-            "operator": "not-in",
-            "list": [
-                "(0, 48)",
-                "(8, 48)",
-                "(16, 48)",
-                "(24, 48)",
-                "(32, 48)",
-                "(40, 48)",
-                "(48, 48)"
-            ]
-        }
+        "name": "lt-shock"
     },
     "logs": [
         "Arena",
