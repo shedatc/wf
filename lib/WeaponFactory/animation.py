@@ -5,8 +5,9 @@ from .utils import Config, log_ex
 
 class Animation:
 
-    def log(msg):
-        log_ex(msg, category="Animation")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self, name, width, height, surface, rate, is_loop, frames):
         self.name      = name
@@ -60,8 +61,9 @@ class Animation:
 
 class AnimationManager:
 
-    def log(msg):
-        log_ex(msg, category="AnimationManager")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self, surface):
         self.animations = {}
