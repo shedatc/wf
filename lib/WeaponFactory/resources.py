@@ -1,53 +1,69 @@
 import json
 import os
 import os.path
-import pyxel
+import pygame
 
-from pprint import pprint
+from os      import getcwd, getenv
+from os.path import join           as pjoin
+from pprint  import pprint
 
-from .utils import Config, logEx
+from .utils import Config, log_ex
 
 class Resources:
 
-    singleton = None
+    _singleton = None
 
-    def log(msg):
-        logEx(msg, category="Resources", frame=False)
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category="Resources")
 
-    def __init__(self):
-        assert Resources.singleton is None
-        Resources.singleton = self
+    @classmethod
+    def singleton(cls):
+        if cls._singleton is None:
+            cls._singleton = Resources()
+        return cls._singleton
 
-        self.nextImg = 1
-        self.images  = {}
+    @classmethod
+    def _dir(cls):
+        wf_data_dir = getenv("WF_DATA")
+        if wf_data_dir is not None:
+            return wf_data_dir
+        xdg_data_home_dir = getenv("XDG_DATA_HOME")
+        if xdg_data_home_dir is not None:
+            return pjoin(xdg_data_home_dir, "wf")
+        home_dir = getenv("HOME")
+        assert home_dir is not None, "Missing HOME environment variable"
+        return pjoin(home_dir, ".local", "share", "wf")
 
-    def locateResource(self, resourceType, fileName):
-        for d in Config.get("resources.json", resourceType):
+    @classmethod
+    def locate(cls, resource_type, file_name):
+        rt_dirs = Config.singleton().get("resources.json", resource_type)
+        if rt_dirs is None:
+            raise RuntimeError(f"Invalid resource type: {resource_type}")
+        for d in rt_dirs:
             if d[0] == "/":
-                path = os.path.join(d, fileName)
+                path = os.path.join(d, file_name)
             else:
-                path = os.path.join(os.getcwd(), d, fileName)
+                path = pjoin(Resources._dir(), d, file_name)
             if os.path.exists(path):
                 return path
         else:
-            return None
+            Resources.log(f'Resources Base Directory: {Resources._dir()}')
+            Resources.log(f'{resource_type} Directories: {rt_dirs}')
+            raise RuntimeError(f"Missing {resource_type} resource: {file_name}")
 
-    def image(name):
-        assert Resources.singleton is not None
-        self = Resources.singleton
+    def __init__(self):
+        self.images = {}
 
+    def image(self, name):
         if name in self.images:
             return self.images[name]
-        elif self.nextImg >= 3:
-            raise RuntimeError("images pool exhausted")
 
-        path = self.locateResource("image", f"{name}.png")
+        path = Resources.locate("image", f"{name}.png")
         if path is None:
-            raise RuntimeError("image not found")
+            raise RuntimeError("Image not found")
 
-        img = self.nextImg
-        pyxel.image(img).load(0, 0, path)
+        img               = pygame.image.load(path)
         self.images[name] = img
         Resources.log(f'Image: name="{name}" path="{path}" img={img}')
-        self.nextImg += 1
         return img

@@ -1,48 +1,62 @@
 {
     "default-mode": "tactical/select",
+    "repeat": {
+        "delay":    10,
+        "interval": 0
+    },
     "modes": {
         "strategic/select": {
-            "abbrev": "M",
+            "abbrev": "S",
             "colors": {
-                "foreground": 0,
-                "background": 6
+                "foreground": [0,   0, 0],
+                "background": [255, 0, 0]
             },
             "keys": {
                 "pressed": {
                     "KEY_Q":             "quit",
-                    "KEY_A":             "cameraLeft",
-                    "KEY_U":             "cameraUp",
-                    "KEY_I":             "cameraDown",
-                    "KEY_E":             "cameraRight",
-                    "MOUSE_BUTTON_LEFT": "cameraToMouse"
+                    "KEY_ESCAPE":        "quit",
+                    "KEY_A":             "camera_left",
+                    "KEY_LEFT":          "camera_left",
+                    "KEY_U":             "camera_up",
+                    "KEY_UP":            "camera_up",
+                    "KEY_I":             "camera_down",
+                    "KEY_DOWN":          "camera_down",
+                    "KEY_E":             "camera_right",
+                    "KEY_RIGHT":         "camera_right",
+                    "MOUSE_BUTTON_LEFT": "camera_to_mouse"
                 },
                 "released": {
-                    "KEY_O":              "arenaViewToggle",
-                    "MOUSE_BUTTON_RIGHT": "strategicMoveToMouse"
+                    "KEY_O":              "arena_view_toggle",
+                    "MOUSE_BUTTON_RIGHT": "strategic_move_to_mouse"
                 }
             }
         },
         "tactical/select": {
             "abbrev": "S",
             "colors": {
-                "foreground": 0,
-                "background": 7
+                "foreground": [0, 0,   0],
+                "background": [0, 255, 0]
             },
             "keys": {
                 "pressed": {
-                    "KEY_F1":            "debugTileDataFromMouse",
-                    "KEY_F2":            "debugSquareCoordinatesFromMouse",
+                    "KEY_F1":            "debug_tile_data_from_mouse",
+                    "KEY_F2":            "debug_square_coordinates_from_mouse",
                     "KEY_Q":             "quit",
-                    "MOUSE_BUTTON_LEFT": "regionEnable",
-                    "KEY_A":             "cameraLeft",
-                    "KEY_U":             "cameraUp",
-                    "KEY_I":             "cameraDown",
-                    "KEY_E":             "cameraRight"
+                    "KEY_ESCAPE":        "quit",
+                    "MOUSE_BUTTON_LEFT": "region_enable",
+                    "KEY_A":             "camera_left",
+                    "KEY_LEFT":          "camera_left",
+                    "KEY_U":             "camera_up",
+                    "KEY_UP":            "camera_up",
+                    "KEY_I":             "camera_down",
+                    "KEY_DOWN":          "camera_down",
+                    "KEY_E":             "camera_right",
+                    "KEY_RIGHT":         "camera_right"
                 },
                 "released": {
-                    "KEY_O":              "arenaViewToggle",
-                    "MOUSE_BUTTON_LEFT":  "regionDisable",
-                    "MOUSE_BUTTON_RIGHT": "tacticalMoveToMouse"
+                    "KEY_O":              "arena_view_toggle",
+                    "MOUSE_BUTTON_LEFT":  "region_disable",
+                    "MOUSE_BUTTON_RIGHT": "tactical_move_to_mouse"
                 }
             }
         }

@@ -1,3 +1,33 @@
 * Weapon Factory
 
-My experimentations with creating an RTS game engine with [[https:/kitao/pyxel][Pyxel]].
+My experimentations with creating an arcade RTS game engine with [[https:pygame.org][Pygame]].
+
+** Files
+
+=$WF_CONF/engine.json=
+
+Main configuration file.
+
+=$WF_CONF/input.json=
+
+Input configuration file.
+
+=$WF_CONF/resources.json=
+
+Per-resource type search directories. Relative path are relative to =$WF_DATA=.
+
+** Environment
+
+=WF_DATA=
+
+Directory containing data, e.g., assets. Used by =resources.json=. When
+undefined, will try the following directories in that order:
+- =$XDG_DATA_HOME/wf=
+- =$HOME/.local/share/wf=
+
+=WF_CONF=
+
+Directory containing the other files, e.g., configuration files. When undefined,
+will try the following directories in that order:
+- =$XDG_CONFIG_HOME/wf=
+- =$HOME/.config/wf=

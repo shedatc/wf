@@ -1,11 +1,12 @@
 {
-    "pyxel-resource": [
-        "assets/pyxel-resources"
-    ],
     "image": [
-        "assets/images"
+        "assets/images/lt-shock",
+        "assets/images/drone"
     ],
     "sprite": [
-        "assets/sprites"
+        "assets/sprites/drone"
+    ],
+    "tilemap": [
+        "assets/tilemaps/lt-shock"
     ]
 }

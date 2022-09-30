@@ -1,65 +1,72 @@
-import pyxel
+import pygame
 
-from .const      import OBSTACLE, SCREEN_HEIGHT, SCREEN_WIDTH, SQUARE_SIZE, WALKABLE
+from pygame import Rect
+
+from .const      import OBSTACLE, SQUARE_SIZE, WALKABLE
 from .input      import Mouse
 from .navigation import Compass
-from .utils      import Config, logEx
+from .resources  import Resources
+from .tilemap    import Tilemap
+from .utils      import Config, log_ex
 
 class Camera:
 
-    singleton = None
+    _singleton = None
 
-    def getSingleton():
-        if Camera.singleton is None:
-            Camera.singleton = Camera()
-        return Camera.singleton
+    @classmethod
+    def singleton(cls):
+        if cls._singleton is None:
+            cls._singleton = Camera()
+        return cls._singleton
 
-    def log(msg):
-        logEx(msg, category="Camera")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        assert Camera.singleton is None
-        Camera.singleton = self
+        (screen_width, screen_height) = pygame.display.get_window_size()
 
-        a           = Arena.getSingleton()
+        a           = Arena.singleton()
         self.u      = 0
         self.v      = 0
-        self.width  = 32
-        self.height = 32
+        self.width  = screen_width  // SQUARE_SIZE
+        self.height = screen_height // SQUARE_SIZE
         self.lu     = a.width  - self.width  - 1
         self.lv     = a.height - self.height - 1
         self.show()
 
+    def rect(self):
+        return Rect(self.u, self.v, self.width, self.height)
+
     def show(self):
-        Camera.log(f"u={self.u} v={self.v}")
-        Camera.log(f"lu={self.lu} lv={self.lv}")
-        Camera.log(f"width={self.width} height={self.height}")
+        Camera.log(f"rect={self.rect()}")
 
     def left(self):
-        Camera.log(f"left")
         if self.u >= 1:
             self.u -= 1
+            Camera.log(f"left: rect={self.rect()}")
 
     def right(self):
-        Camera.log(f"right")
         if self.u <= self.lu:
             self.u += 1
+            Camera.log(f"right: rect={self.rect()}")
 
     def up(self):
-        Camera.log(f"up")
         if self.v >= 1:
             self.v -= 1
+            Camera.log(f"up: rect={self.rect()}")
 
     def down(self):
-        Camera.log(f"down")
         if self.v <= self.lv:
             self.v += 1
+            Camera.log(f"down: rect={self.rect()}")
 
     def move(self, u, v):
-        self.u = min(SCREEN_WIDTH  - self.width,  max(0, u))
-        self.v = min(SCREEN_HEIGHT - self.height, max(0, v))
+        (screen_width, screen_height) = pygame.display.get_window_size()
+        self.u                        = min(screen_width  - self.width,  max(0, u))
+        self.v                        = min(screen_height - self.height, max(0, v))
 
-    def centeredMove(self, u, v):
+    def centered_move(self, u, v):
         self.move(u - self.width  // 2,
                   v - self.height // 2)
 
@@ -71,217 +78,232 @@ class Camera:
 # An arena is the terrain with all its obstacles.
 class Arena:
 
-    singleton = None
+    _singleton = None
 
-    def getSingleton():
-        assert Arena.singleton is not None
-        return Arena.singleton
+    @classmethod
+    def singleton(cls):
+        assert cls._singleton is not None
+        return cls._singleton
 
-    def log(msg):
-        logEx(msg, category="Arena")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
-    def logEntitiesMatrix(self):
-        if not Config.mustLog("Arena"):
+    def log_entities_matrix(self):
+        if not Config.singleton().must_log("Arena"):
             return
-        Arena.log(f"Entities Matrix:")
+        Arena.log(f"Entities Matrix {self.width}x{self.height}:")
         for v in range(self.height):
             for u in range(self.width):
-                    entities = self.entitiesMatrix[v][u]
+                    entities = self.entities_matrix[v][u]
                     if len(entities) >= 1:
                         msg = f"[{u}, {v}]"
                         for entity in entities:
                             msg += f" {entity.name}"
                         Arena.log(msg)
 
-    def logObstaclesMatrix(self):
-        if not Config.mustLog("Arena"):
+    def log_obstacles_matrix(self):
+        if not Config.singleton().must_log("Arena"):
             return
         Arena.log(f"Obstacles Matrix:")
         for v in range(self.height):
             msg = ''
             for u in range(self.width):
-                    if self.obstaclesMatrix[v][u] == OBSTACLE:
+                    if self.obstacles_matrix[v][u] == OBSTACLE:
                         msg += 'x'
                     else:
                         msg += ' '
             Arena.log(msg)
 
     def __init__(self, config):
-        assert Arena.singleton is None
-        Arena.singleton = self
+        assert Arena._singleton is None
+        Arena._singleton = self
 
-        Arena.log(f"square={SQUARE_SIZE}")
+        self.name = config["name"]
+        Arena.log(f"name={self.name} square={SQUARE_SIZE}")
 
-        self.tm     = 0
-        self.width  = pyxel.tilemap(self.tm).width
-        self.height = pyxel.tilemap(self.tm).height
-        Arena.log(f"tm={self.tm} size={self.width}x{self.height}")
+        # Tilemap
+        self.tm                   = Tilemap(self.name)
+        (self.width, self.height) = self.tm.get_map_size()
+
+        # Strategic View
+        sv_path               = Resources.locate("image", f"{self.name}-sv.png")
+        self.sv               = pygame.image.load(sv_path)
+        (sv_width, sv_height) = self.sv.get_size()
+        Arena.log(f"sv: path={sv_path} size={sv_width}x{sv_height}")
+        assert sv_width  == self.width,  "SV image width must match tilemap width"
+        assert sv_height == self.height, "SV image height must match tilemap height"
 
         # Obstacles:
-        o = config["obstacles"]["operator"] or "in"
-        l = config["obstacles"]["list"]
-        assert o in ["in", "not-in"], "unknown obstacles operator"
-        if o == "in":
-            def isTileObstacle(data):
-                return data in l
-        elif o == "not-in":
-            def isTileObstacle(data):
-                return data not in l
-
-        self.obstaclesMatrix = [[1] * self.width for i in range(self.height)]
-        for v in range(self.height):
-            msg = ''
-            for u in range(self.width):
-                tileData = pyxel.tilemap(self.tm).pget(u, v)
-                tileData = (tileData[0] * SQUARE_SIZE, tileData[1] * SQUARE_SIZE) # Match what's displayed when hovering tiles in editor.
-                tileData = str(tileData)
-                if isTileObstacle(tileData):
-                    self.obstaclesMatrix[v][u] = OBSTACLE
-                else:
-                    self.obstaclesMatrix[v][u] = WALKABLE
-        # self.logObstaclesMatrix()
-
-        self.entitiesMatrix = [[1] * self.width for i in range(self.height)]
+        self.obstacles_matrix = [[WALKABLE] * self.width for i in range(self.height)]
         for v in range(self.height):
             for u in range(self.width):
-                    self.entitiesMatrix[v][u] = []
-        self.logEntitiesMatrix()
+                if self.tm.is_obstacle(u, v, 0):
+                    self.obstacles_matrix[v][u] = OBSTACLE
+        # self.log_obstacles_matrix()
 
-    def tileDataFromMouse(self):
-        return Square(0, 0).fromMouse().tileData()
+        self.entities_matrix = [[1] * self.width for i in range(self.height)]
+        for v in range(self.height):
+            for u in range(self.width):
+                    self.entities_matrix[v][u] = []
+        self.log_entities_matrix()
 
-    def isObstacle(self, square):
-        return self.obstaclesMatrix[square.v][square.u] == OBSTACLE
+    def tile_data_from_mouse(self):
+        return Square(0, 0).from_mouse().tile_data()
 
-    def entitiesAtSquare(self, u, v):
-        return self.entitiesMatrix[v][u]
+    def is_obstacle(self, square):
+        return self.obstacles_matrix[square.v][square.u] == OBSTACLE
+
+    def entities_at_square(self, u, v):
+        return self.entities_matrix[v][u]
 
     def notify(self, event, observable, **kwargs):
         if event == "entity-spawned":
-            self.entitySpawned(observable, kwargs["square"])
+            self.entity_spawned(observable, kwargs["square"])
         elif event == "entity-moved":
-            self.entityMoved(observable, kwargs["oldSquare"], kwargs["newSquare"])
+            self.entity_moved(observable, kwargs["old_square"], kwargs["new_square"])
         else:
             raise AssertionError(f"Event not supported: {event}")
 
-    def entitySpawned(self, entity, square):
+    def entity_spawned(self, entity, square):
         Arena.log(f"Entity {entity.name} spawned on {square}")
 
         (u, v) = (square.u, square.v)
-        self.entitiesMatrix[v][u].append(entity)
-        self.obstaclesMatrix[v][u] = OBSTACLE
-        Compass.getSingleton().setObstacle(square)
+        self.entities_matrix[v][u].append(entity)
+        self.obstacles_matrix[v][u] = OBSTACLE
+        Compass.singleton().set_obstacle(square)
         Arena.log(f"Obstacle at square {square}")
-        self.logEntitiesMatrix()
+        self.log_entities_matrix()
 
-    def entityMoved(self, entity, oldSquare, newSquare):
-        Arena.log(f"Entity {entity.name} moved from {oldSquare} to {newSquare}")
+    def entity_moved(self, entity, old_square, new_square):
+        Arena.log(f"Entity {entity.name} moved from {old_square} to {new_square}")
 
-        (ou, ov) = (oldSquare.u, oldSquare.v)
-        self.entitiesMatrix[ov][ou].remove(entity)
-        if (len(self.entitiesMatrix[ov][ou]) == 0):
-            self.obstaclesMatrix[ov][ou] = WALKABLE
-            Compass.getSingleton().setWalkable(oldSquare)
-            Arena.log(f"No more obstacle at square {oldSquare}")
+        (ou, ov) = (old_square.u, old_square.v)
+        self.entities_matrix[ov][ou].remove(entity)
+        if (len(self.entities_matrix[ov][ou]) == 0):
+            self.obstacles_matrix[ov][ou] = WALKABLE
+            Compass.singleton().set_walkable(old_square)
+            Arena.log(f"No more obstacle at square {old_square}")
 
-        (nu, nv) = (newSquare.u, newSquare.v)
-        self.entitiesMatrix[nv][nu].append(entity)
-        assert len(self.entitiesMatrix[nv][nu]) == 1, "Stacking not allowed for now"
+        (nu, nv) = (new_square.u, new_square.v)
+        self.entities_matrix[nv][nu].append(entity)
+        assert len(self.entities_matrix[nv][nu]) == 1, "Stacking not allowed for now"
 
-        self.obstaclesMatrix[nv][nu] = OBSTACLE
-        Compass.getSingleton().setObstacle(newSquare)
-        Arena.log(f"Obstacle at square {newSquare}")
-        self.logEntitiesMatrix()
+        self.obstacles_matrix[nv][nu] = OBSTACLE
+        Compass.singleton().set_obstacle(new_square)
+        Arena.log(f"Obstacle at square {new_square}")
+        self.log_entities_matrix()
 
 class ArenaView:
 
-    singleton = None
+    _singleton = None
 
-    def getSingleton():
-        if ArenaView.singleton is None:
-            ArenaView.singleton = ArenaView()
-        return ArenaView.singleton
+    @classmethod
+    def singleton(cls):
+        if cls._singleton is None:
+            cls._singleton = ArenaView()
+        return cls._singleton
 
-    def log(msg):
-        logEx(msg, category="ArenaView")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        self.isTactical = True
-        self.svi        = 2 # Strategic View Image
+        self.is_tactical = True
+        ArenaView.log(f"is_tactical={self.is_tactical}")
 
-        ArenaView.log(f"isTactical={self.isTactical} svi={self.svi}")
+    def get_width(self):
+        return Arena.singleton().width
 
-    def getWidth(self):
-        return Arena.getSingleton().width
+    def get_height(self):
+        return Arena.singleton().height
 
-    def getHeight(self):
-        return Arena.getSingleton().height
+    def get_tilemap(self):
+        return Arena.singleton().tm
 
-    def getTilemap(self):
-        return Arena.getSingleton().tm
+    def get_strategic_view(self):
+        return Arena.singleton().sv
 
     def tactical(self):
-        self.isTactical = True
+        self.is_tactical = True
         return self
 
     def strategic(self):
-        self.isTactical = False
+        self.is_tactical = False
         return self
 
     def toggle(self):
-        self.isTactical = not self.isTactical
+        self.is_tactical = not self.is_tactical
         return self
 
     def update(self):
-        if self.isTactical:
-            Region.getSingleton().update()
+        if self.is_tactical:
+            Region.singleton().update()
 
-    def drawTactical(self):
-        c = Camera.getSingleton()
-        pyxel.bltm(0, 0,                                              # x, y
-                   self.getTilemap(),                                 # tm
-                   c.u * SQUARE_SIZE, c.v * SQUARE_SIZE,              # u, v
-                   c.width * SQUARE_SIZE, c.height * SQUARE_SIZE,     # w, h
-                   0)                                                 # colkey
-        Region.getSingleton().draw()
+    def blit_tactical(self, surface):
+        c = Camera.singleton()
+        self.get_tilemap().blit_layer(c.rect(), 0, surface)
+        Region.singleton().blit(surface)
 
-    def drawStrategic(self):
-        c = Camera.getSingleton()
-        pyxel.blt(0, 0, self.svi, 0, 0, self.getWidth(), self.getHeight())
-        for v in range(0, SCREEN_HEIGHT):
-            for u in range(0, SCREEN_WIDTH):
-                entities = Arena.getSingleton().entitiesAtSquare(u, v)
+    def blit_strategic(self, surface):
+
+        # Blit the view itself.
+        (screen_width, screen_height) = pygame.display.get_window_size()
+        sv                            = self.get_strategic_view()
+        (w, h)                        = sv.get_size()
+        x                             = (screen_width  - w) // 2
+        y                             = (screen_height - h) // 2
+        surface.blit(sv, Rect((x, y), (w, h)))
+
+        # Blit the rectangle corresponding to the camera.
+        c = Camera.singleton()
+        pygame.draw.rect(surface, (200, 0, 0),
+                         Rect((c.u, c.v), (c.width, c.height)),
+                         width=1)
+
+        # FIXME
+        return
+
+        (screen_width, screen_height) = pygame.display.get_window_size()
+        for v in range(0, screen_height):
+            for u in range(0, screen_width):
+                entities = Arena.singleton().entities_at_square(u, v)
                 if len(entities) >= 1:
                     for e in entities:
-                        if e.isSelected:
-                            pyxel.pset(u, v, 9)
-                        else:
-                            pyxel.pset(u, v, 13)
-            pyxel.rectb(c.u, c.v, c.width, c.height, 12)
+                        # FIXME
+                        # if e.isSelected:
+                        #     pyxel.pset(u, v, 9)
+                        # else:
+                        #     pyxel.pset(u, v, 13)
+                        raise NotImplementedError("Must replace pyxel.pset")
 
-    def draw(self):
-        if self.isTactical:
-            self.drawTactical()
+    def blit(self, surface):
+        if self.is_tactical:
+            self.blit_tactical(surface)
         else:
-            self.drawStrategic()
+            self.blit_strategic(surface)
 
 # A point somewhere in the arena.
 # A point is said to be visible if in the camera range.
 class Point:
 
     def log(msg):
-        logEx(msg, category="Point")
+        log_ex(msg, category="Point")
 
     def __init__(self, x, y):
-        assert 0 <= x and x <= SCREEN_WIDTH*SQUARE_SIZE-1
-        assert 0 <= y and y <= SCREEN_HEIGHT*SQUARE_SIZE-1
+        if __debug__:
+            (screen_width, screen_height) = pygame.display.get_window_size()
+            if 0 > x or x > screen_width*SQUARE_SIZE-1:
+                raise AssertionError()
+            if 0 > y or y > screen_height*SQUARE_SIZE-1:
+                raise AssertionError()
         (self.x, self.y) = (x, y)
 
     def __str__(self):
         return f"({self.x}, {self.y})"
 
-    def __eq__(self, otherPoint):
-        return self.x == otherPoint.x and self.y == otherPoint.y
+    def __eq__(self, other_point):
+        return self.x == other_point.x and self.y == other_point.y
 
     # Return the square containing the point.
     def square(self):
@@ -289,77 +311,83 @@ class Point:
 
     # Return the point in screen coordinates.
     def screen(self):
-        assert self.isVisible()
-        c = Camera.getSingleton()
+        assert self.is_visible()
+        c = Camera.singleton()
         return Point(self.x - (c.u * SQUARE_SIZE),
                      self.y - (c.v * SQUARE_SIZE))
 
     # Move to the coordinates pointed by the mouse.
-    def fromMouse(self):
-        (mx, my) = Mouse.getCoords()
-        c        = Camera.getSingleton()
+    def from_mouse(self):
+        (mx, my) = Mouse.get_coords()
+        c        = Camera.singleton()
         self.x   = c.u * SQUARE_SIZE + mx
         self.y   = c.v * SQUARE_SIZE + my
         return self
 
     # Tell if the point is visible from current camera's position.
-    def isVisible(self):
-        return self.square().isVisible()
+    def is_visible(self):
+        return self.square().is_visible()
 
 # A square in the arena.
 class Square:
 
     def log(msg):
-        logEx(msg, category="Square")
+        log_ex(msg, category="Square")
 
     def __init__(self, u, v):
         u = int(u)
         v = int(v)
-        assert 0 <= u and u <= SCREEN_WIDTH-1
-        assert 0 <= v and v <= SCREEN_HEIGHT-1
+        if __debug__:
+            (screen_width, screen_height) = pygame.display.get_window_size()
+            if 0 > u or u > screen_width-1:
+                raise AssertionError()
+            if 0 > v or v > screen_height-1:
+                raise AssertionError()
 
         (self.u, self.v)   = (u, v)
         (self.pu, self.pv) = (None, None)
-        self.tm            = Arena.getSingleton().tm
+        self.tm            = Arena.singleton().tm
 
     def __str__(self):
         return f"[{self.u}, {self.v}]"
 
-    def __eq__(self, otherSquare):
-        return self.u == otherSquare.u and self.v == otherSquare.v
+    def __eq__(self, other_square):
+        return self.u == other_square.u and self.v == other_square.v
 
     def move(self, u, v):
         (self.pu, self.pv) = (self.u, self.v)
         (self.u, self.v)   = (u, v)
         return self
 
-    def relativeMove(self, u, v):
-        c = Camera.getSingleton()
+    def relative_move(self, u, v):
+        c = Camera.singleton()
         return self.move(c.u + u, c.v + v)
 
-    def canRollback(self):
+    def can_rollback(self):
         return self.pu is not None and self.pv is not None
 
     def rollback(self):
-        assert self.canRollback()
+        assert self.can_rollback()
         (self.u, self.v)   = (self.pu, self.pv)
         (self.pu, self.pv) = (None, None)
         return self
 
-    def fromMouse(self):
-        (mx, my) = Mouse.getCoords()
+    def from_mouse(self):
+        (mx, my) = Mouse.get_coords()
         (mu, mv) = (mx // SQUARE_SIZE, my // SQUARE_SIZE)
-        self.relativeMove(mu, mv)
+        self.relative_move(mu, mv)
         return self
 
-    def tileData(self):
-        return pyxel.tilemap(self.tm).get(self.u, self.v)
+    def tile_data(self):
+        # FIXME
+        # return pyxel.tilemap(self.tm).get(self.u, self.v)
+        raise NotImplementedError("Must replace pyxel.tilemap")
 
-    def isObstacle(self):
-        return Arena.getSingleton().isObstacle(self)
+    def is_obstacle(self):
+        return Arena.singleton().is_obstacle(self)
 
-    def isVisible(self):
-        return Camera.getSingleton().view(self)
+    def is_visible(self):
+        return Camera.singleton().view(self)
 
     def point(self):
         return Point(self.u * SQUARE_SIZE + SQUARE_SIZE // 2,
@@ -367,99 +395,101 @@ class Square:
 
     # Tell if the other square is next to this one. A square is considered next
     # to itself.
-    def isNextTo(self, otherSquare):
-        du = abs(self.u - otherSquare.u)
-        dv = abs(self.v - otherSquare.v)
+    def is_next_to(self, other_square):
+        du = abs(self.u - other_square.u)
+        dv = abs(self.v - other_square.v)
         return du <= 1 and dv <= 1
 
 class Region:
 
-    singleton = None
+    _singleton = None
 
-    def getSingleton():
-        if Region.singleton is None:
-            Region.singleton = Region()
-        return Region.singleton
+    @classmethod
+    def singleton(cls):
+        if cls._singleton is None:
+            cls._singleton = Region()
+        return cls._singleton
 
-    def log(msg):
-        logEx(msg, category="Region")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        assert Region.singleton is None
-        Region.singleton = self
-
-        self.start     = None
-        self.end       = None
-        self.isEnabled = False
-        Region.log(f"start={self.start} end={self.end} isEnabled={self.isEnabled}")
+        self.start      = None
+        self.end        = None
+        self.is_enabled = False
+        Region.log(f"start={self.start} end={self.end} is_enabled={self.is_enabled}")
 
     def enable(self):
-        if self.isEnabled:
+        if self.is_enabled:
             Region.log("already enabled")
         else:
-            self.start     = Square(0, 0).fromMouse()
-            self.end       = Square(0, 0).fromMouse()
-            self.isEnabled = True
+            self.start      = Square(0, 0).from_mouse()
+            self.end        = Square(0, 0).from_mouse()
+            self.is_enabled = True
             Region.log("enabled")
 
+    # Return the entities belonging to the region. Return None if already
+    # disabled.
     def disable(self):
-        if self.isEnabled:
+        if self.is_enabled:
             Region.log("disabled")
-            entities       = self.getEntities()
-            self.start     = None
-            self.end       = None
-            self.isEnabled = False
+            entities        = self.get_entities()
+            self.start      = None
+            self.end        = None
+            self.is_enabled = False
             return entities
         else:
             Region.log("already disabled")
             return None
 
-    def isEmpty(self):
+    def is_empty(self):
         self.end is None or self.start == self.end
 
     def update(self):
-        if not self.isEnabled:
+        if not self.is_enabled:
             return
         if self.end is not None:
-            self.end.fromMouse()
-            Region.log(f"start={self.start} end={self.end} isEnabled={self.isEnabled}")
+            self.end.from_mouse()
+            Region.log(f"start={self.start} end={self.end} is_enabled={self.is_enabled}")
 
-    def getOrigin(self):
-        assert self.isEnabled
+    def get_origin(self):
+        assert self.is_enabled
         s = self.start
         e = self.end
         u = min(s.u, e.u)
         v = min(s.v, e.v)
         return Square(u, v)
 
-    def getWidth(self):
-        assert self.isEnabled
+    def get_width(self):
+        assert self.is_enabled
         return abs(self.start.u - self.end.u) + 1
 
-    def getHeight(self):
-        assert self.isEnabled
+    def get_height(self):
+        assert self.is_enabled
         return abs(self.start.v - self.end.v) + 1
 
-    def draw(self):
-        if not self.isEnabled:
+    def blit(self, surface):
+        if not self.is_enabled:
             return
 
         # Draw the square-level region
-        o  = self.getOrigin().point().screen()
+        o  = self.get_origin().point().screen()
         hs = SQUARE_SIZE // 2
         Region.log(f"origin={o}")
-        pyxel.rectb(o.x - hs, o.y - hs,
-                    self.getWidth() * SQUARE_SIZE, self.getHeight() * SQUARE_SIZE,
-                    8)
+
+        rect = Rect((o.x - hs, o.y - hs),
+                    (self.get_width() * SQUARE_SIZE, self.get_height() * SQUARE_SIZE))
+        pygame.draw.rect(surface, (200, 0, 0), rect, width=1)
 
     # Return the entities that are part of the region.
-    def getEntities(self):
+    def get_entities(self):
         entities = []
-        o = self.getOrigin()
-        a = Arena.getSingleton()
-        for v in range(o.v, o.v + self.getHeight()):
-            for u in range(o.u, o.u + self.getWidth()):
-                e = a.entitiesAtSquare(u, v)
+        o        = self.get_origin()
+        a        = Arena.singleton()
+        for v in range(o.v, o.v + self.get_height()):
+            for u in range(o.u, o.u + self.get_width()):
+                e = a.entities_at_square(u, v)
                 Region.log(f"e={e} len(e)={len(e)}")
                 if len(e) >= 1:
                     # If at least one entity is on the square, add only the
@@ -467,4 +497,3 @@ class Region:
                     entities.append(e[0])
         Region.log(f"entities={entities}")
         return entities
-

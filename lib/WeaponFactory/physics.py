@@ -1,26 +1,24 @@
 # Units:
 #    Speed: frames per seconds
 
-import pyxel
-
 from .arena import Point
 from .core  import Engine
 from .math  import Vector
-from .utils import Config, logEx
+from .utils import Config, log_ex
 
 class Physics:
 
     def log(msg):
-        logEx(msg, category="Physics")
+        log_ex(msg, category="Physics")
 
-    def __init__(self, origAngle, rotationSpeed, origPoint, translationSpeed):
-        self.rotation    = Rotation(origAngle, 22.5, rotationSpeed)
-        self.translation = Translation(origPoint, translationSpeed)
+    def __init__(self, orig_angle, rotation_speed, orig_point, translation_speed):
+        self.rotation    = Rotation(orig_angle, 22.5, rotation_speed)
+        self.translation = Translation(orig_point, translation_speed)
 
     def show(self):
         Physics.log(f"position={self.position()} orientation={self.orientation()}")
-        Physics.log(f"inRotation={not self.rotation.isDone()}")
-        Physics.log(f"inTranslaton={not self.translation.isDone()}")
+        Physics.log(f"rotating={not self.rotation.is_done()}")
+        Physics.log(f"translating={not self.translation.is_done()}")
 
     def orientation(self):
         return self.rotation.current
@@ -28,44 +26,46 @@ class Physics:
     def position(self):
         return self.translation.current
 
-    def targetPosition(self):
+    def target_position(self):
         return self.translation.target
 
-    def lookAt(self, point):
+    def look_at(self, point):
         self.rotation.look(self.position(), point)
 
-    def moveTo(self, point):
-        self.translation.moveTo(point)
+    def move_to(self, point):
+        self.translation.move_to(point)
 
-    def isDone(self):
-        return self.rotation.isDone() and self.translation.isDone()
+    def is_done(self):
+        return self.rotation.is_done() and self.translation.is_done()
 
     def update(self):
         self.rotation.update()
         self.translation.update()
 
-    def drawAt(self, x, y):
+    def blit_at(self, surface, x, y):
         if False:
             x += 20
             y += 8
-            pyxel.text(x, y, f"P: {self.position()}", 0)
+            # FIXME
+            # pyxel.text(x, y, f"P: {self.position()}", 0)
+            raise NotImplementedError("Must replace pyxel.text")
             y += 8
-            pyxel.text(x, y, f"O: {self.orientation()}°", 0)
+            # pyxel.text(x, y, f"O: {self.orientation()}°", 0)
             y += 8
-            pyxel.text(x, y, f"V: {self.translation.vector}", 0)
+            # pyxel.text(x, y, f"V: {self.translation.vector}", 0)
 
 class Rotation:
 
     def log(msg):
-        logEx(msg, category="Rotation")
+        log_ex(msg, category="Rotation")
 
-    def __init__(self, origAngle, step, fps):
-        self.current    = origAngle                   # Degrees
-        self.target     = None                        # Degrees
-        self.direction  = None                        # 1: left, -1: right
-        self.step       = step                        # Rotation steps in degrees.
-        self.frameRatio = Engine.getFrameRate() / fps
-        Rotation.log(f"frameRatio={self.frameRatio}")
+    def __init__(self, orig_angle, step, fps):
+        self.current     = orig_angle                  # Degrees
+        self.target      = None                        # Degrees
+        self.direction   = None                        # 1: left, -1: right
+        self.step        = step                        # Rotation steps in degrees.
+        self.frame_ratio = Engine.singleton().fps / fps
+        Rotation.log(f"frame_ratio={self.frame_ratio}")
 
     def show(self):
         Rotation.log(f"current={self.current} step={self.step}")
@@ -80,14 +80,14 @@ class Rotation:
             Rotation.log(msg)
 
     # Post-Conditions:
-    # - isDone() is True
+    # - is_done() is True
     def stop(self):
         Rotation.log("stop")
         self.target    = None
         self.direction = None
-        assert self.isDone()
+        assert self.is_done()
 
-    def isDone(self):
+    def is_done(self):
         return self.target is None
 
     def rotate(self):
@@ -100,25 +100,25 @@ class Rotation:
         assert self.current % self.step == 0
 
     def update(self):
-        if self.isDone():
+        if self.is_done():
             return
-        if pyxel.frame_count % self.frameRatio != 0:
+        if Engine.singleton().frame_count % self.frame_ratio != 0:
             return
         self.rotate()
         if self.current == self.target:
             self.stop()
 
-    def look(self, fromPoint, toPoint):
-        Rotation.log(f"look: from={fromPoint} to={toPoint}")
+    def look(self, from_point, to_point):
+        Rotation.log(f"look: from={from_point} to={to_point}")
 
         # Find the target angle.
-        dx = fromPoint.x - toPoint.x
-        dy = fromPoint.y - toPoint.y
+        dx = from_point.x - to_point.x
+        dy = from_point.y - to_point.y
         Rotation.log(f"look: dx={dx} dy={dy}")
         target = None
         if dx == 0:                              # top|bottom
             if dy == 0:
-                Rotation.log("look: nothing to do: fromPoint == toPoint")
+                Rotation.log("look: nothing to do: from_point == to_point")
                 return
             elif dy > 0:                          # top
                 target = 90
@@ -164,35 +164,35 @@ class Rotation:
 class Translation:
 
     def log(msg):
-        logEx(msg, category="Translation")
+        log_ex(msg, category="Translation")
 
     def __init__(self, current, fps):
-        self.current    = current
-        self.target     = None
-        self.distance   = None
-        self.vector     = None
-        self.vectorLen  = None
-        self.frameRatio = Engine.getFrameRate() / fps
-        Translation.log(f"frameRatio={self.frameRatio}")
+        self.current     = current
+        self.target      = None
+        self.distance    = None
+        self.vector      = None
+        self.vector_len  = None
+        self.frame_ratio = Engine.singleton().fps / fps
+        Translation.log(f"frame_ratio={self.frame_ratio}")
 
     def show(self):
         Translation.log(f"current={self.current}")
         if self.target is not None:
             Translation.log(f"target={self.target} distance={self.distance}")
-            Translation.log(f"vector={self.vector} vectorLen={self.vectorLen}")
+            Translation.log(f"vector={self.vector} vector_len={self.vector_len}")
 
     # Post-Conditions:
-    # - isDone() is True
+    # - is_done() is True
     def stop(self):
         Translation.log("stop")
-        self.current   = self.target
-        self.target    = None
-        self.distance  = None
-        self.vector    = None
-        self.vectorLen = None
-        assert self.isDone()
+        self.current    = self.target
+        self.target     = None
+        self.distance   = None
+        self.vector     = None
+        self.vector_len = None
+        assert self.is_done()
 
-    def isDone(self):
+    def is_done(self):
         return self.target is None
 
     def translate(self):
@@ -201,28 +201,28 @@ class Translation:
         assert self.vector is not None
         self.current.x += self.vector.x
         self.current.y += self.vector.y
-        self.distance  -= self.vectorLen
+        self.distance  -= self.vector_len
 
-    def moveTo(self, point):
+    def move_to(self, point):
         assert isinstance(point, Point)
-        Translation.log("moveTo")
+        Translation.log("move_to")
         self.target = point
         v           = Vector(self.target.x - self.current.x,
                              self.target.y - self.current.y)
-        Translation.log(f"moveTo: v={v}")
-        self.distance = v.getLength()
+        Translation.log(f"move_to: v={v}")
+        self.distance = v.get_length()
         if self.distance >= 1:
-            self.vector    = v.getUnit().scale(self.distance // self.frameRatio)
-            self.vectorLen = self.vector.getLength()
-            assert self.vectorLen <= self.distance
+            self.vector    = v.get_unit().scale(self.distance // self.frame_ratio)
+            self.vector_len = self.vector.get_length()
+            assert self.vector_len <= self.distance
         else:
             self.stop()
         self.show()
 
     def update(self):
-        if self.isDone():
+        if self.is_done():
             return
-        if pyxel.frame_count % self.frameRatio != 0:
+        if Engine.singleton().frame_count % self.frame_ratio != 0:
             return
         self.translate()
         if self.distance is None or self.distance <= 0:

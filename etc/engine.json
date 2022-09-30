@@ -1,5 +1,10 @@
 {
     "caption":    "Weapon Factory",
+    "screen": {
+        "width": 256,
+        "height": 256,
+        "fullscreen": true
+    },
     "fps":        30,
     "mouse":      true,
     "arena": {
@@ -20,14 +25,13 @@
     "logs": [
         "Arena",
         "ArenaView",
-        "Camera",
         "Compass",
         "Engine",
         "Entity",
-        "InputHandler",
         "NavBeacon",
         "NavPath",
-        "Region",
-        "Sprite"
+        "Resources",
+        "Sprite",
+        "Tilemap"
     ]
 }

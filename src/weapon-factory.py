@@ -1,9 +1,4 @@
-# You can run me as follow:
-#
-#    WF=$HOME/_/wf
-#    env PYTHONPATH=$WF/lib               \
-#        RUST_BACKTRACE=1                 \
-#        python $WF/src/weapon-factory.py
+#!/usr/bin/env python
 
 from WeaponFactory import core as WF
 

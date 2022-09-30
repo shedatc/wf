@@ -1,20 +1,21 @@
 from .animation import AnimationManager
+from .resources import Resources
 from .sprites   import Entity
-from .utils     import Config, logEx
+from .utils     import Config, log_ex
 
 class Drone(Entity):
 
     def log(msg):
-        logEx(msg, category="Drone")
+        log_ex(msg, category="Drone")
 
     def __init__(self, square):
         Drone.log(f'square={square}')
         Entity.__init__(self, "drone", square.point(), 8, 8, 22.5, 10, 10)
 
-    def initAnimation(self, img):
-        self.animation = DroneAnimationManager(img)
+    def init_animation(self):
+        self.animation = DroneAnimationManager()
 
-    def updateAnimation(self):
+    def update_animation(self):
         o = str(self.physics.orientation())
         if o[-2:] == '.0':
             o = o[:-2]
@@ -24,8 +25,9 @@ class Drone(Entity):
 
 class DroneAnimationManager(AnimationManager):
 
-    def __init__(self, img):
-        AnimationManager.__init__(self, img)
+    # FIXME Must use assets/sprites/drone/drone.json
+    def __init__(self):
+        AnimationManager.__init__(self, Resources.singleton().image("drone"))
         self.add("standby@0", [
             (0, 0),
         ])
@@ -74,7 +76,7 @@ class DroneAnimationManager(AnimationManager):
         self.add("standby@337.5", [
             (120, 0),
         ])
-        self.add("leftRotation", [
+        self.add("left_rotation", [
             (0, 0),
             (8, 0),
             (16, 0),
@@ -92,7 +94,7 @@ class DroneAnimationManager(AnimationManager):
             (112, 0),
             (120, 0),
         ])
-        self.add("rightRotation", [
+        self.add("right_rotation", [
             (0, 0),
             (120, 0),
             (112, 0),

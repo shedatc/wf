@@ -1,33 +1,33 @@
 import os.path
-import pyxel
-
-from os import chdir, getcwd
+import pygame
 
 from .arena      import Arena, Square, ArenaView, Camera, Region
 from .const      import SCREEN_WIDTH, SCREEN_HEIGHT
 from .input      import ModalInputHandler, Mouse
 from .navigation import Compass, NavBeacon
 from .resources  import Resources
-from .utils      import Config, logEx
+from .utils      import Config, log_ex
+
+COLOR_BLUE = (0, 0, 200)
+
+EV_NAV = pygame.event.custom_type()
 
 class Engine:
 
-    singleton = None
+    _singleton = None
 
-    def getFrameRate():
-        assert Engine.singleton is not None
-        self = Engine.singleton
-
-        return self.fps
+    @classmethod
+    def singleton(cls):
+        assert cls._singleton is not None
+        return cls._singleton
 
     def log(msg):
-        logEx(msg, category="Engine", frame=False)
+        log_ex(msg, category="Engine")
 
     def __init__(self, profiling=False):
-        assert Engine.singleton is None
-        Engine.singleton = self
+        assert Engine._singleton is None
+        Engine._singleton = self
 
-        Engine.log(f"Working Directory: {getcwd()}")
         Engine.log(f"Profiling: {profiling}")
         if profiling:
             import cProfile
@@ -36,257 +36,198 @@ class Engine:
         else:
             self.profile = None
 
-        config = Config.load("engine.json")
-        self.fps = config["fps"]
-
-        arenaConfig = config["arena"]
-        arenaName   = arenaConfig["name"]
-
+        config         = Config.singleton().load("engine.json")
+        self.fps       = config["fps"]
+        arena_config   = config["arena"]
+        arena_name     = arena_config["name"]
         self.resources = Resources()
 
-        orig_cwd = getcwd()
-        pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT,
-                   title=config["caption"], fps=self.fps,
-                   quit_key=pyxel.KEY_NONE)
-        chdir(orig_cwd)
-        pyxel.mouse(config["mouse"])
+        pygame.init()
 
-        pyxel.load( self.resources.locateResource("pyxel-resource", f"{arenaName}.pyxres") )
+        flags = 0
+        if config["screen"]["fullscreen"]:
+            flags |= pygame.FULLSCREEN
+            flags |= pygame.SCALED
+        self.screen = pygame.display.set_mode(
+            (config["screen"]["width"], config["screen"]["height"]), # size
+            flags)                                                   # flags
+        pygame.display.set_caption(config["caption"])
+        pygame.mouse.set_visible(config["mouse"])
 
-        self.entities         = []
-        self.selectedEntities = []
-        self.initScene(arenaConfig)
-
-        self.debugData = None
-
-        self.initInput()
+        self.entities          = []
+        self.selected_entities = []
+        self.debug_data        = None
+        self.init_scene(arena_config)
+        self.init_input()
 
         Engine.log("Ready")
 
-    def initInput(self):
+    def quit(self):
+        if self.profile is not None:
+            from io     import StringIO
+            from pstats import SortKey, Stats
+
+            self.profile.disable()
+            s  = StringIO()
+            ps = Stats(self.profile, stream=s).sort_stats(SortKey.CUMULATIVE)
+            ps.print_stats()
+            with open("wf.pstats", "w") as f:
+                f.write(s.getvalue())
+        self.is_running = False
+
+    def init_input(self):
         ih = ModalInputHandler()
 
-        def wfQuit():
-            if self.profile is not None:
-                from io     import StringIO
-                from pstats import SortKey, Stats
-
-                self.profile.disable()
-                s  = StringIO()
-                ps = Stats(self.profile, stream=s).sort_stats(SortKey.CUMULATIVE)
-                ps.print_stats()
-                with open("wf.pstats", "w") as f:
-                    f.write(s.getvalue())
-            pyxel.quit()
-        ih.addFunc("quit", wfQuit)
+        ih.addFunc("quit", lambda: self.quit())
 
         # DEBUG
-        def debugTileDataFromMouse():
-            self.debugData = Arena.getSingleton().tileDataFromMouse()
-        ih.addFunc("debugTileDataFromMouse", debugTileDataFromMouse)
+        def debug_tile_data_from_mouse():
+            self.debug_data = Arena.singleton().tile_data_from_mouse()
+        ih.addFunc("debug_tile_data_from_mouse", debug_tile_data_from_mouse)
 
         # DEBUG
-        def debugSquareCoordinatesFromMouse():
-            self.debugData = Square(0, 0).fromMouse()
-        ih.addFunc("debugSquareCoordinatesFromMouse", debugSquareCoordinatesFromMouse)
+        def debug_square_coordinates_from_mouse():
+            self.debug_data = Square(0, 0).from_mouse()
+        ih.addFunc("debug_square_coordinates_from_mouse", debug_square_coordinates_from_mouse)
 
         # Moving the camera
-        def cameraUp():
-            Camera.getSingleton().up()
-        ih.addFunc("cameraUp", cameraUp)
-        def cameraDown():
-            Camera.getSingleton().down()
-        ih.addFunc("cameraDown", cameraDown)
-        def cameraLeft():
-            Camera.getSingleton().left()
-        ih.addFunc("cameraLeft", cameraLeft)
-        def cameraRight():
-            Camera.getSingleton().right()
-        ih.addFunc("cameraRight", cameraRight)
-        def cameraToMouse():
-            (mx, my) = Mouse.getCoords()
-            Camera.getSingleton().centeredMove(mx, my)
-        ih.addFunc("cameraToMouse", cameraToMouse)
+        def camera_up():
+            Camera.singleton().up()
+        ih.addFunc("camera_up", camera_up)
+        def camera_down():
+            Camera.singleton().down()
+        ih.addFunc("camera_down", camera_down)
+        def camera_left():
+            Camera.singleton().left()
+        ih.addFunc("camera_left", camera_left)
+        def camera_right():
+            Camera.singleton().right()
+        ih.addFunc("camera_right", camera_right)
+        def camera_to_mouse():
+            (mx, my) = Mouse.get_coords()
+            Camera.singleton().centered_move(mx, my)
+        ih.addFunc("camera_to_mouse", camera_to_mouse)
 
-        def arenaViewToggle():
-            if ArenaView.getSingleton().toggle().isTactical:
+        def arena_view_toggle():
+            if ArenaView.singleton().toggle().is_tactical:
                 ih.enterMode("tactical/select")
             else:
                 ih.enterMode("strategic/select")
-        ih.addFunc("arenaViewToggle", arenaViewToggle)
+        ih.addFunc("arena_view_toggle", arena_view_toggle)
 
-        def tacticalMoveToMouse():
-            self.navBeacon.fromMouse()
-            if self.navBeacon.isEnabled:
-                for entity in self.selectedEntities:
-                    Compass.getSingleton().navigate(entity, self.navBeacon.square)
-        ih.addFunc("tacticalMoveToMouse", tacticalMoveToMouse)
-        def strategicMoveToMouse():
-            (mx, my) = Mouse.getCoords()
-            if self.navBeacon.tryMove( Square(mx, my) ):
-                for entity in self.selectedEntities:
-                    Compass.getSingleton().navigate(entity, self.navBeacon.square)
-        ih.addFunc("strategicMoveToMouse", strategicMoveToMouse)
+        def tactical_move_to_mouse():
+            self.nav_beacon.from_mouse()
+            if self.nav_beacon.is_enabled:
+                for entity in self.selected_entities:
+                    Compass.singleton() \
+                           .navigate(entity, self.nav_beacon.square)
+        ih.addFunc("tactical_move_to_mouse", tactical_move_to_mouse)
+
+        def strategic_move_to_mouse():
+            (mx, my) = Mouse.get_coords()
+            if self.nav_beacon.try_move( Square(mx, my) ):
+                for entity in self.selected_entities:
+                    path_found = Compass.singleton() \
+                                        .navigate(entity, self.nav_beacon.square)
+        ih.addFunc("strategic_move_to_mouse", strategic_move_to_mouse)
 
         # Region
-        def regionEnable():
-            self.clearSelection()
-            Region.getSingleton().enable()
-        ih.addFunc("regionEnable", regionEnable)
-        def regionDisable():
-            entities = Region.getSingleton().disable()
+        def region_enable():
+            self.clear_selection()
+            Region.singleton().enable()
+        ih.addFunc("region_enable", region_enable)
+        def region_disable():
+            entities = Region.singleton().disable()
             if entities is None:
-                self.clearSelection()
+                self.clear_selection()
             else:
                 for entity in entities:
                     self.select(entity)
-        ih.addFunc("regionDisable", regionDisable)
+        ih.addFunc("region_disable", region_disable)
 
         ih.configure()
 
-        self.inputHandler = ih
+        self.input_handler = ih
 
-    def clearSelection(self):
-        for entity in self.selectedEntities:
+    def clear_selection(self):
+        for entity in self.selected_entities:
             entity.unselect()
-        self.selectedEntities = []
+        self.selected_entities = []
 
     def select(self, entity):
         entity.select()
-        self.selectedEntities.append(entity)
+        self.selected_entities.append(entity)
 
-    def initScene(self, arenaConfig):
-        a = Arena(arenaConfig)
-        Compass(a.obstaclesMatrix)
+    def init_scene(self, arena_config):
+        a = Arena(arena_config)
+        Compass(a.obstacles_matrix)
 
         # Spawn some drones
         drones = {
-            "A": Square(20, 10),
+            "A": Square(10, 10),
             "B": Square(21, 10),
-            "C": Square(10, 30),
+            "C": Square(10, 20),
         }
         for name, square in drones.items():
-            drone = Drone(square)
+            drone      = Drone(square)
             drone.name = name
-            drone.registerObserver(a)
-            drone.notifyObservers("entity-spawned", square=drone.position().square())
+            drone.register_observer(a)
+            drone.notify_observers("entity-spawned", square=drone.position().square())
             self.entities.append(drone)
 
-        self.navBeacon = NavBeacon()
+        self.nav_beacon = NavBeacon()
 
     def update(self):
-        self.inputHandler.probe()
-        self.updateScene()
+        self.input_handler.probe()
+        self.update_scene()
 
-    def updateScene(self):
-        ArenaView.getSingleton().update()
+    def update_scene(self):
+        ArenaView.singleton().update()
         for entity in self.entities:
             entity.update()
 
     def draw(self):
-        pyxel.cls(pyxel.COLOR_BLACK)
-        self.drawScene()
-        self.drawDebugData()
+        self.screen.fill(COLOR_BLUE)
+        self._blit_scene(self.screen)
+        self._blit_debug_data(self.screen)
 
-    def drawScene(self):
-        av = ArenaView.getSingleton()
-        av.draw()
-        if av.isTactical:
-            c        = Camera.getSingleton()
+    def _blit_scene(self, surface):
+        av = ArenaView.singleton()
+        av.blit(surface)
+        if av.is_tactical:
+            c        = Camera.singleton()
             entities = []
-            a        = Arena.getSingleton()
+            a        = Arena.singleton()
             for v in range(c.v, c.v + c.height):
                 for u in range(c.u, c.u + c.width):
-                    entities.extend( a.entitiesAtSquare(u, v) )
+                    entities.extend( a.entities_at_square(u, v) )
             for e in entities:
-                e.drawNavPath()
+                e.blit_nav_path(surface)
             for e in entities:
-                e.drawSelection()
+                e.blit_selection(surface)
             for e in entities:
-                e.draw()
+                e.blit(surface)
             for e in entities:
-                e.drawOverlay()
-        self.inputHandler.draw()
+                e.blit_overlay(surface)
+        self.input_handler.blit(surface)
 
-    def drawDebugData(self):
-        if self.debugData is not None:
-            pyxel.text(0, 0, f"{self.debugData}", pyxel.COLOR_BLACK)
+    def _blit_debug_data(self, surface):
+        if self.debug_data is None:
+            return
+
+        # FIXME
+        # pyxel.text(0, 0, f"{self.debug_data}", pyxel.COLOR_BLACK)
+        raise NotImplementedError("Must replace pyxel.text")
 
     def run(self):
-        pyxel.run(self.update, self.draw)
-
-class AnimationSandbox(Engine):
-
-    def __init__(self, configDir="etc/animation"):
-        Engine.__init__(self, configDir=configDir)
-
-    def pickSprite(self, sprite):
-        self.sprite            = sprite
-        self.animations        = list( sprite.animation.animations.values() )
-        self.animationsCount   = len(self.animations)
-        self.setAnimationByIndex(0)
-
-    def initScene(self):
-        self.pickSprite( Drone(Square(15, 15)) )
-
-    def updateScene(self):
-        if pyxel.btnp(pyxel.KEY_UP):
-            self.previousAnimation()
-        elif pyxel.btnp(pyxel.KEY_DOWN):
-            self.nextAnimation()
-        elif pyxel.btnp(pyxel.KEY_SPACE):
-            self.sprite.animation.toggle()
-        elif pyxel.btnp(pyxel.KEY_RIGHT) and self.sprite.animation.current.isPaused:
-            self.nextFrame()
-        self.sprite.update()
-
-    def nextFrame(self):
-        animation = self.sprite.animation.current
-        animation.resume()
-        animation.nextFrame()
-        animation.pause()
-
-    def setAnimationByIndex(self, index):
-        assert index >= 0
-        assert index < self.animationsCount
-        self.currentAnimationIndex = index
-        self.currentAnimationName  = self.animations[index].name
-        self.sprite.animation.pause()
-        self.sprite.animation.select( self.currentAnimationName )
-        self.sprite.animation.pause()
-        Engine.log(f"Animation: {self.currentAnimationIndex}<{self.currentAnimationName}>")
-
-    def nextAnimation(self):
-        i = self.currentAnimationIndex + 1
-        if i == len(self.animations):
-            i = 0
-        self.setAnimationByIndex(i)
-
-    def previousAnimation(self):
-        i = self.currentAnimationIndex - 1
-        if i < 0:
-            i = len(self.animations) - 1
-        self.setAnimationByIndex(i)
-
-    def drawScene(self):
-        # List available animations
-        y = ( pyxel.height - self.animationsCount * 10 ) / 2
-        for a in range(self.animationsCount):
-            animation = self.animations[a]
-            if a == self.currentAnimationIndex:
-                pyxel.text(0, y, f"{animation.name}", pyxel.COLOR_WHITE)
-            else:
-                pyxel.text(0, y, f"{animation.name}", pyxel.COLOR_NAVY)
-            y += 10
-
-        # Frames Data
-        x = pyxel.width - 60
-        y = ( pyxel.height - 2 * 10 ) / 2
-        animation = self.sprite.animation.current
-        pyxel.text(x, y,      f"Current: {animation.current}", pyxel.COLOR_WHITE)
-        pyxel.text(x, y + 10, f"Last:    {animation.last}", pyxel.COLOR_WHITE)
-
-        # Draw the animatede sprite
-        self.sprite.draw()
+        clock            = pygame.time.Clock()
+        self.is_running  = True
+        self.frame_count = 0
+        while self.is_running:
+            self.update()
+            self.draw()
+            pygame.display.flip()
+            self.frame_count += 1
+            clock.tick(self.fps)
 
 from .drone import Drone

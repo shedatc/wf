@@ -1,11 +1,13 @@
-import pyxel
+import pygame
+
+from pygame import Rect
 
 from .animation  import Animation, AnimationManager
 from .arena      import Arena
 from .navigation import Compass, NavPath
 from .physics    import Physics
 from .resources  import Resources
-from .utils      import Config, Observable, logEx
+from .utils      import Config, Observable, log_ex
 
 # A sprite is something that is animated.
 #
@@ -13,45 +15,50 @@ from .utils      import Config, Observable, logEx
 # type Point). There's no direct relationship between a sprite and a square.
 class Sprite:
 
-    def __init__(self, name, origPoint, width, height):
-        self.img    = Resources.image(name)
+    def __init__(self, name, orig_point, width, height):
         self.name   = f"{name}@{hex(id(self))}"
-        self.point  = origPoint
+        self.point  = orig_point
         self.width  = width
         self.height = height
 
-        self.initAnimation(self.img)
+        self.init_animation()
         assert isinstance(self.animation, AnimationManager)
 
-        Sprite.log(self, f'point={origPoint} size={width}x{height}')
+        Sprite.log(self, f'point={orig_point} size={width}x{height}')
 
     def log(self, msg):
-        logEx(msg, category="Sprite", name=self.name)
+        log_ex(msg, category="Sprite", name=self.name)
 
     def position(self):
         return self.point
 
-    def initAnimation(self, img):
+    def init_animation(self):
         raise NotImplementedError
 
     def update(self):
-        self.updateAnimation()
+        self.update_animation()
 
-    def updateAnimation(self):
+    def update_animation(self):
         self.animation.update()
 
-    def isVisible(self):
-        return self.position().isVisible()
+    def is_visible(self):
+        return self.position().is_visible()
 
-    def draw(self):
-        if not self.isVisible():
+    def blit_debug_overlay(self, surface):
+        if not Config.singleton().must_log("Sprite"):
+            return
+        if False:
+            # FIXME
+            # pyxel.text(p.x + 5, p.y, self.name, 0)
+            raise NotImplementedError("Must replace pyxel.text")
+
+    def blit(self, surface):
+        if not self.is_visible():
             return
 
         p = self.position().screen()
-        self.animation.drawAt(p.x, p.y)
-
-        if Config.mustLog("Sprite"):
-            pyxel.text(p.x + 5, p.y, self.name, 0)
+        self.animation.blit_at(surface, p.x, p.y)
+        # self.blit_debug_overlay(surface)
 
 # An entity is a sprite that somehow obey the laws of physics.
 #
@@ -59,129 +66,136 @@ class Sprite:
 # system (see `NavPath`).
 class Entity(Sprite, Observable):
 
-    def __init__(self, name, origPoint, width, height, rotStep, rotFps, trFps):
-        Sprite.__init__(self, name, origPoint, width, height)
+    def __init__(self, name, orig_point, width, height, rot_step, rot_fps, tr_fps):
+        Sprite.__init__(self, name, orig_point, width, height)
         Observable.__init__(self)
 
-        self.navPath   = NavPath(self)
-        self.physics   = Physics(0, rotFps, origPoint, trFps)
-        self.moves     = []
-
-        self.isSelected = False
+        self.nav_path     = NavPath(self)
+        self.physics     = Physics(0, rot_fps, orig_point, tr_fps)
+        self.moves       = []
+        self.is_selected = False
 
     def log(self, msg):
-        logEx(msg, category="Entity", name=self.name)
+        log_ex(msg, category="Entity", name=self.name)
 
     def select(self):
-        self.isSelected = True
+        self.is_selected = True
 
     def unselect(self):
-        self.isSelected = False
+        self.is_selected = False
 
     def show(self):
-        Entity.log(self, f"moves={len(self.moves)} navPath={self.navPath.isDone()}")
-        Entity.log(self, f"square={self.square()} targetSquare={self.targetSquare()}")
-        Entity.log(self, f"isMoving={self.isMoving()} isIdle={self.isIdle()}")
+        Entity.log(self, f"moves={len(self.moves)} nav_path={self.nav_path.is_done()}")
+        Entity.log(self, f"square={self.square()} target_square={self.target_square()}")
+        Entity.log(self, f"is_moving={self.is_moving()} is_idle={self.is_idle()}")
         self.physics.show()
 
-    def addMove(self, move):
+    def add_move(self, move):
         self.moves.append(move)
 
-    def clearMoves(self):
+    def clear_moves(self):
         self.moves.clear()
 
     def position(self):
         return self.physics.position()
 
-    def targetPosition(self):
-        return self.physics.targetPosition()
+    def target_position(self):
+        return self.physics.target_position()
 
     def square(self):
         return self.physics.position().square()
 
-    def targetSquare(self):
-        p = self.physics.targetPosition()
+    def target_square(self):
+        p = self.physics.target_position()
         if p is None:
             return None
         else:
             return p.square()
 
-    def isMoving(self):
-        return self.physics.targetPosition() is not None
+    def is_moving(self):
+        return self.physics.target_position() is not None
 
-    def lookAt(self, hop):
-        def lookAtHop():
-            self.physics.lookAt(hop.point())
-        self.addMove(lookAtHop)
+    def look_at(self, hop):
+        def look_at_hop():
+            self.physics.look_at(hop.point())
+        self.add_move(look_at_hop)
 
-    def moveTo(self, hop):
-        def moveToHop():
+    def move_to(self, hop):
+        def move_to_hop():
             p = hop.point()
-            if Compass.getSingleton().isObstacle(hop):
-                Entity.log(self, f"moveToHop: Cannot move, obstacle at target hop {hop}")
+            if Compass.singleton().is_obstacle(hop):
+                Entity.log(self, f"move_to_hop: Cannot move, obstacle at target hop {hop}")
             else:
-                self.physics.moveTo(p)
-                self.notifyObservers("entity-moved",
-                                     oldSquare=self.square(), newSquare=hop)
-        self.addMove(moveToHop)
+                self.physics.move_to(p)
+                self.notify_observers("entity-moved",
+                                      old_square=self.square(), new_square=hop)
+        self.add_move(move_to_hop)
 
-    def isIdle(self):
-        return self.physics.isDone() and len(self.moves) == 0
+    def is_idle(self):
+        return self.physics.is_done() and len(self.moves) == 0
+
+    def stop(self):
+        Entity.log(self, "stop")
+        self.clear_moves()
+        self.nav_path.clear()
 
     def navigate(self, hops):
         assert len(hops) >= 1
         Entity.log(self, "navigate")
-        self.clearMoves()
-        self.navPath.set(hops)
-        self.lookAt(self.navPath.hop)
-        self.moveTo(self.navPath.hop)
+        self.clear_moves()
+        self.nav_path.set(hops)
+        self.look_at(self.nav_path.hop)
+        self.move_to(self.nav_path.hop)
         self.show()
 
-    def nextHop(self):
-        if self.navPath.isDone():
+    def next_hop(self):
+        if self.nav_path.is_done():
             return
 
-        self.navPath.nextHop()
-        if self.navPath.isDone():
-            Entity.log(self, f"nextHop: Destination {self.square()} reached")
+        self.nav_path.next_hop()
+        if self.nav_path.is_done():
+            Entity.log(self, f"next_hop: Destination {self.square()} reached")
         else:
-            nh = self.navPath.hop
-            Entity.log(self, f"nextHop: Moving to hop {nh}")
-            self.lookAt(nh)
-            self.moveTo(nh)
+            nh = self.nav_path.hop
+            Entity.log(self, f"next_hop: Moving to hop {nh}")
+            self.look_at(nh)
+            self.move_to(nh)
 
-    def nextMove(self):
-        if not self.physics.isDone():
+    def next_move(self):
+        if not self.physics.is_done():
             return
 
         if len(self.moves) >= 1:
             move = self.moves.pop(0)
             move()
         else:
-            self.nextHop()
+            self.next_hop()
 
     def update(self):
         self.physics.update()
-        self.nextMove()
+        self.next_move()
         Sprite.update(self)
 
-    def drawSelection(self):
-        if not self.isSelected:
+    def blit_selection(self, surface):
+        if not self.is_selected:
             return
+
         p  = self.position().screen()
         bw = 1
         w  = self.width  + bw + bw
         h  = self.height + bw + bw
-        pyxel.rectb(p.x - w // 2, p.y - h // 2, w, h, 8)
+        pygame.draw.rect(surface, (200, 0, 0),
+                         Rect((p.x - w // 2, p.y - h // 2), (w, h)),
+                         width=bw)
 
-    def drawNavPath(self):
-        if Config.mustLog("NavPath"):
-            self.navPath.draw()
+    def blit_nav_path(self, surface):
+        if Config.singleton().must_log("NavPath"):
+            self.nav_path.blit(surface)
 
-    def drawOverlay(self):
-        if Config.mustLog("Physics"):
+    def blit_overlay(self, surface):
+        if Config.singleton().must_log("Physics"):
             p = self.position().screen()
-            self.physics.drawAt(p.x, p.y)
+            self.physics.blit_at(surface, p.x, p.y)
 
-    def draw(self):
-        Sprite.draw(self)
+    def blit(self, surface):
+        Sprite.blit(self, surface)
