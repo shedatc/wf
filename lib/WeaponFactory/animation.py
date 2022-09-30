@@ -108,7 +108,8 @@ class AnimationManager:
             return
         self.current.blit_at(surface, x, y)
 
-        if Config.singleton().must_log("Animation"):
-            # FIXME
-            # pyxel.text(x + 20, y + 1, f"A: {self.current.name}", 0)
-            raise NotImplementedError("Must replace pyxel.text")
+        if False:
+            if Config.singleton().must_log("Animation"):
+                # FIXME
+                # pyxel.text(x + 20, y + 1, f"A: {self.current.name}", 0)
+                raise NotImplementedError("Must replace pyxel.text")
