@@ -59,7 +59,7 @@ class Resources:
         if name in self.images:
             return self.images[name]
 
-        path = Resources.locate("image", f"{name}.png")
+        path = Resources.locate("image", name)
         if path is None:
             raise RuntimeError("Image not found")
 

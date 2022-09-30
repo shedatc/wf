@@ -11,6 +11,8 @@
         "name": "lt-shock"
     },
     "logs": [
+        "Animation",
+        "AnimationManager",
         "Arena",
         "ArenaView",
         "Compass",

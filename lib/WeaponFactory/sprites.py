@@ -16,13 +16,11 @@ from .utils      import Config, Observable, log_ex
 class Sprite:
 
     def __init__(self, name, orig_point, width, height):
-        self.name   = f"{name}@{hex(id(self))}"
-        self.point  = orig_point
-        self.width  = width
-        self.height = height
-
-        self.init_animation()
-        assert isinstance(self.animation, AnimationManager)
+        self.name      = f"{name}@{hex(id(self))}"
+        self.point     = orig_point
+        self.width     = width
+        self.height    = height
+        self.animation = AnimationManager(name)
 
         Sprite.log(self, f'point={orig_point} size={width}x{height}')
 
@@ -31,9 +29,6 @@ class Sprite:
 
     def position(self):
         return self.point
-
-    def init_animation(self):
-        raise NotImplementedError
 
     def update(self):
         self.update_animation()
