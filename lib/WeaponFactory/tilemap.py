@@ -5,10 +5,6 @@ from pytmx.util_pygame import load_pygame as tmx_load
 from .resources import Resources
 from .utils     import log_ex
 
-# self.width  = pyxel.tilemap(self.tm).width
-# self.height = pyxel.tilemap(self.tm).height
-# tileData = pyxel.tilemap(self.tm).pget(u, v)
-# return pyxel.tilemap(self.tm).get(self.u, self.v)
 class Tilemap:
 
     def log(msg):
@@ -47,7 +43,6 @@ class Tilemap:
 
     def blit_layer(self, rect, layer_index, surface):
         (tw, th) = self.tile_size
-        verbose = False
         for v in range(rect.y, rect.y + rect.h):
             for u in range(rect.x, rect.x + rect.w):
                 tile = self.tmx.get_tile_image(u, v, layer_index)
