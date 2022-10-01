@@ -26,10 +26,9 @@ class Tilemap:
             if h < screen_height / th:
                 raise AssertionError("Invalid tilemap height")
 
-    # FIXME Re-implement building the obstacles matrix from the Tilemap class.
     def is_obstacle(self, u, v, layer_index):
         props = self.tmx.get_tile_properties(u, v, layer_index)
-        return props["is_obstacle"]
+        return type(props) is dict and props["is_obstacle"]
 
     def get_layer(self, layer_index):
         return self.tmx.layers[layer_index]
