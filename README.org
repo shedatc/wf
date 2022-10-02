@@ -31,3 +31,27 @@ Directory containing the other files, e.g., configuration files. When undefined,
 will try the following directories in that order:
 - =$XDG_CONFIG_HOME/wf=
 - =$HOME/.config/wf=
+
+** Log Categories
+
+Animation
+AnimationManager
+Arena
+ArenaView
+Camera
+Compass
+Drone
+Engine
+Entity
+InputHandler
+ModalInputHandler
+NavBeacon
+Physics
+Point
+Region
+Resources
+Rotation
+Sprite
+Square
+Tilemap
+Translation
