@@ -1,14 +1,17 @@
 import os.path
 import pygame
 
-from .arena      import Arena, Square, ArenaView, Camera, Region
-from .const      import SCREEN_WIDTH, SCREEN_HEIGHT
+from pygame            import Rect
+from pytmx.util_pygame import load_pygame as tmx_load
+
+from .arena      import Arena, Point, Square, ArenaView, Camera, Region
+from .const      import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
+from .const      import SCREEN_WIDTH, SCREEN_HEIGHT, SQUARE_SIZE, TILE_WIDTH, TILE_HEIGHT
+from .const      import ISO_TILE_WIDTH, ISO_TILE_HEIGHT
 from .input      import ModalInputHandler, Mouse
 from .navigation import Compass, NavBeacon
 from .resources  import Resources
-from .utils      import Config, log_ex
-
-COLOR_BLUE = (0, 0, 200)
+from .utils      import Config, log_ex, sz
 
 EV_NAV = pygame.event.custom_type()
 
@@ -48,9 +51,11 @@ class Engine:
         if config["screen"]["fullscreen"]:
             flags |= pygame.FULLSCREEN
             flags |= pygame.SCALED
-        self.screen = pygame.display.set_mode(
-            (config["screen"]["width"], config["screen"]["height"]), # size
-            flags)                                                   # flags
+        wanted_screen_size = (config["screen"]["width"], config["screen"]["height"])
+        self.screen = pygame.display.set_mode(wanted_screen_size, flags)
+        Engine.log(f"screen: wanted={sz(wanted_screen_size)}"
+                   + f" current={sz(self.screen.get_size())}")
+
         pygame.display.set_caption(config["caption"])
         pygame.mouse.set_visible(config["mouse"])
 
@@ -59,6 +64,8 @@ class Engine:
         self.debug_data        = None
         self.init_scene(arena_config)
         self.init_input()
+
+        self._misc_tm = tmx_load( Resources.locate("tilemap", "misc.tmx") )
 
         Engine.log("Ready")
 
@@ -163,17 +170,18 @@ class Engine:
         Compass(a.obstacles_matrix)
 
         # Spawn some drones
-        drones = {
-            "A": Square(10, 10),
-            "B": Square(21, 10),
-            "C": Square(10, 20),
-        }
-        for name, square in drones.items():
-            drone      = Drone(square)
-            drone.name = name
-            drone.register_observer(a)
-            drone.notify_observers("entity-spawned", square=drone.position().square())
-            self.entities.append(drone)
+        if False:
+            drones = {
+                "A": Square(5,  10),
+                "B": Square(11, 10),
+                "C": Square(5,  20),
+            }
+            for name, square in drones.items():
+                drone      = Drone(square)
+                drone.name = name
+                drone.register_observer(a)
+                drone.notify_observers("entity-spawned", square=drone.position().square())
+                self.entities.append(drone)
 
         self.nav_beacon = NavBeacon()
 
@@ -187,7 +195,7 @@ class Engine:
             entity.update()
 
     def draw(self):
-        self.screen.fill(COLOR_BLUE)
+        self.screen.fill(COLOR_BLACK)
         self._blit_scene(self.screen)
         self._blit_debug_data(self.screen)
 
@@ -198,8 +206,8 @@ class Engine:
             c        = Camera.singleton()
             entities = []
             a        = Arena.singleton()
-            for v in range(c.v, c.v + c.height):
-                for u in range(c.u, c.u + c.width):
+            for v in range(c.v, c.v + c.height - 1):
+                for u in range(c.u, c.u + c.width - 1):
                     entities.extend( a.entities_at_square(u, v) )
             for e in entities:
                 e.blit_nav_path(surface)
@@ -212,6 +220,25 @@ class Engine:
         self.input_handler.blit(surface)
 
     def _blit_debug_data(self, surface):
+        (mx, my) = Mouse.get_coords()
+        m        = Point(mx, my)
+
+        if False:
+            o = m.copy().to_ortho().to_square()
+            pygame.draw.rect(surface,
+                             COLOR_GREEN,
+                             Rect(o.pos(),
+                                  (SQUARE_SIZE, SQUARE_SIZE)),
+                             width=1)
+
+        if True:
+            t   = m.copy().to_tile()
+            img = self._misc_tm.get_tile_image(0, 0, 0)
+            surface.blit(img, t.pos())
+
+        i = m.copy()
+        pygame.draw.rect(surface, COLOR_RED, Rect(i.pos(), (2, 2)))
+
         if self.debug_data is None:
             return
 

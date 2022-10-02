@@ -9,7 +9,6 @@ from pathfinding.finder.finder          import ExecutionTimeException
 
 from math import sqrt
 
-from .const import SQUARE_SIZE
 from .utils import Config, log_ex
 
 # A compass help find a navigation path through an arena, avoiding obstacles.

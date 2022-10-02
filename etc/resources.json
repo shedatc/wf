@@ -1,12 +1,16 @@
 {
     "image": [
-        "assets/images/lt-shock",
-        "assets/images/drone"
+        "assets/images/arena",
+        "assets/images/arena-0",
+        "assets/images/drone",
+        "assets/images/lt-shock"
     ],
     "sprite": [
         "assets/sprites/drone"
     ],
     "tilemap": [
-        "assets/tilemaps/lt-shock"
+        "assets/tilemaps/arena-0",
+        "assets/tilemaps/lt-shock",
+        "assets/tilemaps/misc"
     ]
 }

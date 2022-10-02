@@ -1,13 +1,15 @@
+import numpy  as np
 import pygame
 
 from pygame import Rect
 
-from .const      import OBSTACLE, SQUARE_SIZE, WALKABLE
+from .const      import OBSTACLE, WALKABLE
+from .const      import SQUARE_SIZE, TILE_WIDTH, TILE_HEIGHT, TILE_SQUARE_SIZE
 from .input      import Mouse
 from .navigation import Compass
 from .resources  import Resources
 from .tilemap    import Tilemap
-from .utils      import Config, log_ex
+from .utils      import Config, log_ex, sz
 
 class Camera:
 
@@ -24,42 +26,48 @@ class Camera:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        (screen_width, screen_height) = pygame.display.get_window_size()
+        (screen_width, screen_height) = pygame.display.get_surface().get_size()
+        Camera.log(f"screen={sz((screen_width, screen_height))}")
 
         a           = Arena.singleton()
-        self.u      = 0
+        self.u      = a.width // 2 - screen_width // TILE_WIDTH // 2
         self.v      = 0
-        self.width  = screen_width  // SQUARE_SIZE
-        self.height = screen_height // SQUARE_SIZE
+        self.width  = screen_width  // TILE_WIDTH
+        self.height = screen_height // TILE_HEIGHT
         self.lu     = a.width  - self.width  - 1
         self.lv     = a.height - self.height - 1
+        Camera.log(f"luv=({self.lu}, {self.lv})")
+
         self.show()
 
-    def rect(self):
+    def squares(self):
         return Rect(self.u, self.v, self.width, self.height)
 
-    def show(self):
-        Camera.log(f"rect={self.rect()}")
+    def show(self, prefix=None):
+        if prefix is None:
+            Camera.log(f"squares={self.squares()}")
+        else:
+            Camera.log(f"{prefix}: squares={self.squares()}")
 
     def left(self):
         if self.u >= 1:
-            self.u -= 1
-            Camera.log(f"left: rect={self.rect()}")
+            self.u -= 2
+            self.show("left")
 
     def right(self):
         if self.u <= self.lu:
-            self.u += 1
-            Camera.log(f"right: rect={self.rect()}")
+            self.u += 2
+            self.show("right")
 
     def up(self):
         if self.v >= 1:
-            self.v -= 1
-            Camera.log(f"up: rect={self.rect()}")
+            self.v -= 2
+            self.show("up")
 
     def down(self):
         if self.v <= self.lv:
-            self.v += 1
-            Camera.log(f"down: rect={self.rect()}")
+            self.v += 2
+            self.show("down")
 
     def move(self, u, v):
         (screen_width, screen_height) = pygame.display.get_window_size()
@@ -120,11 +128,11 @@ class Arena:
         Arena._singleton = self
 
         self.name = config["name"]
-        Arena.log(f"name={self.name} square={SQUARE_SIZE}")
+        Arena.log(f"name={self.name} square={SQUARE_SIZE}x{SQUARE_SIZE}")
 
         # Tilemap
         self.tm                   = Tilemap(self.name)
-        (self.width, self.height) = self.tm.get_map_size()
+        (self.width, self.height) = self.tm.map_size
 
         # Strategic View
         sv_path               = Resources.locate("image", f"{self.name}-sv.png")
@@ -147,6 +155,9 @@ class Arena:
             for u in range(self.width):
                     self.entities_matrix[v][u] = []
         self.log_entities_matrix()
+
+    def size(self):
+        return (self.width, self.height)
 
     def tile_data_from_mouse(self):
         return Square(0, 0).from_mouse().tile_data()
@@ -209,7 +220,8 @@ class ArenaView:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        self.is_tactical = True
+        self.is_tactical       = True
+        self._tactical_surface = None
         ArenaView.log(f"is_tactical={self.is_tactical}")
 
     def get_width(self):
@@ -240,9 +252,15 @@ class ArenaView:
         if self.is_tactical:
             Region.singleton().update()
 
+    def _surface(self, surface):
+        return self.surface
+
     def blit_tactical(self, surface):
-        c = Camera.singleton()
-        self.get_tilemap().blit_layer(c.rect(), 0, surface)
+        # ArenaView.log(f"blit")
+        tm = self.get_tilemap()
+        for level in range(tm.level_count):
+            tm.blit_level(Camera.singleton().squares(), level, surface)
+
         Region.singleton().blit(surface)
 
     def blit_strategic(self, surface):
@@ -305,23 +323,77 @@ class Point:
     def __eq__(self, other_point):
         return self.x == other_point.x and self.y == other_point.y
 
+    def copy(self):
+        return Point(self.x, self.y)
+
+    def pos(self):
+        return (self.x, self.y)
+
+    def mat(self):
+        return np.array([(self.x,),
+                         (self.y,)])
+
+    def transform(self, t):
+        m                = np.matmul(t, self.mat())
+        (self.x, self.y) = (m[0][0], m[1][0])
+        return self
+
+    # FIXME Use a matrix transform.
+    def translate(self, v):
+        (vx, vy)         = v
+        (self.x, self.y) = (self.x + vx, self.y + vy)
+        return self
+
+    # Rotate at 45°, then scale (1, 0.5).
+    def to_iso(self):
+        t = np.array([(1,   -1),
+                      (0.5,  0.5)])
+        return self.transform(t)
+
+    # Scale (1, 2), then rotate -45°.
+    def to_ortho(self):
+        t = np.array([( 0.5, 1),
+                      (-0.5, 1)])
+        return self.transform(t)
+
     # Return the square containing the point.
     def square(self):
-        return Square(self.x // SQUARE_SIZE, self.y // SQUARE_SIZE)
+        if True:
+            return Square(self.x // TILE_WIDTH, self.y // TILE_HEIGHT)
+        else:
+            return Square(self.x // SQUARE_SIZE, self.y // SQUARE_SIZE)
+
+    # Move the point to the top left corner of the square it belong to.
+    # FIXME Use a matrix tranform.
+    def to_square(self):
+        (self.x,  self.y) = (self.x // (TILE_SQUARE_SIZE) * (TILE_SQUARE_SIZE),
+                             self.y // (TILE_SQUARE_SIZE) * (TILE_SQUARE_SIZE))
+        return self
+
+    def to_tile(self):
+        return self.to_ortho().to_square().to_iso().translate((-TILE_WIDTH, 0))
 
     # Return the point in screen coordinates.
     def screen(self):
         assert self.is_visible()
         c = Camera.singleton()
-        return Point(self.x - (c.u * SQUARE_SIZE),
-                     self.y - (c.v * SQUARE_SIZE))
+        if True:
+            return Point(self.x - (c.u * TILE_WIDTH),
+                         self.y - (c.v * TILE_HEIGHT))
+        else:
+            return Point(self.x - (c.u * SQUARE_SIZE),
+                         self.y - (c.v * SQUARE_SIZE))
 
     # Move to the coordinates pointed by the mouse.
     def from_mouse(self):
         (mx, my) = Mouse.get_coords()
         c        = Camera.singleton()
-        self.x   = c.u * SQUARE_SIZE + mx
-        self.y   = c.v * SQUARE_SIZE + my
+        if True:
+            self.x = c.u * TILE_WIDTH  + mx
+            self.y = c.v * TILE_HEIGHT + my
+        else:
+            self.x = c.u * SQUARE_SIZE + mx
+            self.y = c.v * SQUARE_SIZE + my
         return self
 
     # Tell if the point is visible from current camera's position.
@@ -374,7 +446,10 @@ class Square:
 
     def from_mouse(self):
         (mx, my) = Mouse.get_coords()
-        (mu, mv) = (mx // SQUARE_SIZE, my // SQUARE_SIZE)
+        if True:
+            (mu, mv) = (mx // TILE_WIDTH, my // TILE_HEIGHT)
+        else:
+            (mu, mv) = (mx // SQUARE_SIZE, my // SQUARE_SIZE)
         self.relative_move(mu, mv)
         return self
 
@@ -390,8 +465,12 @@ class Square:
         return Camera.singleton().view(self)
 
     def point(self):
-        return Point(self.u * SQUARE_SIZE + SQUARE_SIZE // 2,
-                     self.v * SQUARE_SIZE + SQUARE_SIZE // 2)
+        if True:
+            return Point(self.u * TILE_WIDTH  + TILE_WIDTH  // 2,
+                         self.v * TILE_HEIGHT + TILE_HEIGHT // 2)
+        else:
+            return Point(self.u * SQUARE_SIZE  + SQUARE_SIZE  // 2,
+                         self.v * SQUARE_SIZE + SQUARE_SIZE // 2)
 
     # Tell if the other square is next to this one. A square is considered next
     # to itself.
@@ -475,12 +554,15 @@ class Region:
 
         # Draw the square-level region
         o  = self.get_origin().point().screen()
-        hs = SQUARE_SIZE // 2
         Region.log(f"origin={o}")
 
-        rect = Rect((o.x - hs, o.y - hs),
-                    (self.get_width() * SQUARE_SIZE, self.get_height() * SQUARE_SIZE))
-        pygame.draw.rect(surface, (200, 0, 0), rect, width=1)
+        if True:
+            pixels = Rect((o.x - TILE_WIDTH // 2,         o.y - TILE_HEIGHT // 2),
+                          (self.get_width() * TILE_WIDTH, self.get_height() * TILE_HEIGHT))
+        else:
+            pixels = Rect((o.x - SQUARE_SIZE // 2,         o.y - SQUARE_SIZE // 2),
+                          (self.get_width() * SQUARE_SIZE, self.get_height() * SQUARE_SIZE))
+        pygame.draw.rect(surface, (200, 0, 0), pixels, width=1)
 
     # Return the entities that are part of the region.
     def get_entities(self):

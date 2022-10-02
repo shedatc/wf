@@ -8,11 +8,12 @@
     "fps": 30,
     "mouse": true,
     "arena": {
-        "name": "lt-shock"
+        "name": "arena-0"
     },
     "logs": [
         "Arena",
         "ArenaView",
+        "Camera",
         "Compass",
         "Engine",
         "Entity",

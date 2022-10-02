@@ -42,6 +42,10 @@ def log_current_context():
     msg = f"In file {f.f_code.co_filename} at line {f.f_lineno}"
     log_ex(msg)
 
+def sz(size):
+    (w, h) = size
+    return f"{w}x{h}"
+
 class Config:
 
     _singleton = None
