@@ -11,8 +11,6 @@
         "name": "lt-shock"
     },
     "logs": [
-        "Animation",
-        "AnimationManager",
         "Arena",
         "ArenaView",
         "Compass",
@@ -20,7 +18,6 @@
         "Entity",
         "NavBeacon",
         "NavPath",
-        "Resources",
         "Sprite",
         "Tilemap"
     ]
