@@ -1,7 +1,7 @@
 {
     "default-mode": "tactical/select",
     "repeat": {
-        "delay":    10,
+        "delay":    30,
         "interval": 0
     },
     "modes": {
