@@ -3,11 +3,46 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "/home/sheda/c/github/shedatc/wf/assets/tilemaps/arena-1/arena-1.tmx",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "/home/sheda/c/github/shedatc/wf/assets/papa/map/1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "/home/sheda/c/github/shedatc/wf/assets/papa/map/map.tmx": {
+            "scale": 0.4977604166666666,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 481.1551742178508,
+                "y": 240.07533744899024
+            }
+        },
+        "/home/sheda/c/github/shedatc/wf/assets/tilemaps/arena-1/1.tsx": {
+            "scaleInDock": 1
+        },
+        "/home/sheda/c/github/shedatc/wf/assets/tilemaps/arena-1/arena-1.tmx": {
+            "scale": 0.4977604166666666,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 678.0370409124203,
+                "y": 384.7232395103067
+            }
+        },
+        "arena-0.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 1026.3333333333333,
+                "y": 113.66666666666666
+            }
+        },
+        "isometric-tileset.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        }
     },
     "last.imagePath": "/home/sheda/c/github/shedatc/wf/assets/tilemaps/arena-0",
     "map.height": 128,
@@ -16,9 +51,16 @@
     "map.tileWidth": 16,
     "map.width": 128,
     "openFiles": [
+        "/home/sheda/c/github/shedatc/wf/assets/tilemaps/arena-1/arena-1.tmx"
     ],
     "project": "arena-0.tiled-project",
+    "property.type": "bool",
     "recentFiles": [
+        "/home/sheda/c/github/shedatc/wf/assets/tilemaps/arena-1/arena-1.tmx",
+        "/home/sheda/c/github/shedatc/wf/assets/papa/map/map.tmx",
+        "/home/sheda/c/github/shedatc/wf/assets/papa/map/1.tsx",
+        "isometric-tileset.tsx",
+        "arena-0.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

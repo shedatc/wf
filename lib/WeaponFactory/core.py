@@ -138,8 +138,31 @@ class Engine:
                                         .navigate(entity, self.nav_beacon.square)
         ih.addFunc("strategic_move_to_mouse", strategic_move_to_mouse)
 
+        def describe_square(square):
+            tm    = Arena.singleton().tm
+            level = tm.lookup_tile_property(square, "level")
+            if level is None:
+                Engine.log(f"Tile at {square} has no level")
+            else:
+                Engine.log(f"Tile at {square} is at level {level}")
+
+            is_obstacle = tm.lookup_tile_property(square, "is_obstacle")
+            if is_obstacle in [None, False]:
+                Engine.log(f"Tile is not an obstacle")
+            else:
+                Engine.log(f"Tile is an obstacle")
+
         # Region
         def region_enable():
+
+            # Describe the square at mouse.
+            c        = Camera.singleton()
+            (mx, my) = Mouse.get_coords()
+            mouse_square = Square(mx // TILE_WIDTH  + c.u,
+                                  my // TILE_HEIGHT + c.v)
+            Engine.log(f"mouse: xy=({mx}, {my}) square={mouse_square}")
+            describe_square(mouse_square)
+
             self.clear_selection()
             Region.singleton().enable()
         ih.addFunc("region_enable", region_enable)

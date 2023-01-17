@@ -72,3 +72,29 @@ class Tilemap:
         pixels   = Rect((squares.x     * tw, squares.y      * th),
                         (squares.width * tw, squares.height * th))
         surface.blit(self._level_surfaces[level], (0, 0), pixels)
+
+    def lookup_layer(self, square):
+        layers = self.tmx.layers.copy()
+        while len(layers) > 0:
+            layer = layers.pop(-1)
+            for u, v, _ in layer.tiles():
+                if square.u == u and square.v == v:
+                    return layer
+        raise RuntimeError(f"No layer for tile at {square}")
+
+    # Look for the given property. First at tile-level and, if missing, at
+    # layer-level.
+    def lookup_tile_property(self, square, prop_name):
+        layer = self.lookup_layer(square)
+        ps    = []
+        if layer.data is not None:
+            gid = layer.data[square.v][square.u]
+            ps.append(self.tmx.tile_properties[gid])
+        ps.append(layer.properties)
+        for p in ps:
+            if p is not None and prop_name in p:
+                prop_value = p[prop_name]
+                Tilemap.log(f"Property {prop_name} for tile {square} is {prop_value}")
+                return prop_value
+        Tilemap.log(f"Missing property {prop_name} for tile {square}")
+        return None
