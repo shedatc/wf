@@ -33,10 +33,8 @@ class Tilemap:
         if __debug__:
             (screen_width, screen_height) = pygame.display.get_window_size()
             Tilemap.log(f"screen={sz(pygame.display.get_window_size())}")
-            if mw < screen_width  / tw:
-                raise AssertionError("Invalid tilemap width")
-            if mh < screen_height / th:
-                raise AssertionError("Invalid tilemap height")
+            assert screen_width  // tw <= mw, "Invalid tilemap width"
+            assert screen_height // th <= mh, "Invalid tilemap height"
 
     def _build_level_surfaces(self):
         self.level_count     = 0
