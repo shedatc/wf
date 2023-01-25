@@ -6,7 +6,7 @@
         "fullscreen": true
     },
     "fps": 30,
-    "mouse": true,
+    "mouse": false,
     "arena": {
         "name": "arena-0"
     },
