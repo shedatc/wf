@@ -11,6 +11,6 @@
     "tilemap": [
         "assets/tilemaps/arena-0",
         "assets/tilemaps/lt-shock",
-        "assets/tilemaps/misc"
+        "assets/tilemaps/debug",
     ]
 }
