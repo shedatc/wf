@@ -5,6 +5,7 @@
     ],
     "tilemap": [
         "assets/tilemaps/arena-0",
+        "assets/tilemaps/arena-1",
         "assets/tilemaps/chessboard",
         "assets/tilemaps/debug",
         "assets/tilemaps/sandbox"
