@@ -135,12 +135,13 @@ class Arena:
         (self.width, self.height) = self.tm.map_size
 
         # Strategic View
-        sv_path               = Resources.locate("image", f"{self.name}-sv.png")
-        self.sv               = pygame.image.load(sv_path)
-        (sv_width, sv_height) = self.sv.get_size()
-        Arena.log(f"sv: path={sv_path} size={sv_width}x{sv_height}")
-        assert sv_width  == self.width,  "SV image width must match tilemap width"
-        assert sv_height == self.height, "SV image height must match tilemap height"
+        if False:
+            sv_path               = Resources.locate("image", f"{self.name}-sv.png")
+            self.sv               = pygame.image.load(sv_path)
+            (sv_width, sv_height) = self.sv.get_size()
+            Arena.log(f"sv: path={sv_path} size={sv_width}x{sv_height}")
+            assert sv_width  == self.width,  "SV image width must match tilemap width"
+            assert sv_height == self.height, "SV image height must match tilemap height"
 
         # Obstacles:
         self.obstacles_matrix = [[WALKABLE] * self.width for i in range(self.height)]
