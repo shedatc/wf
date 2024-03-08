@@ -1,11 +1,10 @@
 {
     "caption": "Weapon Factory",
     "screen": {
-        "width": 256,
-        "height": 256,
-        "fullscreen": true
+        "width": 512,
+        "height": 384
     },
-    "fps": 30,
+    "fps": 24,
     "mouse": false,
     "arena": {
         "name": "arena-0"

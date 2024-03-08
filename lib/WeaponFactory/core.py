@@ -46,13 +46,9 @@ class Engine:
         self.resources = Resources()
 
         pygame.init()
-
-        flags = 0
-        if config["screen"]["fullscreen"]:
-            flags |= pygame.FULLSCREEN
-            flags |= pygame.SCALED
         wanted_screen_size = (config["screen"]["width"], config["screen"]["height"])
-        self.screen = pygame.display.set_mode(wanted_screen_size, flags)
+        self.screen = pygame.display.set_mode(wanted_screen_size,
+                                              pygame.FULLSCREEN | pygame.SCALED)
         Engine.log(f"screen: wanted={sz(wanted_screen_size)}"
                    + f" current={sz(self.screen.get_size())}")
 
