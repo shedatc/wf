@@ -1,10 +1,9 @@
-import numpy  as np
 import pygame
 
 from pygame import Rect
 
 from .const      import OBSTACLE, WALKABLE
-from .const      import SQUARE_SIZE, TILE_WIDTH, TILE_HEIGHT, TILE_SQUARE_SIZE
+from .const      import TILE_SQUARE_SIZE
 from .input      import Mouse
 from .navigation import Compass
 from .resources  import Resources
@@ -27,47 +26,59 @@ class Camera:
 
     def __init__(self):
         (screen_width, screen_height) = pygame.display.get_surface().get_size()
-        Camera.log(f"screen={sz((screen_width, screen_height))}")
 
-        a           = Arena.singleton()
-        self.u      = a.width // 2 - screen_width // TILE_WIDTH // 2
-        self.v      = 0
-        self.width  = screen_width  // TILE_WIDTH
-        self.height = screen_height // TILE_HEIGHT
-        self.lu     = a.width  - self.width  - 1
-        self.lv     = a.height - self.height - 1
-        Camera.log(f"luv=({self.lu}, {self.lv})")
+        self.horizontal_step = 4
+        self.vertical_step   = 2
 
-        self.show()
+        a = Arena.singleton()
+        (map_width, map_height)             = a.tm.map_size
+        (self.tile_width, self.tile_height) = a.tm.tile_size
+
+        # Center the camera
+        self.u  = map_width  // 2 - screen_width  // self.tile_width  // 2
+        self.u -= self.u % self.horizontal_step
+        self.v  = map_height // 2 - screen_height // self.tile_height // 2
+        self.v -= self.v % self.vertical_step
+
+        self.width  = screen_width  // self.tile_width
+        self.height = screen_height // self.tile_height
+        self.lu     = map_width  - self.width
+        self.lv     = map_height - self.height
+
+        Camera.log(f"Screen:              {sz((screen_width, screen_height))}")
+        Camera.log(f"Position (uv):       [{self.u}, {self.v}]")
+        Camera.log(f"Last position (luv): [{self.lu}, {self.lv}]")
+        Camera.log(f"Size:                {self.width}x{self.height} squares")
+
+    def pos(self):
+        return (self.u * self.tile_width, self.v * self.tile_height)
+
+    # Inverted position
+    def ipos(self):
+        return (-self.u * self.tile_width, -self.v * self.tile_height)
 
     def squares(self):
         return Rect(self.u, self.v, self.width, self.height)
 
-    def show(self, prefix=None):
-        if prefix is None:
-            Camera.log(f"squares={self.squares()}")
-        else:
-            Camera.log(f"{prefix}: squares={self.squares()}")
-
     def left(self):
-        if self.u >= 1:
-            self.u -= 2
-            self.show("left")
+        if self.u - self.horizontal_step >= 0:
+            self.u -= self.horizontal_step
+            Camera.log(f"left: squares={self.squares()}")
 
     def right(self):
-        if self.u <= self.lu:
-            self.u += 2
-            self.show("right")
+        if self.u + self.horizontal_step <= self.lu:
+            self.u += self.horizontal_step
+            Camera.log(f"right: squares={self.squares()}")
 
     def up(self):
-        if self.v >= 1:
-            self.v -= 2
-            self.show("up")
+        if self.v - self.vertical_step >= 0:
+            self.v -= self.vertical_step
+            Camera.log(f"up: squares={self.squares()}")
 
     def down(self):
-        if self.v <= self.lv:
-            self.v += 2
-            self.show("down")
+        if self.v + self.vertical_step <= self.lv:
+            self.v += self.vertical_step
+            Camera.log(f"down: squares={self.squares()}")
 
     def move(self, u, v):
         (screen_width, screen_height) = pygame.display.get_surface().get_size()
@@ -128,11 +139,22 @@ class Arena:
         Arena._singleton = self
 
         self.name = config["name"]
-        Arena.log(f"name={self.name} square={SQUARE_SIZE}x{SQUARE_SIZE}")
+        Arena.log(f"name={self.name}")
 
         # Tilemap
         self.tm                   = Tilemap(self.name)
         (self.width, self.height) = self.tm.map_size
+        Arena.log(f"size={sz((self.width, self.height))}")
+
+        # Resize the screen if the tilemap is smaller
+        (screen_width, screen_height) = pygame.display.get_surface().get_size()
+        (tm_width, tm_height)         = self.tm.surface_size
+        if tm_width < screen_width or tm_height < screen_height:
+            new_screen_width  = min(screen_width, tm_width)
+            new_screen_height = min(screen_height, tm_height)
+            Arena.log(f"Resizing screen: {screen_width}x{screen_height} → {new_screen_width}x{new_screen_height}")
+            self.screen = pygame.display.set_mode((new_screen_width, new_screen_height),
+                                                  pygame.FULLSCREEN | pygame.SCALED)
 
         # Strategic View
         if False:
@@ -147,14 +169,15 @@ class Arena:
         self.obstacles_matrix = [[WALKABLE] * self.width for i in range(self.height)]
         for v in range(self.height):
             for u in range(self.width):
-                if self.tm.is_obstacle(u, v, 0):
+                if self.tm.is_obstacle(u, v):
                     self.obstacles_matrix[v][u] = OBSTACLE
         # self.log_obstacles_matrix()
 
+        # Entities:
         self.entities_matrix = [[1] * self.width for i in range(self.height)]
         for v in range(self.height):
             for u in range(self.width):
-                    self.entities_matrix[v][u] = []
+                self.entities_matrix[v][u] = []
         self.log_entities_matrix()
 
     def size(self):
@@ -167,7 +190,10 @@ class Arena:
         return self.obstacles_matrix[square.v][square.u] == OBSTACLE
 
     def entities_at_square(self, u, v):
-        return self.entities_matrix[v][u]
+        try:
+            return self.entities_matrix[v][u]
+        except IndexError:
+            return []
 
     def notify(self, event, observable, **kwargs):
         if event == "entity-spawned":
@@ -231,9 +257,6 @@ class ArenaView:
     def get_height(self):
         return Arena.singleton().height
 
-    def get_tilemap(self):
-        return Arena.singleton().tm
-
     def get_strategic_view(self):
         return Arena.singleton().sv
 
@@ -253,15 +276,8 @@ class ArenaView:
         if self.is_tactical:
             Region.singleton().update()
 
-    def _surface(self, surface):
-        return self.surface
-
     def blit_tactical(self, surface):
-        # ArenaView.log(f"blit")
-        tm = self.get_tilemap()
-        for level in range(tm.level_count):
-            tm.blit_level(Camera.singleton().squares(), level, surface)
-
+        Arena.singleton().tm.blit(surface, Camera.singleton().squares())
         Region.singleton().blit(surface)
 
     def blit_strategic(self, surface):
@@ -283,7 +299,7 @@ class ArenaView:
         # FIXME
         return
 
-        (screen_width, screen_height) = pygame.display.get_window_size()
+        (screen_width, screen_height) = pygame.display.get_surface().get_size()
         for v in range(0, screen_height):
             for u in range(0, screen_width):
                 entities = Arena.singleton().entities_at_square(u, v)
@@ -311,12 +327,6 @@ class Point:
         log_ex(msg, category="Point")
 
     def __init__(self, x, y):
-        if __debug__:
-            (screen_width, screen_height) = pygame.display.get_window_size()
-            if 0 > x or x > screen_width*SQUARE_SIZE-1:
-                raise AssertionError()
-            if 0 > y or y > screen_height*SQUARE_SIZE-1:
-                raise AssertionError()
         (self.x, self.y) = (x, y)
 
     def __str__(self):
@@ -331,71 +341,32 @@ class Point:
     def pos(self):
         return (self.x, self.y)
 
-    def mat(self):
-        return np.array([(self.x,),
-                         (self.y,)])
-
-    def transform(self, t):
-        m                = np.matmul(t, self.mat())
-        (self.x, self.y) = (m[0][0], m[1][0])
-        return self
-
-    # FIXME Use a matrix transform.
-    def translate(self, v):
-        (vx, vy)         = v
-        (self.x, self.y) = (self.x + vx, self.y + vy)
-        return self
-
-    # Rotate at 45°, then scale (1, 0.5).
-    def to_iso(self):
-        t = np.array([(1,   -1),
-                      (0.5,  0.5)])
-        return self.transform(t)
-
-    # Scale (1, 2), then rotate -45°.
-    def to_ortho(self):
-        t = np.array([( 0.5, 1),
-                      (-0.5, 1)])
-        return self.transform(t)
-
     # Return the square containing the point.
     def square(self):
-        if True:
-            return Square(self.x // TILE_WIDTH, self.y // TILE_HEIGHT)
-        else:
-            return Square(self.x // SQUARE_SIZE, self.y // SQUARE_SIZE)
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        return Square(self.x // tile_width, self.y // tile_height)
 
     # Move the point to the top left corner of the square it belong to.
-    # FIXME Use a matrix tranform.
     def to_square(self):
-        (self.x,  self.y) = (self.x // (TILE_SQUARE_SIZE) * (TILE_SQUARE_SIZE),
-                             self.y // (TILE_SQUARE_SIZE) * (TILE_SQUARE_SIZE))
+        (self.x,  self.y) = (self.x // TILE_SQUARE_SIZE * TILE_SQUARE_SIZE,
+                             self.y // TILE_SQUARE_SIZE * TILE_SQUARE_SIZE)
         return self
-
-    def to_tile(self):
-        return self.to_ortho().to_square().to_iso().translate((-TILE_WIDTH, 0))
 
     # Return the point in screen coordinates.
     def screen(self):
         assert self.is_visible()
-        c = Camera.singleton()
-        if True:
-            return Point(self.x - (c.u * TILE_WIDTH),
-                         self.y - (c.v * TILE_HEIGHT))
-        else:
-            return Point(self.x - (c.u * SQUARE_SIZE),
-                         self.y - (c.v * SQUARE_SIZE))
+        c                         = Camera.singleton()
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        return Point(self.x - (c.u * tile_width),
+                     self.y - (c.v * tile_height))
 
     # Move to the coordinates pointed by the mouse.
     def from_mouse(self):
-        (mx, my) = Mouse.get_coords()
-        c        = Camera.singleton()
-        if True:
-            self.x = c.u * TILE_WIDTH  + mx
-            self.y = c.v * TILE_HEIGHT + my
-        else:
-            self.x = c.u * SQUARE_SIZE + mx
-            self.y = c.v * SQUARE_SIZE + my
+        (mx, my)                  = Mouse.get_coords()
+        c                         = Camera.singleton()
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        self.x = c.u * tile_width  + mx
+        self.y = c.v * tile_height + my
         return self
 
     # Tell if the point is visible from current camera's position.
@@ -439,11 +410,9 @@ class Square:
         return self
 
     def from_mouse(self):
-        (mx, my) = Mouse.get_coords()
-        if True:
-            (mu, mv) = (mx // TILE_WIDTH, my // TILE_HEIGHT)
-        else:
-            (mu, mv) = (mx // SQUARE_SIZE, my // SQUARE_SIZE)
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        (mx, my)                  = Mouse.get_coords()
+        (mu, mv)                  = (mx // tile_width, my // tile_height)
         self.relative_move(mu, mv)
         return self
 
@@ -459,12 +428,9 @@ class Square:
         return Camera.singleton().view(self)
 
     def point(self):
-        if True:
-            return Point(self.u * TILE_WIDTH  + TILE_WIDTH  // 2,
-                         self.v * TILE_HEIGHT + TILE_HEIGHT // 2)
-        else:
-            return Point(self.u * SQUARE_SIZE  + SQUARE_SIZE  // 2,
-                         self.v * SQUARE_SIZE + SQUARE_SIZE // 2)
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        return Point(self.u * tile_width  + tile_width  // 2,
+                     self.v * tile_height + tile_height // 2)
 
     # Tell if the other square is next to this one. A square is considered next
     # to itself.
@@ -550,12 +516,9 @@ class Region:
         o  = self.get_origin().point().screen()
         Region.log(f"origin={o}")
 
-        if True:
-            pixels = Rect((o.x - TILE_WIDTH // 2,         o.y - TILE_HEIGHT // 2),
-                          (self.get_width() * TILE_WIDTH, self.get_height() * TILE_HEIGHT))
-        else:
-            pixels = Rect((o.x - SQUARE_SIZE // 2,         o.y - SQUARE_SIZE // 2),
-                          (self.get_width() * SQUARE_SIZE, self.get_height() * SQUARE_SIZE))
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        pixels = Rect((o.x - tile_width // 2,         o.y - tile_height // 2),
+                      (self.get_width() * tile_width, self.get_height() * tile_height))
         pygame.draw.rect(surface, (200, 0, 0), pixels, width=1)
 
     # Return the entities that are part of the region.

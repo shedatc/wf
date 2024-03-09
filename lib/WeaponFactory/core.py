@@ -5,9 +5,7 @@ from pygame            import Rect
 from pytmx.util_pygame import load_pygame as tmx_load
 
 from .arena      import Arena, Point, Square, ArenaView, Camera, Region
-from .const      import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
-from .const      import SCREEN_WIDTH, SCREEN_HEIGHT, SQUARE_SIZE, TILE_WIDTH, TILE_HEIGHT
-from .const      import ISO_TILE_WIDTH, ISO_TILE_HEIGHT
+from .const      import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK, COLOR_WHITE
 from .input      import ModalInputHandler, Mouse
 from .navigation import Compass, NavBeacon
 from .resources  import Resources
@@ -43,15 +41,15 @@ class Engine:
         config         = Config.singleton().load("engine.json")
         self.fps       = config["fps"]
         arena_config   = config["arena"]
-        arena_name     = arena_config["name"]
         self.resources = Resources()
 
         pygame.init()
         wanted_screen_size = (config["screen"]["width"], config["screen"]["height"])
         self.screen = pygame.display.set_mode(wanted_screen_size,
                                               pygame.FULLSCREEN | pygame.SCALED)
-        Engine.log(f"screen: wanted={sz(wanted_screen_size)}"
-                   + f" current={sz(self.screen.get_size())}")
+
+        Engine.log(f"Screen: {sz(self.screen.get_size())} ({sz(wanted_screen_size)})")
+        Engine.log(f"FPS:    {self.fps}")
 
         pygame.display.set_caption(config["caption"])
         pygame.mouse.set_visible(config["mouse"])
@@ -62,7 +60,7 @@ class Engine:
         self.init_scene(arena_config)
         self.init_input()
 
-        self._misc_tm = tmx_load( Resources.locate("tilemap", "misc.tmx") )
+        self._debug_tm = tmx_load( Resources.locate("tilemap", "debug.tmx") )
 
         Engine.log("Ready")
 
@@ -135,31 +133,8 @@ class Engine:
                                         .navigate(entity, self.nav_beacon.square)
         ih.addFunc("strategic_move_to_mouse", strategic_move_to_mouse)
 
-        def describe_square(square):
-            tm    = Arena.singleton().tm
-            level = tm.lookup_tile_property(square, "level")
-            if level is None:
-                Engine.log(f"Tile at {square} has no level")
-            else:
-                Engine.log(f"Tile at {square} is at level {level}")
-
-            is_obstacle = tm.lookup_tile_property(square, "is_obstacle")
-            if is_obstacle in [None, False]:
-                Engine.log(f"Tile is not an obstacle")
-            else:
-                Engine.log(f"Tile is an obstacle")
-
         # Region
         def region_enable():
-
-            # Describe the square at mouse.
-            c        = Camera.singleton()
-            (mx, my) = Mouse.get_coords()
-            mouse_square = Square(mx // TILE_WIDTH  + c.u,
-                                  my // TILE_HEIGHT + c.v)
-            Engine.log(f"mouse: xy=({mx}, {my}) square={mouse_square}")
-            describe_square(mouse_square)
-
             self.clear_selection()
             Region.singleton().enable()
         ih.addFunc("region_enable", region_enable)
@@ -222,6 +197,8 @@ class Engine:
     def _blit_scene(self, surface):
         av = ArenaView.singleton()
         av.blit(surface)
+        if True: # XXX
+            return
         if av.is_tactical:
             c        = Camera.singleton()
             entities = []
@@ -240,24 +217,55 @@ class Engine:
         self.input_handler.blit(surface)
 
     def _blit_debug_data(self, surface):
-        (mx, my) = Mouse.get_coords()
-        m        = Point(mx, my)
+        (mx, my)     = Mouse.get_coords()
+        m            = Point(mx, my)
+        c            = Camera.singleton()
+        (tile_width, tile_height) = Arena.singleton().tm.tile_size
+        mouse_square = Square(mx // tile_width  + c.u,
+                              my // tile_height + c.v)
+        (mu, mv)     = (mouse_square.u, mouse_square.v)
 
-        if False:
-            o = m.copy().to_ortho().to_square()
-            pygame.draw.rect(surface,
-                             COLOR_GREEN,
-                             Rect(o.pos(),
-                                  (SQUARE_SIZE, SQUARE_SIZE)),
-                             width=1)
+        # Describe square at mouse
+        tm          = Arena.singleton().tm
+        is_obstacle = mouse_square.is_obstacle()
+        if mouse_square.u == 0 and mouse_square.v == 0:
+            Engine.log(f"is_obstacle={is_obstacle}")
 
-        if True:
-            t   = m.copy().to_tile()
-            img = self._misc_tm.get_tile_image(0, 0, 0)
-            surface.blit(img, t.pos())
+        # Tile and is_obstacle
+        o      = mouse_square.point().screen()
+        pixels = Rect((o.x - tile_width // 2, o.y - tile_height // 2),
+                      (tile_width,            tile_height))
+        if is_obstacle:
+            color = COLOR_RED
+        else:
+            color = COLOR_GREEN
+        pygame.draw.rect(surface, color, pixels, width=1)
 
-        i = m.copy()
-        pygame.draw.rect(surface, COLOR_RED, Rect(i.pos(), (2, 2)))
+        # Mouse Pointer
+        pygame.draw.rect(surface, COLOR_BLUE, Rect(m.pos(), (1, 1)))
+
+        # Display various coordinates
+        font      = pygame.font.Font(None, 15)
+        text = [f"Mouse: {m} {mouse_square}",
+                f"Camera: {c.pos()}"]
+        text_surf = font.render(" ".join(text),  # text
+                                True,            # antialias
+                                COLOR_GREEN,     # color
+                                COLOR_BLACK)     # background
+        surface.blit(text_surf, (0, 0))
+
+        # Tile Properties:
+        tile_properties = tm.get_tile_properties(mu, mv)
+        if tile_properties is not None:
+            text = []
+            for k, v in tile_properties.items():
+                text.append(f"{k}: {v}")
+            text_surf = font.render(" ".join(text),  # text
+                                    True,            # antialias
+                                    COLOR_GREEN,     # color
+                                    COLOR_BLACK)     # background
+            surface.blit(text_surf, (0, 10))
+
 
         if self.debug_data is None:
             return

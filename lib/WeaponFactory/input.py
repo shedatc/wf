@@ -37,7 +37,10 @@ class InputHandler:
         return pygame.key.key_code( key_name[len("KEY_"):].upper() )
 
     def _button_code2name(self, button_code):
-        return "MOUSE_" + InputHandler.MOUSE_BUTTONS[button_code]
+        if button_code in InputHandler.MOUSE_BUTTONS:
+            return "MOUSE_" + InputHandler.MOUSE_BUTTONS[button_code]
+        else:
+            return f"MOUSE_<{button_code}>"
 
     def _button_name2code(self, button_name):
         assert button_name.startswith("MOUSE_")
