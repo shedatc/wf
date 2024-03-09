@@ -70,7 +70,7 @@ class Camera:
             self.show("down")
 
     def move(self, u, v):
-        (screen_width, screen_height) = pygame.display.get_window_size()
+        (screen_width, screen_height) = pygame.display.get_surface().get_size()
         self.u                        = min(screen_width  - self.width,  max(0, u))
         self.v                        = min(screen_height - self.height, max(0, v))
 
@@ -267,7 +267,7 @@ class ArenaView:
     def blit_strategic(self, surface):
 
         # Blit the view itself.
-        (screen_width, screen_height) = pygame.display.get_window_size()
+        (screen_width, screen_height) = pygame.display.get_surface().get_size()
         sv                            = self.get_strategic_view()
         (w, h)                        = sv.get_size()
         x                             = (screen_width  - w) // 2
@@ -410,16 +410,7 @@ class Square:
         log_ex(msg, category="Square")
 
     def __init__(self, u, v):
-        u = int(u)
-        v = int(v)
-        if __debug__:
-            (screen_width, screen_height) = pygame.display.get_window_size()
-            if 0 > u or u > screen_width-1:
-                raise AssertionError()
-            if 0 > v or v > screen_height-1:
-                raise AssertionError()
-
-        (self.u, self.v)   = (u, v)
+        (self.u, self.v)   = (int(u), int(v))
         (self.pu, self.pv) = (None, None)
         self.tm            = Arena.singleton().tm
 

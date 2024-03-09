@@ -114,7 +114,7 @@ class InputHandler:
 
     def blit(self, surface):
         (width, height)               = (10, 13)
-        (screen_width, screen_height) = pygame.display.get_window_size()
+        (screen_width, screen_height) = pygame.display.get_surface().get_size()
         (x, y)                        = (screen_width - width, screen_height - height)
         pygame.draw.rect(surface, self.background_color, Rect((x, y), (width, height)))
         pygame.draw.rect(surface, self.foreground_color, Rect((x, y), (width, height)),
