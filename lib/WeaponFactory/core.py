@@ -24,7 +24,8 @@ class Engine:
         assert cls._singleton is not None
         return cls._singleton
 
-    def log(msg):
+    @classmethod
+    def log(cls, msg):
         log_ex(msg, category="Engine")
 
     def __init__(self, profiling=False):

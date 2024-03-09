@@ -306,7 +306,8 @@ class ArenaView:
 # A point is said to be visible if in the camera range.
 class Point:
 
-    def log(msg):
+    @classmethod
+    def log(cls, msg):
         log_ex(msg, category="Point")
 
     def __init__(self, x, y):
@@ -404,7 +405,8 @@ class Point:
 # A square in the arena.
 class Square:
 
-    def log(msg):
+    @classmethod
+    def log(cls, msg):
         log_ex(msg, category="Square")
 
     def __init__(self, u, v):
