@@ -345,12 +345,6 @@ class Point:
         (tile_width, tile_height) = Arena.singleton().tm.tile_size
         return Square(self.x // tile_width, self.y // tile_height)
 
-    # Move the point to the top left corner of the square it belong to.
-    def to_square(self):
-        (self.x,  self.y) = (self.x // Square.SIZE * Square.SIZE,
-                             self.y // Square.SIZE * Square.SIZE)
-        return self
-
     # Return the point in screen coordinates.
     def screen(self):
         assert self.is_visible()
@@ -361,7 +355,7 @@ class Point:
 
     # Move to the coordinates pointed by the mouse.
     def from_mouse(self):
-        (mx, my)                  = Mouse.get_coords()
+        (mx, my)                  = Mouse.pos()
         c                         = Camera.singleton()
         (tile_width, tile_height) = Arena.singleton().tm.tile_size
         self.x = c.u * tile_width  + mx
@@ -412,7 +406,7 @@ class Square:
 
     def from_mouse(self):
         (tile_width, tile_height) = Arena.singleton().tm.tile_size
-        (mx, my)                  = Mouse.get_coords()
+        (mx, my)                  = Mouse.pos()
         (mu, mv)                  = (mx // tile_width, my // tile_height)
         self.relative_move(mu, mv)
         return self

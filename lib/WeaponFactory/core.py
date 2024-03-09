@@ -106,7 +106,7 @@ class Engine:
             Camera.singleton().right()
         ih.addFunc("camera_right", camera_right)
         def camera_to_mouse():
-            (mx, my) = Mouse.get_coords()
+            (mx, my) = Mouse.pos()
             Camera.singleton().centered_move(mx, my)
         ih.addFunc("camera_to_mouse", camera_to_mouse)
 
@@ -126,7 +126,7 @@ class Engine:
         ih.addFunc("tactical_move_to_mouse", tactical_move_to_mouse)
 
         def strategic_move_to_mouse():
-            (mx, my) = Mouse.get_coords()
+            (mx, my) = Mouse.pos()
             if self.nav_beacon.try_move( Square(mx, my) ):
                 for entity in self.selected_entities:
                     path_found = Compass.singleton() \
@@ -217,7 +217,7 @@ class Engine:
         self.input_handler.blit(surface)
 
     def _blit_debug_data(self, surface):
-        (mx, my)     = Mouse.get_coords()
+        (mx, my)     = Mouse.pos()
         m            = Point(mx, my)
         c            = Camera.singleton()
         (tile_width, tile_height) = Arena.singleton().tm.tile_size

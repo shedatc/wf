@@ -178,5 +178,6 @@ class ModalInputHandler:
 
 class Mouse:
 
-    def get_coords():
+    @classmethod
+    def pos(cls):
         return pygame.mouse.get_pos()
