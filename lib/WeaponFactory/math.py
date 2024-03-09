@@ -24,6 +24,14 @@ class Vector:
             self.unit = Vector(self.x / l, self.y / l)
         return self.unit
 
+    def pos(self):
+        return (self.x, self.y)
+
+    def invert(self):
+        self.x = -self.x
+        self.y = -self.y
+        return self
+
     def scale(self, s):
         self.x *= s
         self.y *= s
