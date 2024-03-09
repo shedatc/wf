@@ -6,6 +6,3 @@ COLOR_WHITE = (255, 255, 255)
 
 OBSTACLE = 0
 WALKABLE = 1
-
-SQUARE_SIZE      = 8 # pixels
-TILE_SQUARE_SIZE = 2 * SQUARE_SIZE         # TODO Explain why

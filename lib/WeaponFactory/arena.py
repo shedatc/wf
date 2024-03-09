@@ -3,7 +3,6 @@ import pygame
 from pygame import Rect
 
 from .const      import OBSTACLE, WALKABLE
-from .const      import TILE_SQUARE_SIZE
 from .input      import Mouse
 from .navigation import Compass
 from .resources  import Resources
@@ -348,8 +347,8 @@ class Point:
 
     # Move the point to the top left corner of the square it belong to.
     def to_square(self):
-        (self.x,  self.y) = (self.x // TILE_SQUARE_SIZE * TILE_SQUARE_SIZE,
-                             self.y // TILE_SQUARE_SIZE * TILE_SQUARE_SIZE)
+        (self.x,  self.y) = (self.x // Square.SIZE * Square.SIZE,
+                             self.y // Square.SIZE * Square.SIZE)
         return self
 
     # Return the point in screen coordinates.
@@ -375,6 +374,8 @@ class Point:
 
 # A square in the arena.
 class Square:
+
+    SIZE = 8 # pixels
 
     @classmethod
     def log(cls, msg):
