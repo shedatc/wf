@@ -9,18 +9,18 @@ from pprint  import pprint
 
 from .utils import Config, log_ex
 
-class Resources:
+class Assets:
 
     _singleton = None
 
     @classmethod
     def log(cls, msg):
-        log_ex(msg, category="Resources")
+        log_ex(msg, category="Assets")
 
     @classmethod
     def singleton(cls):
         if cls._singleton is None:
-            cls._singleton = Resources()
+            cls._singleton = Assets()
         return cls._singleton
 
     @classmethod
@@ -36,21 +36,21 @@ class Resources:
         return pjoin(home_dir, ".local", "share", "wf")
 
     @classmethod
-    def locate(cls, resource_type, file_name):
-        rt_dirs = Config.singleton().get("resources.json", resource_type)
+    def locate(cls, asset_type, file_name):
+        rt_dirs = Config.singleton().get("assets.json", asset_type)
         if rt_dirs is None:
-            raise RuntimeError(f"Invalid resource type: {resource_type}")
+            raise RuntimeError(f"Invalid asset type: {asset_type}")
         for d in rt_dirs:
             if d[0] == "/":
                 path = os.path.join(d, file_name)
             else:
-                path = pjoin(Resources._dir(), d, file_name)
+                path = pjoin(Assets._dir(), d, file_name)
             if os.path.exists(path):
                 return path
         else:
-            Resources.log(f'Resources Base Directory: {Resources._dir()}')
-            Resources.log(f'{resource_type} Directories: {rt_dirs}')
-            raise RuntimeError(f"Missing {resource_type} resource: {file_name}")
+            Assets.log(f'Assets Base Directory: {Assets._dir()}')
+            Assets.log(f'{asset_type} Directories: {rt_dirs}')
+            raise RuntimeError(f"Missing {asset_type} asset: {file_name}")
 
     def __init__(self):
         self.images = {}
@@ -59,11 +59,11 @@ class Resources:
         if name in self.images:
             return self.images[name]
 
-        path = Resources.locate("image", name)
+        path = Assets.locate("image", name)
         if path is None:
             raise RuntimeError("Image not found")
 
         img               = pygame.image.load(path)
         self.images[name] = img
-        Resources.log(f'Image: name="{name}" path="{path}" img={img}')
+        Assets.log(f'Image: name="{name}" path="{path}" img={img}')
         return img

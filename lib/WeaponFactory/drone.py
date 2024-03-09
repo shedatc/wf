@@ -1,5 +1,5 @@
 from .animation import AnimationManager
-from .resources import Resources
+from .assets    import Assets
 from .sprites   import Entity
 from .utils     import Config, log_ex
 

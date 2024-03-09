@@ -6,7 +6,6 @@ from .animation  import Animation, AnimationManager
 from .arena      import Arena
 from .navigation import Compass, NavPath
 from .physics    import Physics
-from .resources  import Resources
 from .utils      import Config, Observable, log_ex
 
 # A sprite is something that is animated.

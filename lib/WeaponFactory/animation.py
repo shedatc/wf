@@ -2,9 +2,9 @@ import json
 
 from pygame import Rect
 
-from .core      import Engine
-from .resources import Resources
-from .utils     import Config, log_ex
+from .core   import Engine
+from .assets import Assets
+from .utils  import Config, log_ex
 
 class Animation:
 
@@ -69,12 +69,12 @@ class AnimationManager:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self, sprite_name):
-        path = Resources.locate("sprite", f"{sprite_name}.json")
+        path = Assets.locate("sprite", f"{sprite_name}.json")
         with open(path, "r") as cf:
             conf = json.loads(cf.read())
 
             self.current = None
-            self.surface = Resources.singleton().image(conf["image"])
+            self.surface = Assets.singleton().image(conf["image"])
 
             self.animations = {}
             for a_name, a_conf in conf["animations"].items():

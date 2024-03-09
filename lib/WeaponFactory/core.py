@@ -8,7 +8,7 @@ from .arena      import Arena, Point, Square, ArenaView, Camera, Region
 from .const      import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK, COLOR_WHITE
 from .input      import ModalInputHandler, Mouse
 from .navigation import Compass, NavBeacon
-from .resources  import Resources
+from .assets     import Assets
 from .utils      import Config, log_ex, sz
 
 EV_NAV = pygame.event.custom_type()
@@ -41,7 +41,6 @@ class Engine:
         config         = Config.singleton().load("engine.json")
         self.fps       = config["fps"]
         arena_config   = config["arena"]
-        self.resources = Resources()
 
         pygame.init()
         wanted_screen_size = (config["screen"]["width"], config["screen"]["height"])
@@ -60,7 +59,7 @@ class Engine:
         self.init_scene(arena_config)
         self.init_input()
 
-        self._debug_tm = tmx_load( Resources.locate("tilemap", "debug.tmx") )
+        self._debug_tm = tmx_load( Assets.locate("tilemap", "debug.tmx") )
 
         Engine.log("Ready")
 

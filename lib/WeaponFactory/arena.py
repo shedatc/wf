@@ -5,7 +5,7 @@ from pygame import Rect
 from .const      import OBSTACLE, WALKABLE
 from .input      import Mouse
 from .navigation import Compass
-from .resources  import Resources
+from .assets     import Assets
 from .tilemap    import Tilemap
 from .utils      import Config, log_ex, sz
 
@@ -157,7 +157,7 @@ class Arena:
 
         # Strategic View
         if False:
-            sv_path               = Resources.locate("image", f"{self.name}-sv.png")
+            sv_path               = Assets.locate("image", f"{self.name}-sv.png")
             self.sv               = pygame.image.load(sv_path)
             (sv_width, sv_height) = self.sv.get_size()
             Arena.log(f"sv: path={sv_path} size={sv_width}x{sv_height}")

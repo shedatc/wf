@@ -4,9 +4,9 @@ from math              import floor
 from pygame            import Rect
 from pytmx.util_pygame import load_pygame as tmx_load
 
-from .const     import COLOR_BLACK
-from .resources import Resources
-from .utils     import log_ex, sz
+from .const  import COLOR_BLACK
+from .assets import Assets
+from .utils  import log_ex, sz
 
 DEBUG_PROPERTIES = False # Log setting/getting properties
 
@@ -21,8 +21,9 @@ class Tilemap:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self, name):
-        path     = Resources.locate("tilemap", f"{name}.tmx")
-        self._tmx = tmx_load(path)
+        # FIXME Find a way to use Assets.locate also for tilesets to allow
+        #       sharing them between tilemaps.
+        self._tmx = tmx_load( Assets.locate("tilemap", f"{name}.tmx") )
         Tilemap.log(f"Filename:         {self._tmx.filename}")
         Tilemap.log(f"Version:          {self._tmx.version}")
         Tilemap.log(f"Tiled Version:    {self._tmx.tiledversion}")
