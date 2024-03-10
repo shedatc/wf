@@ -219,9 +219,9 @@ class Engine:
         (mx, my)     = Mouse.pos()
         m            = Point(mx, my)
         c            = Camera.singleton()
-        (tile_width, tile_height) = Arena.singleton().tm.tile_size
-        mouse_square = Square(mx // tile_width  + c.u,
-                              my // tile_height + c.v)
+        (square_width, square_height) = Arena.singleton().square_size
+        mouse_square = Square(mx // square_width  + c.u,
+                              my // square_height + c.v)
         (mu, mv)     = (mouse_square.u, mouse_square.v)
 
         # Describe square at mouse
@@ -232,8 +232,8 @@ class Engine:
 
         # Tile and is_obstacle
         o      = mouse_square.point().screen()
-        pixels = Rect((o.x - tile_width // 2, o.y - tile_height // 2),
-                      (tile_width,            tile_height))
+        pixels = Rect((o.x - square_width // 2, o.y - square_height // 2),
+                      (square_width,            square_height))
         if is_obstacle:
             color = COLOR_RED
         else:
