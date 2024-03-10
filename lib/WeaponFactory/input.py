@@ -179,5 +179,5 @@ class ModalInputHandler:
 class Mouse:
 
     @classmethod
-    def pos(cls):
+    def screen_xy(cls):
         return pygame.mouse.get_pos()

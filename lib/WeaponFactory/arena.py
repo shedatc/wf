@@ -24,7 +24,7 @@ class Camera:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        (screen_width, screen_height) = pygame.display.get_surface().get_size()
+        (self.screen_width, self.screen_height) = pygame.display.get_surface().get_size()
 
         a = Arena.singleton()
         (map_width, map_height)                 = (a.width, a.height)
@@ -34,17 +34,17 @@ class Camera:
         self.vertical_step   = 1 # squares
 
         # Center the camera
-        self.u  = map_width  // 2 - screen_width  // self.square_width  // 2
+        self.u  = map_width  // 2 - self.screen_width  // self.square_width  // 2
         self.u -= self.u % self.horizontal_step
-        self.v  = map_height // 2 - screen_height // self.square_height // 2
+        self.v  = map_height // 2 - self.screen_height // self.square_height // 2
         self.v -= self.v % self.vertical_step
 
-        self.width  = screen_width  // self.square_width
-        self.height = screen_height // self.square_height
+        self.width  = self.screen_width  // self.square_width
+        self.height = self.screen_height // self.square_height
         self.lu     = map_width  - self.width
         self.lv     = map_height - self.height
 
-        Camera.log(f"Screen:              {sz((screen_width, screen_height))}")
+        Camera.log(f"Screen:              {self.screen_width}x{self.screen_height}")
         Camera.log(f"Position (uv):       [{self.u}, {self.v}]")
         Camera.log(f"Last position (luv): [{self.lu}, {self.lv}]")
         Camera.log(f"Size:                {self.width}x{self.height} squares")
@@ -52,12 +52,8 @@ class Camera:
         Camera.log(f"    Horizontal:      {self.horizontal_step} squares")
         Camera.log(f"    Vertical:        {self.vertical_step} squares")
 
-    def pos(self):
+    def xy(self):
         return (self.u * self.square_width, self.v * self.square_height)
-
-    # Inverted position
-    def ipos(self):
-        return (-self.u * self.square_width, -self.v * self.square_height)
 
     def squares(self):
         return Rect(self.u, self.v, self.width, self.height)
@@ -79,9 +75,8 @@ class Camera:
             self.v += self.vertical_step
 
     def move(self, u, v):
-        (screen_width, screen_height) = pygame.display.get_surface().get_size()
-        self.u                        = min(screen_width  - self.width,  max(0, u))
-        self.v                        = min(screen_height - self.height, max(0, v))
+        self.u = min(self.screen_width  - self.width,  max(0, u))
+        self.v = min(self.screen_height - self.height, max(0, v))
 
     def centered_move(self, u, v):
         self.move(u - self.width  // 2,
@@ -339,7 +334,7 @@ class Point:
     def copy(self):
         return Point(self.x, self.y)
 
-    def pos(self):
+    def xy(self):
         return (self.x, self.y)
 
     # Return the square containing the point.
@@ -358,7 +353,7 @@ class Point:
 
     # Move to the coordinates pointed by the mouse.
     def from_mouse(self):
-        (mx, my)                  = Mouse.pos()
+        (mx, my)                  = Mouse.screen_xy()
         c                         = Camera.singleton()
         (square_width, square_height) = Arena.singleton().square_size
         self.x = c.u * square_width  + mx
@@ -407,7 +402,7 @@ class Square:
 
     def from_mouse(self):
         (square_width, square_height) = Arena.singleton().square_size
-        (mx, my)                      = Mouse.pos()
+        (mx, my)                      = Mouse.screen_xy()
         (mu, mv)                      = (mx // square_width, my // square_height)
         self.relative_move(mu, mv)
         return self

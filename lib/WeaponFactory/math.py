@@ -24,7 +24,7 @@ class Vector:
             self.unit = Vector(self.x / l, self.y / l)
         return self.unit
 
-    def pos(self):
+    def xy(self):
         return (self.x, self.y)
 
     def invert(self):

@@ -104,9 +104,12 @@ class Engine:
         def camera_right():
             Camera.singleton().right()
         ih.addFunc("camera_right", camera_right)
+        # FIXME Broken in tactical view.
         def camera_to_mouse():
-            (mx, my) = Mouse.pos()
-            Camera.singleton().centered_move(mx, my)
+            c        = Camera.singleton()
+            (cx, cy) = c.xy()
+            (mx, my) = Mouse.screen_xy()
+            c.centered_move(mx + cx, my + cy)
         ih.addFunc("camera_to_mouse", camera_to_mouse)
 
         def arena_view_toggle():
@@ -125,7 +128,7 @@ class Engine:
         ih.addFunc("tactical_move_to_mouse", tactical_move_to_mouse)
 
         def strategic_move_to_mouse():
-            (mx, my) = Mouse.pos()
+            (mx, my) = Mouse.screen_xy()
             if self.nav_beacon.try_move( Square(mx, my) ):
                 for entity in self.selected_entities:
                     path_found = Compass.singleton() \
@@ -216,7 +219,7 @@ class Engine:
         self.input_handler.blit(surface)
 
     def _blit_debug_data(self, surface):
-        (mx, my)     = Mouse.pos()
+        (mx, my)     = Mouse.screen_xy()
         m            = Point(mx, my)
         c            = Camera.singleton()
         (square_width, square_height) = Arena.singleton().square_size
@@ -241,12 +244,12 @@ class Engine:
         pygame.draw.rect(surface, color, pixels, width=1)
 
         # Mouse Pointer
-        pygame.draw.rect(surface, COLOR_BLUE, Rect(m.pos(), (1, 1)))
+        pygame.draw.rect(surface, COLOR_BLUE, Rect(m.xy(), (1, 1)))
 
         # Display various coordinates
         font      = pygame.font.Font(None, 15)
         text = [f"Mouse: {m} {mouse_square}",
-                f"Camera: {c.pos()}"]
+                f"Camera: {c.xy()}"]
         text_surf = font.render(" ".join(text),  # text
                                 True,            # antialias
                                 COLOR_GREEN,     # color

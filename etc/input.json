@@ -44,6 +44,7 @@
                     "KEY_Q":             "quit",
                     "KEY_ESCAPE":        "quit",
                     "MOUSE_BUTTON_LEFT": "region_enable",
+                    "MOUSE_BUTTON_MIDDLE": "camera_to_mouse",
                     "KEY_A":             "camera_left",
                     "KEY_LEFT":          "camera_left",
                     "KEY_U":             "camera_up",
