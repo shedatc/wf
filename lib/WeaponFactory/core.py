@@ -104,12 +104,16 @@ class Engine:
         def camera_right():
             Camera.singleton().right()
         ih.addFunc("camera_right", camera_right)
-        # FIXME Broken in tactical view.
         def camera_to_mouse():
-            c        = Camera.singleton()
-            (cx, cy) = c.xy()
-            (mx, my) = Mouse.screen_xy()
-            c.centered_move(mx + cx, my + cy)
+            # Center the camera on mouse position
+            c                             = Camera.singleton()
+            (square_width, square_height) = Arena.singleton().square_size
+            (cu, cv)                      = c.uv()
+            (mx, my)                      = Mouse.screen_xy()
+            (mu, mv)                      = (mx // square_width, my // square_height)
+            c.centered_move(mu + cu, mv + cv)
+
+            Mouse.center()
         ih.addFunc("camera_to_mouse", camera_to_mouse)
 
         def arena_view_toggle():
@@ -247,9 +251,11 @@ class Engine:
         pygame.draw.rect(surface, COLOR_BLUE, Rect(m.xy(), (1, 1)))
 
         # Display various coordinates
+        (cx, cy) = c.xy()
+        (cu, cv) = c.uv()
         font      = pygame.font.Font(None, 15)
         text = [f"Mouse: {m} {mouse_square}",
-                f"Camera: {c.xy()}"]
+                f"Camera: ({cx}, {cy}) [{cu}, {cv}]"]
         text_surf = font.render(" ".join(text),  # text
                                 True,            # antialias
                                 COLOR_GREEN,     # color

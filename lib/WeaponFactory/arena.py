@@ -52,6 +52,9 @@ class Camera:
         Camera.log(f"    Horizontal:      {self.horizontal_step} squares")
         Camera.log(f"    Vertical:        {self.vertical_step} squares")
 
+    def uv(self):
+        return (self.u, self.v)
+
     def xy(self):
         return (self.u * self.square_width, self.v * self.square_height)
 
@@ -75,8 +78,7 @@ class Camera:
             self.v += self.vertical_step
 
     def move(self, u, v):
-        self.u = min(self.screen_width  - self.width,  max(0, u))
-        self.v = min(self.screen_height - self.height, max(0, v))
+        (self.u, self.v) = (u, v)
 
     def centered_move(self, u, v):
         self.move(u - self.width  // 2,
