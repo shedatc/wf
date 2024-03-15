@@ -1,4 +1,4 @@
-from .utils  import log_ex
+from .utils import log_ex
 
 class Animation:
 
@@ -7,38 +7,40 @@ class Animation:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self, name, frames, is_loop=True):
-        self.name      = name
-        self.frames    = frames
-        self.is_loop   = is_loop
-        self.last      = len(frames) - 1
-        self.current   = 0
+        self.name           = name
+        self.is_loop        = is_loop
+        self._frames        = frames
+        self._index_last    = len(frames) - 1
+        self._index_current = 0
 
     def rewind(self):
-        self.current = 0
+        Animation.log("Rewinding")
+        for f in self._frames:
+            Animation.log(f"Reset frame {self._index_current}/{self._index_last}")
+            f.reset()
+        self._index_current = 0
+        Animation.log(f"Now at frame {self._index_current}/{self._index_last}")
 
     def is_done(self):
-        return not self.is_loop and self.current == self.last
+        return self._index_current > self._index_last and not self.is_loop
 
     def _next_frame(self):
         assert not self.is_done()
-        if self.current < self.last:
-            self.current += 1
-            return True
-        elif self.current == self.last and self.is_loop:
-            self.current = 0
-            return True
-        assert 0 <= self.current and self.current < self.last
-        return False # No next frame
+        self._index_current += 1
+        if self._index_current > self._index_last and self.is_loop:
+            self.rewind()
+        Animation.log(f"Now at frame {self._index_current}/{self._index_last}")
 
     def add_time(self, t):
         assert t > 0
         assert not self.is_done()
-        while t > 0:
-            f = self.frames[self.current]
+        while t > 0 and not self.is_done():
+            Animation.log(f"Adding {t} ms to frame {self._index_current}/{self._index_last}")
+            f = self._frames[self._index_current]
             t = f.add_time(t)
             if f.is_done():
-                if not self._next_frame():
-                    return
+                self._next_frame()
+        Animation.log(f"Done")
 
     def blit_at(self, surface, x, y):
-        self.frames[self.current].blit_at(surface, x, y)
+        self._frames[self._index_current].blit_at(surface, x, y)

@@ -62,10 +62,6 @@ class AnimationManager:
             end       = frame_tag["to"]
             if direction != "forward":
                 raise RuntimeError("Direction not supported")
-            AnimationManager.log(f"Animation '{name}':")
-            AnimationManager.log(f"    Direction: {direction}")
-            AnimationManager.log(f"    Frames:    {start}..{end}")
-
             frames = []
             for f in range(start, end+1):
                 frame           = conf["frames"][f]
@@ -76,6 +72,10 @@ class AnimationManager:
                                                  frame["frame"]["h"],
                                                  duration=frame["duration"])
                 frames.append(animation_frame)
+
+            AnimationManager.log(f"Animation '{name}':")
+            AnimationManager.log(f"    Direction:   {direction}")
+            AnimationManager.log(f"    Frames:      {start}..{end}, {len(frames)} frames")
 
             self.animations[name] = Animation(name, frames)
 

@@ -57,10 +57,12 @@ class AnimationClock:
     # Add time to running animations and return time (ms) since previous tick.
     def tick(self):
         t = self.clock.tick(self._fps)
-        AnimationClock.log(f"Tick: {t} ms")
+        AnimationClock.log(f"Tick: {t} ms since previous tick")
         c = 0
         for a in self._running_animations:
             a.add_time(t)
+            if a.is_done():
+                self.pause_animation(a)
             c += 1
         AnimationClock.log(f"Added {t} ms to {c} animations")
         return t
