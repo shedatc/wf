@@ -15,8 +15,9 @@ class InputHandler:
 
     MOUSE_BUTTONS = ["BUTTON_LEFT", "BUTTON_MIDDLE", "BUTTON_RIGHT"]
 
-    def log(msg):
-        log_ex(msg, category="InputHandler")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self):
         self.key_pressed     = {}
@@ -130,8 +131,9 @@ class InputHandler:
 
 class ModalInputHandler:
 
-    def log(msg):
-        log_ex(msg, category="ModalInputHandler")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self):
         self.inputHandlers       = {}
@@ -175,19 +177,3 @@ class ModalInputHandler:
 
     def blit(self, surface):
         self.currentInputHandler.blit(surface)
-
-class Mouse:
-
-    @classmethod
-    def screen_xy(cls):
-        return pygame.mouse.get_pos()
-
-    @classmethod
-    def move(cls, x, y):
-        pygame.mouse.set_pos([x, y])
-
-    @classmethod
-    def center(cls):
-        (screen_width, screen_height) = pygame.display.get_surface().get_size()
-        pygame.mouse.set_pos([screen_width  // 2,
-                              screen_height // 2])

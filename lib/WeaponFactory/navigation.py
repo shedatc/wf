@@ -23,7 +23,7 @@ class Compass:
 
     @classmethod
     def log(cls, msg):
-        log_ex(msg, category="Compass")
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self, obstacles_matrix):
         assert Compass._singleton is None
@@ -191,7 +191,7 @@ class NavPath:
 class NavBeacon:
 
     def log(msg):
-        log_ex(msg, category="NavBeacon")
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self):
         from .arena import Square

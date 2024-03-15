@@ -15,7 +15,7 @@ class Assets:
 
     @classmethod
     def log(cls, msg):
-        log_ex(msg, category="Assets")
+        log_ex(msg, category=cls.__name__)
 
     @classmethod
     def singleton(cls):
@@ -55,7 +55,9 @@ class Assets:
     def __init__(self):
         self.images = {}
 
-    def image(self, name):
+    @classmethod
+    def image(cls, name):
+        self = cls.singleton()
         if name in self.images:
             return self.images[name]
 
@@ -65,5 +67,7 @@ class Assets:
 
         img               = pygame.image.load(path)
         self.images[name] = img
-        Assets.log(f'Image: name="{name}" path="{path}" img={img}')
+        Assets.log(f"Image:")
+        Assets.log(f"    Name: {name}")
+        Assets.log(f"    Path: {path}")
         return img

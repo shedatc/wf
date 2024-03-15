@@ -1,15 +1,24 @@
-import os.path
 import pygame
 
 from pygame            import Rect
 from pytmx.util_pygame import load_pygame as tmx_load
 
-from .arena      import Arena, Point, Square, ArenaView, Camera, Region
-from .const      import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK, COLOR_WHITE
-from .input      import ModalInputHandler, Mouse
-from .navigation import Compass, NavBeacon
-from .assets     import Assets
-from .utils      import Config, log_ex, sz
+from .AnimationClock import AnimationClock
+if False:
+    from .Drone          import Drone
+from .Monolith       import Monolith
+from .Mouse          import Mouse
+from .Arena          import Arena
+from .ArenaView      import ArenaView
+from .Point          import Point
+from .Square         import Square
+from .Camera         import Camera
+from .Region         import Region
+from .assets         import Assets
+from .const          import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
+from .input          import ModalInputHandler
+from .navigation     import Compass, NavBeacon
+from .utils          import Config, log_ex, sz
 
 EV_NAV = pygame.event.custom_type()
 
@@ -24,7 +33,7 @@ class Engine:
 
     @classmethod
     def log(cls, msg):
-        log_ex(msg, category="Engine")
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self, profiling=False):
         assert Engine._singleton is None
@@ -38,9 +47,8 @@ class Engine:
         else:
             self.profile = None
 
-        config         = Config.singleton().load("engine.json")
-        self.fps       = config["fps"]
-        arena_config   = config["arena"]
+        config       = Config.singleton().load("engine.json")
+        arena_config = config["arena"]
 
         pygame.init()
         wanted_screen_size = (config["screen"]["width"], config["screen"]["height"])
@@ -48,7 +56,6 @@ class Engine:
                                               pygame.FULLSCREEN | pygame.SCALED)
 
         Engine.log(f"Screen: {sz(self.screen.get_size())} ({sz(wanted_screen_size)})")
-        Engine.log(f"FPS:    {self.fps}")
 
         pygame.display.set_caption(config["caption"])
         pygame.mouse.set_visible(config["mouse"])
@@ -56,7 +63,8 @@ class Engine:
         self.entities          = []
         self.selected_entities = []
         self.debug_data        = None
-        self.init_scene(arena_config)
+        self.init_arena(arena_config)
+        self.init_scene()
         self.init_input()
 
         self._debug_tm = tmx_load( Assets.locate("tilemap", "debug.tmx") )
@@ -166,23 +174,36 @@ class Engine:
         entity.select()
         self.selected_entities.append(entity)
 
-    def init_scene(self, arena_config):
+    def init_arena(self, arena_config):
         a = Arena(arena_config)
+        Camera((a.width, a.height), a.square_size)
         Compass(a.obstacles_matrix)
 
+    def init_scene(self):
+        a = Arena.singleton()
+
+        if True:
+            s = Square(22, 35)
+            p = a.point(s)
+            Engine.log("Spawing Monolith at {p} {s}…")
+            monolith = Monolith(p)
+            # monolith.register_observer(a)
+            # monolith.notify_observers("entity-spawned", square=s)
+            self.entities.append(monolith)
+        return # XXX
+
         # Spawn some drones
-        if False:
-            drones = {
-                "A": Square(5,  10),
-                "B": Square(11, 10),
-                "C": Square(5,  20),
-            }
-            for name, square in drones.items():
-                drone      = Drone(square)
-                drone.name = name
-                drone.register_observer(a)
-                drone.notify_observers("entity-spawned", square=drone.position().square())
-                self.entities.append(drone)
+        drones = {
+            "A": Square(5,  10),
+            "B": Square(11, 10),
+            "C": Square(5,  20),
+        }
+        for name, square in drones.items():
+            drone      = Drone(square)
+            drone.name = name
+            drone.register_observer(a)
+            drone.notify_observers("entity-spawned", square=drone.position().square())
+            self.entities.append(drone)
 
         self.nav_beacon = NavBeacon()
 
@@ -203,44 +224,50 @@ class Engine:
     def _blit_scene(self, surface):
         av = ArenaView.singleton()
         av.blit(surface)
-        if True: # XXX
-            return
         if av.is_tactical:
             c        = Camera.singleton()
-            entities = []
             a        = Arena.singleton()
-            for v in range(c.v, c.v + c.height - 1):
-                for u in range(c.u, c.u + c.width - 1):
-                    entities.extend( a.entities_at_square(u, v) )
-            for e in entities:
-                e.blit_nav_path(surface)
-            for e in entities:
-                e.blit_selection(surface)
+            entities = []
+            if True:
+                entities = self.entities
+            else:
+                for v in range(c.v, c.v + c.height - 1):
+                    for u in range(c.u, c.u + c.width - 1):
+                        entities.extend( a.entities_at_square(u, v) )
+
+            # Engine.log(f"len(entities)={len(entities)}")
+            if False:
+                for e in entities:
+                    e.blit_nav_path(surface)
+            if False:
+                for e in entities:
+                    e.blit_selection(surface)
             for e in entities:
                 e.blit(surface)
-            for e in entities:
-                e.blit_overlay(surface)
+            if False:
+                for e in entities:
+                    e.blit_overlay(surface)
         self.input_handler.blit(surface)
 
     def _blit_debug_data(self, surface):
-        (mx, my)     = Mouse.screen_xy()
-        m            = Point(mx, my)
-        c            = Camera.singleton()
-        (square_width, square_height) = Arena.singleton().square_size
-        mouse_square = Square(mx // square_width  + c.u,
-                              my // square_height + c.v)
-        (mu, mv)     = (mouse_square.u, mouse_square.v)
+        a                             = Arena.singleton()
+        (mx, my)                      = Mouse.screen_xy()
+        m                             = Point(mx, my)
+        c                             = Camera.singleton()
+        (square_width, square_height) = a.square_size
+        mouse_square                  = Square(mx // square_width  + c.u,
+                                               my // square_height + c.v)
+        (mu, mv)                      = (mouse_square.u, mouse_square.v)
 
         # Describe square at mouse
-        tm          = Arena.singleton().tm
-        is_obstacle = mouse_square.is_obstacle()
+        tm          = a.tm
+        is_obstacle = a.is_obstacle(mouse_square)
         if mouse_square.u == 0 and mouse_square.v == 0:
             Engine.log(f"is_obstacle={is_obstacle}")
 
         # Tile and is_obstacle
-        o      = mouse_square.point().screen()
-        pixels = Rect((o.x - square_width // 2, o.y - square_height // 2),
-                      (square_width,            square_height))
+        pixels = Rect((mx - square_width // 2, my - square_height // 2),
+                      (square_width,           square_height))
         if is_obstacle:
             color = COLOR_RED
         else:
@@ -283,14 +310,9 @@ class Engine:
         raise NotImplementedError("Must replace pyxel.text")
 
     def run(self):
-        clock            = pygame.time.Clock()
-        self.is_running  = True
-        self.frame_count = 0
+        self.is_running = True
         while self.is_running:
             self.update()
             self.draw()
             pygame.display.flip()
-            self.frame_count += 1
-            clock.tick(self.fps)
-
-from .drone import Drone
+            AnimationClock.singleton().tick()

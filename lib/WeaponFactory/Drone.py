@@ -1,12 +1,11 @@
-from .animation import AnimationManager
-from .assets    import Assets
-from .sprites   import Entity
-from .utils     import Config, log_ex
+from .Entity import Entity
+from .utils  import log_ex
 
 class Drone(Entity):
 
-    def log(msg):
-        log_ex(msg, category="Drone")
+    @classmethod
+    def log(cls, msg):
+        log_ex(msg, category=cls.__name__)
 
     def __init__(self, square):
         Drone.log(f'square={square}')
