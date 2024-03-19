@@ -1,21 +1,22 @@
 from pygame import Rect
 
-from .utils import log_ex
+from .Screen import Screen
+from .utils  import log_ex
 
 class AnimationFrame:
 
-    @classmethod
-    def log(cls, msg):
-        log_ex(msg, category=cls.__name__)
+    def log(self, msg):
+        log_ex(f"Frame '{self.name}': {msg}", category=self.__class__.__name__)
 
-    def __init__(self, surface, x, y, width, height,
+    def __init__(self, name, surface, rect,
                  duration=100, rotated=False, trimmed=False):
+        self.name      = name
         self._surface  = surface
-        self._x        = x
-        self._y        = y
-        self._width    = width
-        self._height   = height
+        self._rect     = rect
         self._duration = duration # ms
+
+        self.log(f"Surface:   {surface}")
+        self.log(f"Rectangle: {rect}")
 
         assert rotated is False, "Frame rotation is not supported"
         assert trimmed is False, "Frame trim is not supported"
@@ -23,7 +24,7 @@ class AnimationFrame:
         self._remaining_duration = self._duration
 
     def reset(self):
-        AnimationFrame.log("Reset")
+        self.log(f"Reset")
         self._remaining_duration = self._duration
 
     # Add time to the frame. If adding more time than necessary to finish it,
@@ -39,16 +40,18 @@ class AnimationFrame:
             dt                       = t - self._remaining_duration
             self._remaining_duration = 0
 
-        AnimationFrame.log(f"Added {t} ms")
-        AnimationFrame.log(f"{orig_remaining_duration}→{self._remaining_duration} ms to complete")
-        AnimationFrame.log(f"{dt} ms extra")
+        self.log(f"Added {t} ms")
+        self.log(f"{orig_remaining_duration}→{self._remaining_duration} ms to complete")
+        self.log(f"{dt} ms extra")
         return dt
 
     def is_done(self):
         return self._remaining_duration == 0
 
-    def blit_at(self, surface, x, y):
-        surface.blit(self._surface,                                   # source
-                     (x - self._width // 2, y - self._height // 2),   # dest
-                     area=Rect((self._x, self._y), (self._width, self._height)))
+    def blit_at(self, position):
+        dest_rect        = self._rect.copy()
+        dest_rect.center = position
+        self.log(f"Blit {self._rect} at {position}")
+        Screen.singleton().blit(self._surface, dest_rect,
+                                source_rect=self._rect)
 

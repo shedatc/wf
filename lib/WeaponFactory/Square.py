@@ -17,6 +17,9 @@ class Square:
     def __eq__(self, other_square):
         return self.u == other_square.u and self.v == other_square.v
 
+    def uv(self):
+        return (self.u, self.v)
+
     def move(self, u, v):
         (self.pu, self.pv) = (self.u, self.v)
         (self.u, self.v)   = (u, v)

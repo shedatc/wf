@@ -2,7 +2,6 @@ import pygame
 
 from pygame import Rect
 
-from .Arena import Arena
 from .utils import log_ex
 
 class Camera:
@@ -11,75 +10,50 @@ class Camera:
 
     @classmethod
     def singleton(cls):
-        if cls._singleton is None:
-            cls._singleton = Camera()
+        assert cls._singleton is not None
         return cls._singleton
 
     @classmethod
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 
-    def __init__(self):
-        (self.screen_width, self.screen_height) = pygame.display.get_surface().get_size()
+    # Unit is the pixel.
+    def __init__(self, surface_rect, steps):
+        self.surface_rect = surface_rect                                          # pixels
+        self.rect         = Rect((0, 0), pygame.display.get_surface().get_size()) # pixels
+        self.rect.center  = surface_rect.center
 
-        a = Arena.singleton()
-        (map_width, map_height)                 = (a.width, a.height)
-        (self.square_width, self.square_height) = a.square_size
+        (self.horizontal_step, self.vertical_step) = steps
 
-        self.horizontal_step = 1 # squares
-        self.vertical_step   = 1 # squares
-
-        # Center the camera
-        self.u  = map_width  // 2 - self.screen_width  // self.square_width  // 2
-        self.u -= self.u % self.horizontal_step
-        self.v  = map_height // 2 - self.screen_height // self.square_height // 2
-        self.v -= self.v % self.vertical_step
-
-        self.width  = self.screen_width  // self.square_width
-        self.height = self.screen_height // self.square_height
-        self.lu     = map_width  - self.width
-        self.lv     = map_height - self.height
-
-        Camera.log(f"Screen:              {self.screen_width}x{self.screen_height}")
-        Camera.log(f"Position (uv):       [{self.u}, {self.v}]")
-        Camera.log(f"Last position (luv): [{self.lu}, {self.lv}]")
-        Camera.log(f"Size:                {self.width}x{self.height} squares")
+        Camera.log(f"Rectangle:      {self.rect} pixels")
+        Camera.log(f"Surface:        {self.surface_rect} pixels")
         Camera.log(f"Steps:")
-        Camera.log(f"    Horizontal:      {self.horizontal_step} squares")
-        Camera.log(f"    Vertical:        {self.vertical_step} squares")
+        Camera.log(f"    Horizontal: {self.horizontal_step} pixels")
+        Camera.log(f"    Vertical:   {self.vertical_step} pixels")
 
-    def uv(self):
-        return (self.u, self.v)
+        Camera._singleton = self
 
-    def xy(self):
-        return (self.u * self.square_width, self.v * self.square_height)
-
-    def squares(self):
-        return Rect(self.u, self.v, self.width, self.height)
+    def move(self, x, y):
+        orig_rect = self.rect
+        self.rect = orig_rect.move(x, y).clamp(self.surface_rect)
+        Camera.log(f"Move: {orig_rect} → {self.rect}")
 
     def left(self):
-        if self.u - self.horizontal_step >= 0:
-            self.u -= self.horizontal_step
+        self.move(-self.horizontal_step, 0)
 
     def right(self):
-        if self.u + self.horizontal_step <= self.lu:
-            self.u += self.horizontal_step
+        self.move(self.horizontal_step, 0)
 
     def up(self):
-        if self.v - self.vertical_step >= 0:
-            self.v -= self.vertical_step
+        self.move(0, -self.vertical_step)
 
     def down(self):
-        if self.v + self.vertical_step <= self.lv:
-            self.v += self.vertical_step
+        self.move(0, self.vertical_step)
 
-    def move(self, u, v):
-        (self.u, self.v) = (u, v)
+    def view_point(self, p):
+        return self.rect.collidepoint(p)
 
-    def centered_move(self, u, v):
-        self.move(u - self.width  // 2,
-                  v - self.height // 2)
-
-    def view(self, square):
-        return self.u <= square.u and square.u <= self.u + self.width \
-            and self.v <= square.v and square.v <= self.v + self.height
+    def screen_point(self, p):
+        assert self.view_point(p), "Point {p} is not visible through the camera"
+        (x, y) = p
+        return (x - self.rect.x, y - self.rect.y)

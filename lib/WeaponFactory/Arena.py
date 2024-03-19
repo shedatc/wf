@@ -1,10 +1,12 @@
 import pygame
 
+from pygame import Rect
+
 from .Square     import Square
+from .Tilemap    import Tilemap
 from .assets     import Assets
 from .const      import OBSTACLE, WALKABLE
 from .navigation import Compass
-from .tilemap    import Tilemap
 from .utils      import Config, log_ex, sz
 
 # An arena is the terrain with all its obstacles.
@@ -24,9 +26,9 @@ class Arena:
     def log_entities_matrix(self):
         if not Config.singleton().must_log("Arena"):
             return
-        Arena.log(f"Entities Matrix {self.width}x{self.height}:")
-        for v in range(self.height):
-            for u in range(self.width):
+        Arena.log(f"Entities Matrix {self.rect.width}x{self.rect.height}:")
+        for v in range(self.rect.height):
+            for u in range(self.rect.width):
                     entities = self.entities_matrix[v][u]
                     if len(entities) >= 1:
                         msg = f"[{u}, {v}]"
@@ -38,14 +40,17 @@ class Arena:
         if not Config.singleton().must_log("Arena"):
             return
         Arena.log(f"Obstacles Matrix:")
-        for v in range(self.height):
+        for v in range(self.rect.height):
             msg = ''
-            for u in range(self.width):
+            for u in range(self.rect.width):
                     if self.obstacles_matrix[v][u] == OBSTACLE:
                         msg += 'x'
                     else:
                         msg += ' '
             Arena.log(msg)
+
+    def blit(self, source_rect):
+        self._tm.blit(source_rect)
 
     def __init__(self, config):
         assert Arena._singleton is None
@@ -54,17 +59,19 @@ class Arena:
         self.name = config["name"]
 
         # Tilemap
-        self.tm                   = Tilemap(self.name)
-        (self.width, self.height) = self.tm.map_size
-        self.square_size          = (self.tm.tile_size)
+        self._tm          = Tilemap(self.name)
+        self.square_size  = self._tm.tile_rect.size          # pixels
+        self.rect         = Rect((0, 0), self._tm.rect.size) # squares
+        self.surface_rect = self._tm.surface_rect            # pixels
 
-        Arena.log(f"Name:        {self.name}")
-        Arena.log(f"Size:        {sz((self.width, self.height))}")
-        Arena.log(f"Square Size: {sz(self.square_size)}")
+        Arena.log(f"Arena '{self.name}':")
+        Arena.log(f"    Rectangle:    {sz(self.rect.size)} squares")
+        Arena.log(f"    Square Size:  {sz(self.square_size)} pixels")
+        Arena.log(f"    Surface Size: {sz(self.surface_rect.size)} pixels")
 
         # Resize the screen if the tilemap is smaller
-        (screen_width, screen_height) = pygame.display.get_surface().get_size()
-        (tm_width, tm_height)         = self.tm.surface_size
+        (screen_width, screen_height) = pygame.display.get_surface().get_size() # pixels
+        (tm_width, tm_height)         = self.surface_rect.size                  # pixels
         if tm_width < screen_width or tm_height < screen_height:
             new_screen_width  = min(screen_width, tm_width)
             new_screen_height = min(screen_height, tm_height)
@@ -82,30 +89,51 @@ class Arena:
             assert sv_height == self.height, "SV image height must match tilemap height"
 
         # Obstacles:
-        self.obstacles_matrix = [[WALKABLE] * self.width for i in range(self.height)]
-        for v in range(self.height):
-            for u in range(self.width):
-                if self.tm.is_obstacle(u, v):
-                    self.obstacles_matrix[v][u] = OBSTACLE
+        self.obstacles_matrix = [[WALKABLE] * self.rect.width for _ in range(self.rect.height)]
+        for y in range(self.rect.height):
+            for x in range(self.rect.width):
+                if self._tm.is_obstacle(x, y):
+                    self.obstacles_matrix[y][x] = OBSTACLE
         # self.log_obstacles_matrix()
 
         # Entities:
-        self.entities_matrix = [[1] * self.width for i in range(self.height)]
-        for v in range(self.height):
-            for u in range(self.width):
-                self.entities_matrix[v][u] = []
+        self.entities_matrix = [[1] * self.rect.width for _ in range(self.rect.height)]
+        for y in range(self.rect.height):
+            for x in range(self.rect.width):
+                self.entities_matrix[y][x] = []
         self.log_entities_matrix()
 
-    def size(self):
-        return (self.width, self.height)
-
     def tile_data_from_mouse(self):
+        raise NotImplementedError()
         return Square(0, 0).from_mouse().tile_data()
 
     def is_obstacle(self, square):
-        return self.obstacles_matrix[square.v][square.u] == OBSTACLE
+        (x, y) = square
+        return self.obstacles_matrix[y][x] == OBSTACLE
+
+    def point(self, square):
+        raise NotImplementedError()
+        (square_width, square_height) = self.square_size
+        return Point(square.u * square_width  + square_width  // 2,
+                     square.v * square_height + square_height // 2)
+
+    # Return the square to which the point belong.
+    def square(self, world_point):
+        (x, y) = world_point
+        (w, h) = self.square_size
+        return (x // w, y // h)
+
+    # Return the rectangle corresponding to the square to which the point
+    # belong. The point must be in world coordinates. The returned rectangle is
+    # also in world coordinates.
+    def square_rect(self, world_point):
+        (x, y) = self.square(world_point)
+        (w, h) = self.square_size
+        return Rect((x * w, y * h),
+                    self.square_size)
 
     def entities_at_square(self, u, v):
+        raise NotImplementedError()
         try:
             return self.entities_matrix[v][u]
         except IndexError:

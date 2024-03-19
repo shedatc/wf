@@ -4,9 +4,10 @@ from math              import floor
 from pygame            import Rect
 from pytmx.util_pygame import load_pygame as tmx_load
 
-from .const  import COLOR_BLACK
+from .Screen import Screen
+from .const  import COLOR_BLACK, DEBUG_BLIT
 from .assets import Assets
-from .utils  import log_ex, sz
+from .utils  import log_ex
 
 DEBUG_PROPERTIES = False # Log setting/getting properties
 
@@ -23,39 +24,39 @@ class Tilemap:
     def __init__(self, name):
         # FIXME Find a way to use Assets.locate also for tilesets to allow
         #       sharing them between tilemaps.
-        self._tmx = tmx_load( Assets.locate("tilemap", f"{name}.tmx") )
-        Tilemap.log(f"Filename:         {self._tmx.filename}")
-        Tilemap.log(f"Version:          {self._tmx.version}")
-        Tilemap.log(f"Tiled Version:    {self._tmx.tiledversion}")
-        Tilemap.log(f"Orientation:      {self._tmx.orientation}")
+        tmx       = tmx_load( Assets.locate("tilemap", f"{name}.tmx") )
+        self._tmx = tmx
+        Tilemap.log(f"Filename:         {tmx.filename}")
+        Tilemap.log(f"Version:          {tmx.version}")
+        Tilemap.log(f"Tiled Version:    {tmx.tiledversion}")
+        Tilemap.log(f"Orientation:      {tmx.orientation}")
 
-        self.map_size     = (self._tmx.width, self._tmx.height)
-        self.tile_size    = (self._tmx.tilewidth, self._tmx.tileheight)
-        (mw, mh)          = self.map_size
-        (tw, th)          = self.tile_size
-        self.surface_size = (mw*tw, mh*th)
-        Tilemap.log(f"Map:              {sz(self.map_size)} tiles")
-        Tilemap.log(f"Tile:             {sz(self.tile_size)} pixels")
-        Tilemap.log(f"Surface:          {sz(self.surface_size)} pixels")
+        self.rect                 = Rect((0, 0), (tmx.width, tmx.height))             # tiles
+        self.tile_rect            = Rect((0, 0), (tmx.tilewidth, tmx.tileheight))     # pixels
+        self.surface_rect         = self.rect.scale_by(tmx.tilewidth, tmx.tileheight) # pixels
+        self.surface_rect.topleft = (0, 0)
+
+        Tilemap.log(f"Map:              {self.rect} tiles")
+        Tilemap.log(f"Tile:             {self.tile_rect} pixels")
+        Tilemap.log(f"Surface:          {self.surface_rect} pixels")
 
         # FIXME Check Tile Render Order. Only Right Down supported for now.
         #       Does it garantee the order of layers in the TMX file?
-        Tilemap.log(f"Render Order:     {self._tmx.renderorder}")
+        Tilemap.log(f"Render Order:     {tmx.renderorder}")
 
-        background_color = self._tmx.background_color
+        background_color = tmx.background_color
         if background_color is not None:
-            self.background_surface = pygame.Surface(self.surface_size)
+            self.background_surface = pygame.Surface(self.surface_rect.size)
             self.background_surface.fill( pygame.Color(background_color) )
         else:
             self.background_surface = None
         Tilemap.log(f"Background Color: {background_color}")
 
         layer_index           = 0
-        layers                = self._tmx.layers.copy()
-        (tw, th)              = self.tile_size
+        layers                = tmx.layers.copy()
         previous_layer_level  = 0
         self._tile_properties = {}
-        self.surface          = pygame.Surface(self.surface_size)
+        self.surface          = pygame.Surface(self.surface_rect.size)
         self.surface.set_colorkey(COLOR_BLACK)
         while len(layers) > 0:
             layer = layers.pop(0)
@@ -89,29 +90,29 @@ class Tilemap:
             # - properties of a given layer are used even if the tile is
             #   missing from that layer
             tile_count = 0
-            for u, v, tile_surface in layer.tiles():
+            for x, y, tile_surface in layer.tiles():
+                tile_dest = Rect((x * tmx.tilewidth, y * tmx.tileheight),
+                                 tile_surface.get_size())
                 if layer.visible:
                     tile_surface.set_alpha(layer_alpha)
-                    self.surface.blit(tile_surface, (u*tw, v*th))
-                self.apply_tile_properties(u, v,
-                        layer.properties)
-                self.apply_tile_properties(u, v,
-                        self._tmx.get_tile_properties(u, v, layer_index))
+                    self.surface.blit(tile_surface, tile_dest)
+                    if DEBUG_BLIT:
+                        Tilemap.log(f"Blit tile ({x}, {y}) to {self.surface}@{tile_dest}")
+                self.apply_tile_properties(x, y, layer.properties)
+                self.apply_tile_properties(x, y, tmx.get_tile_properties(x, y, layer_index))
                 tile_count += 1
             Tilemap.log(f"    {tile_count} tiles")
             layer_index += 1
         self.layer_count = layer_index
 
-    def blit(self, surface, squares):
-        (tw, th) = self.tile_size
-        pixels   = Rect((squares.x     * tw, squares.y      * th),
-                        (squares.width * tw, squares.height * th))
+    def blit(self, source_rect):
+        screen = Screen.singleton()
         if self.background_surface is not None:
-            surface.blit(self.background_surface, (0, 0), pixels)
-        surface.blit(self.surface, (0, 0), pixels)
+            screen.blit(self.background_surface, (0, 0), source_rect=source_rect)
+        screen.blit(self.surface, (0, 0), source_rect=source_rect)
 
-    def set_tile_property(self, u, v, prop_key, prop_value):
-        tile_key = f"{u}:{v}"
+    def set_tile_property(self, x, y, prop_key, prop_value):
+        tile_key = f"{x}:{y}"
         if tile_key not in self._tile_properties:
             self._tile_properties[tile_key] = {}
         if DEBUG_PROPERTIES:
@@ -122,46 +123,46 @@ class Tilemap:
         self._tile_properties[tile_key][prop_key] = prop_value
         if DEBUG_PROPERTIES:
             if old_prop_value is None:
-                Tilemap.log(f"Property {prop_key} set to {prop_value} for tile [{u}, {v}]")
+                Tilemap.log(f"Property {prop_key} set to {prop_value} for tile ({x}, {y})")
             else:
-                Tilemap.log(f"Property {prop_key} changed from {old_prop_value} to {prop_value} for tile [{u}, {v}]")
+                Tilemap.log(f"Property {prop_key} changed from {old_prop_value} to {prop_value} for tile ({x}, {y})")
 
-    def apply_tile_properties(self, u, v, properties):
+    def apply_tile_properties(self, x, y, properties):
         if type(properties) is not dict:
             return
         for prop_key, prop_value in properties.items():
             if prop_key not in Tilemap.SUPPORTED_TILE_PROPERTIES:
                 continue
-            self.set_tile_property(u, v, prop_key, prop_value)
+            self.set_tile_property(x, y, prop_key, prop_value)
 
-    def get_tile_properties(self, u, v):
-        tile_key = f"{u}:{v}"
+    def get_tile_properties(self, x, y):
+        tile_key = f"{x}:{y}"
         if tile_key not in self._tile_properties:
             if DEBUG_PROPERTIES:
-                Tilemap.log(f"Tile [{u}, {v}] have no property")
+                Tilemap.log(f"Tile ({x}, {y}) have no property")
             return None
         return self._tile_properties[tile_key]
 
-    def get_tile_property(self, u, v, prop_key):
-        properties = self.get_tile_properties(u, v)
+    def get_tile_property(self, x, y, prop_key):
+        properties = self.get_tile_properties(x, y)
         if properties is None:
             return None
         elif prop_key not in properties:
             if DEBUG_PROPERTIES:
-                Tilemap.log(f"Missing property {prop_key} for tile [{u}, {v}]")
+                Tilemap.log(f"Missing property {prop_key} for tile ({x}, {y})")
             return None
         return properties[prop_key]
 
-    def have_tile(self, u, v, layer_index=None):
+    def have_tile(self, x, y, layer_index=None):
         if layer_index is None:
             for layer_index in range(self.layer_count):
-                gid = self._tmx.get_tile_gid(u, v, layer_index)
+                gid = self._tmx.get_tile_gid(x, y, layer_index)
                 if gid > 0:
                     return True
             return False
         else:
-            return self._tmx.get_tile_gid(u, v, layer_index) > 0
+            return self._tmx.get_tile_gid(x, y, layer_index) > 0
 
-    def is_obstacle(self, u, v):
-        return not self.have_tile(u, v) \
-            or self.get_tile_property(u, v, "is_obstacle") is True
+    def is_obstacle(self, x, y):
+        return not self.have_tile(x, y) \
+            or self.get_tile_property(x, y, "is_obstacle") is True

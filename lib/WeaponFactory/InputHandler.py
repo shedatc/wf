@@ -1,11 +1,12 @@
-import json
-import os
-import os.path
-import pygame
+import pygame.draw
+import pygame.event
+import pygame.font
+import pygame.key
 
 from pygame import Rect
 
-from .utils import Config, log_ex
+from .Screen import Screen
+from .utils  import log_ex
 
 # A key is a keyboard key. Its name starts with KEY_, e.g., KEY_F1.
 #
@@ -116,64 +117,16 @@ class InputHandler:
             self._trigger("Button released",
                           event.button - 1, self.button_released, self._button_code2name)
 
-    def blit(self, surface):
+    def blit(self):
+        screen                        = Screen.singleton()
         (width, height)               = (10, 13)
-        (screen_width, screen_height) = pygame.display.get_surface().get_size()
+        (screen_width, screen_height) = screen.size
         (x, y)                        = (screen_width - width, screen_height - height)
-        pygame.draw.rect(surface, self.background_color, Rect((x, y), (width, height)))
-        pygame.draw.rect(surface, self.foreground_color, Rect((x, y), (width, height)),
-                         width=1)
-        font      = pygame.font.Font(None, 15)
-        text_surf = font.render(self.abbrev,
-                                False,                 # Antialias
-                                self.foreground_color)
-        surface.blit(text_surf, (x + 2, y + 2))
-
-class ModalInputHandler:
-
-    @classmethod
-    def log(cls, msg):
-        log_ex(msg, category=cls.__name__)
-
-    def __init__(self):
-        self.inputHandlers       = {}
-        self.funcs               = {}
-        self.currentInputHandler = None
-        self.currentMode         = None
-
-    def addMode(self, mode):
-        ModalInputHandler.log(f"+mode: {mode}")
-        ih = InputHandler()
-        for name, func in self.funcs.items():
-            ih.addFunc(name, func)
-        self.inputHandlers[mode] = ih
-        return ih
-
-    def enterMode(self, mode):
-        self.currentInputHandler = self.inputHandlers[mode]
-        self.currentMode   = mode
-        ModalInputHandler.log(f"enter mode: {mode}")
-
-    def addFunc(self, name, func):
-        ModalInputHandler.log(f"+func: {name}")
-        self.funcs[name] = func
-        for mode, inputHandler in self.inputHandlers.items():
-            inputHandler.addFunc(name, func)
-
-    def configure(self):
-        config      = Config.singleton().load("input.json")
-        defaultMode = config["default-mode"]
-        if "repeat" in config:
-            delay    = config["repeat"]["delay"]
-            interval = config["repeat"]["interval"]
-            ModalInputHandler.log(f"repeat: delay={delay} interval={interval}")
-            pygame.key.set_repeat(delay, interval)
-        for mode, config in config["modes"].items():
-           self.addMode(mode).configure(config)
-        self.enterMode(defaultMode)
-
-    def probe(self):
-        self.currentInputHandler.probe()
-
-    def blit(self, surface):
-        self.currentInputHandler.blit(surface)
+        rect                          = Rect((x, y), (width, height))
+        screen.draw_rect(self.background_color, rect)
+        screen.draw_rect(self.foreground_color, rect, width=1)
+        font         = pygame.font.Font(None, 15)
+        text_surface = font.render(self.abbrev,
+                                   False,                 # Antialias
+                                   self.foreground_color)
+        screen.blit(text_surface, (x + 2, y + 2))

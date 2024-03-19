@@ -12,6 +12,7 @@ class Animation:
         self._frames        = frames
         self._index_last    = len(frames) - 1
         self._index_current = 0
+        self._current       = frames[0]
 
     def rewind(self):
         Animation.log("Rewinding")
@@ -19,7 +20,7 @@ class Animation:
             Animation.log(f"Reset frame {self._index_current}/{self._index_last}")
             f.reset()
         self._index_current = 0
-        Animation.log(f"Now at frame {self._index_current}/{self._index_last}")
+        Animation.log(f"Rewinding done, now at frame {self._index_current}/{self._index_last}")
 
     def is_done(self):
         return self._index_current > self._index_last and not self.is_loop
@@ -42,5 +43,5 @@ class Animation:
                 self._next_frame()
         Animation.log(f"Done")
 
-    def blit_at(self, surface, x, y):
-        self._frames[self._index_current].blit_at(surface, x, y)
+    def blit_at(self, position):
+        self._frames[self._index_current].blit_at(position)

@@ -3,7 +3,7 @@ import pygame
 from pygame import Rect
 
 from .Arena  import Arena
-from .Camera import Camera
+# from .Camera import Camera
 from .Region import Region
 from .utils  import log_ex
 
@@ -26,15 +26,6 @@ class ArenaView:
         self._tactical_surface = None
         ArenaView.log(f"is_tactical={self.is_tactical}")
 
-    def get_width(self):
-        return Arena.singleton().width
-
-    def get_height(self):
-        return Arena.singleton().height
-
-    def get_strategic_view(self):
-        return Arena.singleton().sv
-
     def tactical(self):
         self.is_tactical = True
         return self
@@ -48,14 +39,17 @@ class ArenaView:
         return self
 
     def update(self):
-        if self.is_tactical:
-            Region.singleton().update()
+        pass
+        # if self.is_tactical:
+        #     Region.singleton().update()
 
-    def blit_tactical(self, surface):
-        Arena.singleton().tm.blit(surface, Camera.singleton().squares())
-        Region.singleton().blit(surface)
+    def blit_tactical(self, source_rect):
+        Arena.singleton().blit(source_rect)
+        if False:
+            Region.singleton().blit(surface)
 
-    def blit_strategic(self, surface):
+    def blit_strategic(self):
+        raise NotImplementedError()
 
         # Blit the view itself.
         (screen_width, screen_height) = pygame.display.get_surface().get_size()
@@ -87,8 +81,8 @@ class ArenaView:
                         #     pyxel.pset(u, v, 13)
                         raise NotImplementedError("Must replace pyxel.pset")
 
-    def blit(self, surface):
+    def blit(self, source_rect):
         if self.is_tactical:
-            self.blit_tactical(surface)
+            self.blit_tactical(source_rect)
         else:
-            self.blit_strategic(surface)
+            self.blit_strategic()

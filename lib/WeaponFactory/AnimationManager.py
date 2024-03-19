@@ -1,5 +1,6 @@
 from json    import loads as json_load
 from os.path import basename
+from pygame  import Rect
 
 from .Animation      import Animation
 from .AnimationClock import AnimationClock
@@ -65,11 +66,11 @@ class AnimationManager:
             frames = []
             for f in range(start, end+1):
                 frame           = conf["frames"][f]
-                animation_frame = AnimationFrame(self.surface,
-                                                 frame["frame"]["x"],
-                                                 frame["frame"]["y"],
-                                                 frame["frame"]["w"],
-                                                 frame["frame"]["h"],
+                frame_rect = Rect((frame["frame"]["x"], frame["frame"]["y"]),
+                                  (frame["frame"]["w"], frame["frame"]["h"]))
+                animation_frame = AnimationFrame(f"{name} {f}/{end}",
+                                                 self.surface,
+                                                 frame_rect,
                                                  duration=frame["duration"])
                 frames.append(animation_frame)
 
@@ -102,10 +103,10 @@ class AnimationManager:
         f = self.current
         return f"{f.name}[{f.current}]"
 
-    def blit_current_at(self, surface, x, y):
+    def blit_current_at(self, position):
         if self.current is None:
             return
-        self.current.blit_at(surface, x, y)
+        self.current.blit_at(position)
 
         if False:
             if Config.singleton().must_log("Animation"):
