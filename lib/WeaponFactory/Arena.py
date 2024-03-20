@@ -175,3 +175,7 @@ class Arena:
         Compass.singleton().set_obstacle(new_square)
         Arena.log(f"Obstacle at square {new_square}")
         self.log_entities_matrix()
+
+    def get_square_properties(self, square):
+        (x, y) = square
+        return self._tm.get_tile_properties(x, y)

@@ -229,7 +229,7 @@ class Engine:
     def blit(self):
         Screen.singleton().reset()
         self._blit_scene()
-        self._blit_debug_data()
+        self._blit_debug()
 
     def _blit_scene(self):
         c  = Camera.singleton()
@@ -264,91 +264,73 @@ class Engine:
                     e.blit_overlay(surface)
         self.input_handler.blit()
 
-    def _blit_debug_data(self):
+    def _blit_debug(self):
         self._blit_debug_square_at_mouse()
-        # self._blit_debug_misc()
+        self._blit_debug_mouse_coordinates()
+        self._blit_debug_camera_coordinates()
+        self._blit_debug_square_properties()
         self._blit_debug_mouse_position()
+
+    def _blit_text(self, text, screen_point):
+        text_surf = pygame.font.Font(None, 15) \
+                               .render(text,
+                                       True,            # antialias
+                                       COLOR_GREEN,     # color
+                                       COLOR_BLACK)     # background
+        Screen.singleton().blit(text_surf, screen_point)
+
+    def _blit_debug_mouse_coordinates(self):
+        a                 = Arena.singleton()
+        mouse_position    = Mouse.world_point()
+        mouse_square_rect = a.square_rect(mouse_position)
+        text = " ".join([
+            f"MOUSE:",
+            f"screen: {Mouse.screen_point()}",
+            f"world: {mouse_position}",
+            f"square: {mouse_square_rect}",
+        ])
+        self._blit_text(text, (0, 0))
+
+    def _blit_debug_camera_coordinates(self):
+        text = f"CAMERA: {Camera.singleton().rect}"
+        self._blit_text(text, (0, 10))
+
+    def _blit_debug_square_properties(self):
+        a = Arena.singleton()
+
+        mouse_position = Mouse.world_point()
+        mouse_square   = a.square(mouse_position)
+
+        properties = a.get_square_properties(mouse_square)
+        if properties is None:
+            return
+        text = []
+        for k, v in properties.items():
+            text.append(f"{k}: {v}")
+
+        self._blit_text(" ".join(text), (0, 20))
 
     def _blit_debug_square_at_mouse(self):
         a = Arena.singleton()
 
         # Build the mouse square in screen coordinates.
-        mouse_position       = Mouse.world_point()
-        mouse_square         = a.square_rect(mouse_position)
-        mouse_square.topleft = Camera.singleton().screen_point(mouse_square.topleft)
+        mouse_position            = Mouse.world_point()
+        mouse_square_rect         = a.square_rect(mouse_position)
+        mouse_square_rect.topleft = Camera.singleton() \
+                                          .screen_point(mouse_square_rect.topleft)
 
-
+        # Show if the square is an obstacle or not.
         is_obstacle = a.is_obstacle(a.square(mouse_position))
         if is_obstacle:
             color = COLOR_RED
         else:
             color = COLOR_GREEN
 
-        Screen.singleton().draw_rect(color, mouse_square, width=1)
+        Screen.singleton().draw_rect(color, mouse_square_rect, width=1)
 
     def _blit_debug_mouse_position(self):
         (mx, my) = Mouse.screen_point()
         Screen.singleton().draw_rect(COLOR_BLUE, Rect((mx-1, my-1), (3, 3)))
-
-    def _blit_debug_misc(self, surface):
-        a                             = Arena.singleton()
-        (mx, my)                      = Mouse.screen_point()
-        m                             = Point(mx, my)
-        c                             = Camera.singleton()
-        (square_width, square_height) = a.square_size
-        mouse_square                  = Square(mx // square_width  + c.u,
-                                               my // square_height + c.v)
-        (mu, mv)                      = (mouse_square.u, mouse_square.v)
-
-        # Describe square at mouse
-        tm          = a.tm
-        is_obstacle = a.is_obstacle(mouse_square)
-        if mouse_square.u == 0 and mouse_square.v == 0:
-            Engine.log(f"is_obstacle={is_obstacle}")
-
-        # Tile and is_obstacle
-        pixels = Rect((mx - square_width // 2, my - square_height // 2),
-                      (square_width,           square_height))
-        if is_obstacle:
-            color = COLOR_RED
-        else:
-            color = COLOR_GREEN
-        pygame.draw.rect(surface, color, pixels, width=1)
-
-        # Mouse Pointer
-        pygame.draw.rect(surface, COLOR_BLUE, Rect(m.xy(), (1, 1)))
-
-        # Display various coordinates
-        (cx, cy) = c.xy()
-        (cu, cv) = c.uv()
-        font      = pygame.font.Font(None, 15)
-        text = [f"Mouse: {m} {mouse_square}",
-                f"Camera: ({cx}, {cy}) [{cu}, {cv}]"]
-        text_surf = font.render(" ".join(text),  # text
-                                True,            # antialias
-                                COLOR_GREEN,     # color
-                                COLOR_BLACK)     # background
-        surface.blit(text_surf, (0, 0))
-
-        # Tile Properties:
-        tile_properties = tm.get_tile_properties(mu, mv)
-        if tile_properties is not None:
-            text = []
-            for k, v in tile_properties.items():
-                text.append(f"{k}: {v}")
-            text_surf = font.render(" ".join(text),  # text
-                                    True,            # antialias
-                                    COLOR_GREEN,     # color
-                                    COLOR_BLACK)     # background
-            surface.blit(text_surf, (0, 10))
-
-
-        if self.debug_data is None:
-            return
-
-        # FIXME
-        # pyxel.text(0, 0, f"{self.debug_data}", pyxel.COLOR_BLACK)
-        raise NotImplementedError("Must replace pyxel.text")
 
     def run(self):
         self.is_running = True
