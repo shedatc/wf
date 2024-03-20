@@ -21,9 +21,13 @@ class Camera:
     def __init__(self, surface_rect, steps):
         self.surface_rect = surface_rect                                          # pixels
         self.rect         = Rect((0, 0), pygame.display.get_surface().get_size()) # pixels
-        self.rect.center  = surface_rect.center
 
-        (self.horizontal_step, self.vertical_step) = steps
+        (self.horizontal_step, self.vertical_step) = steps # pixels
+
+        # Ensure the top left corner of the camera is on step boundaries.
+        self.rect.center  = surface_rect.center
+        self.rect.x      += self.rect.x % self.horizontal_step
+        self.rect.y      += self.rect.y % self.vertical_step
 
         Camera.log(f"Rectangle:      {self.rect} pixels")
         Camera.log(f"Surface:        {self.surface_rect} pixels")
