@@ -33,7 +33,7 @@ class AnimationManager:
             assert len(self.animations) > 0, "Missing animations"
 
         for a in self.animations.values():
-            EngineClock.singleton().register_animation(a)
+            EngineClock.singleton().register(a)
         self.select("Idle")
 
     def _load_spritesheet_libresprite(self, conf):
@@ -82,20 +82,20 @@ class AnimationManager:
 
     def select(self, name):
         if self.current is not None:
-            EngineClock.singleton().pause_animation(self.current)
+            EngineClock.singleton().pause(self.current)
         self.current = self.animations[name]
         self.current.rewind()
-        EngineClock.singleton().resume_animation(self.current)
+        EngineClock.singleton().resume(self.current)
         AnimationManager.log(f"Selected animation: {name}")
 
     def pause(self):
         assert self.current is not None
-        EngineClock.singleton().pause_animation(self.current)
+        EngineClock.singleton().pause(self.current)
         AnimationManager.log(f"Paused animation: {self.current.name}")
 
     def resume(self):
         assert self.current is not None
-        EngineClock.singleton().resume_animation(self.current)
+        EngineClock.singleton().resume(self.current)
         AnimationManager.log(f"Resumed animation: {self.current.name}")
 
     def name(self):

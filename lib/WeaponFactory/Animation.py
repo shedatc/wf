@@ -14,6 +14,9 @@ class Animation:
         self._index_current = 0
         self._current       = frames[0]
 
+    def __repr__(self):
+        return f"<Animation {self.name} at frame {self._index_current}/{self._index_last}>"
+
     def rewind(self):
         Animation.log("Rewinding")
         for f in self._frames:

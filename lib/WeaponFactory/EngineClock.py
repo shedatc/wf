@@ -20,49 +20,49 @@ class EngineClock:
         config    = Config.singleton().load("engine.json")
         self._fps = config["fps"]
         EngineClock.log(f"FPS: {self._fps}")
-        self._running_animations = []
-        self._paused_animations  = []
+        self._running = []
+        self._paused  = []
         self.reset_clock()
 
     def reset_clock(self):
         self.clock = pygame.time.Clock()
         EngineClock.log(f"Reset")
 
-    def register_animation(self, animation):
-        assert animation not in self._running_animations
-        assert animation not in self._paused_animations
-        self._paused_animations.append(animation)
-        EngineClock.log(f"Registered paused animation: {animation.name}")
+    def register(self, task):
+        assert task not in self._running
+        assert task not in self._paused
+        self._paused.append(task)
+        EngineClock.log(f"Registered paused task: {task}")
 
-    def unregister_animation(self, animation):
-        if animation in self._running_animations:
-            self._running_animations.remove(animation)
-            EngineClock.log(f"Unregistered running animation: {animation.name}")
-        elif animation in self._paused_animations:
-            self._paused_animations.remove(animation)
-            EngineClock.log(f"Unregistered paused animation: {animation.name}")
+    def unregister(self, task):
+        if task in self._running:
+            self._running.remove(task)
+            EngineClock.log(f"Unregistered running task: {task}")
+        elif task in self._paused:
+            self._paused.remove(task)
+            EngineClock.log(f"Unregistered paused task: {task}")
         else:
-            raise AssertionError("Unknown animation")
+            raise AssertionError("Unknown task")
 
-    def pause_animation(self, animation):
-        self._running_animations.remove(animation)
-        self._paused_animations.append(animation)
-        EngineClock.log(f"Paused animation: {animation.name}")
+    def pause(self, task):
+        self._running.remove(task)
+        self._paused.append(task)
+        EngineClock.log(f"Paused task: {task}")
 
-    def resume_animation(self, animation):
-        self._paused_animations.remove(animation)
-        self._running_animations.append(animation)
-        EngineClock.log(f"Resumed animation: {animation.name}")
+    def resume(self, task):
+        self._paused.remove(task)
+        self._running.append(task)
+        EngineClock.log(f"Resumed task: {task}")
 
     # Add time to running animations and return time (ms) since previous tick.
     def tick(self):
         t = self.clock.tick(self._fps)
         EngineClock.log(f"Tick: {t} ms since previous tick")
         c = 0
-        for a in self._running_animations:
-            a.add_time(t)
-            if a.is_done():
-                self.pause_animation(a)
+        for task in self._running:
+            task.add_time(t)
+            if task.is_done():
+                self.pause(task)
             c += 1
-        EngineClock.log(f"Added {t} ms to {c} animations")
+        EngineClock.log(f"Added {t} ms to {c} tasks")
         return t
