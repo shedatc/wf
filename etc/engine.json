@@ -1,6 +1,5 @@
 {
     "fps": 24,
-    "mouse": false,
     "logs": [
         "Arena",
         "ArenaView",

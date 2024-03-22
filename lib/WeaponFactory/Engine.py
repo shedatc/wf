@@ -51,12 +51,10 @@ class Engine:
         else:
             self.profile = None
 
-        config       = Config.singleton().load("engine.json")
-
         pygame.init()
         Screen()
 
-        Mouse.set_visible(config["mouse"])
+        Mouse.set_visible(False)
         Mouse.center()
 
         self.entities          = []
