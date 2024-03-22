@@ -3,8 +3,8 @@ from os.path import basename
 from pygame  import Rect
 
 from .Animation      import Animation
-from .AnimationClock import AnimationClock
 from .AnimationFrame import AnimationFrame
+from .EngineClock    import EngineClock
 from .assets         import Assets
 from .utils          import Config, log_ex
 
@@ -33,7 +33,7 @@ class AnimationManager:
             assert len(self.animations) > 0, "Missing animations"
 
         for a in self.animations.values():
-            AnimationClock.singleton().register_animation(a)
+            EngineClock.singleton().register_animation(a)
         self.select("Idle")
 
     def _load_spritesheet_libresprite(self, conf):
@@ -82,20 +82,20 @@ class AnimationManager:
 
     def select(self, name):
         if self.current is not None:
-            AnimationClock.singleton().pause_animation(self.current)
+            EngineClock.singleton().pause_animation(self.current)
         self.current = self.animations[name]
         self.current.rewind()
-        AnimationClock.singleton().resume_animation(self.current)
+        EngineClock.singleton().resume_animation(self.current)
         AnimationManager.log(f"Selected animation: {name}")
 
     def pause(self):
         assert self.current is not None
-        AnimationClock.singleton().pause_animation(self.current)
+        EngineClock.singleton().pause_animation(self.current)
         AnimationManager.log(f"Paused animation: {self.current.name}")
 
     def resume(self):
         assert self.current is not None
-        AnimationClock.singleton().resume_animation(self.current)
+        EngineClock.singleton().resume_animation(self.current)
         AnimationManager.log(f"Resumed animation: {self.current.name}")
 
     def name(self):

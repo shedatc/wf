@@ -3,12 +3,12 @@ import pygame
 from pygame            import Rect
 from pytmx.util_pygame import load_pygame as tmx_load
 
-from .AnimationClock import AnimationClock
 if False:
     from .Drone          import Drone
 from .Arena             import Arena
 from .ArenaView         import ArenaView
 from .Camera            import Camera
+from .EngineClock       import EngineClock
 from .ModalInputHandler import ModalInputHandler
 from .Monolith          import Monolith
 from .Mouse             import Mouse
@@ -350,4 +350,4 @@ class Engine:
             self.update()
             self.blit()
             pygame.display.flip()
-            AnimationClock.singleton().tick()
+            EngineClock.singleton().tick()

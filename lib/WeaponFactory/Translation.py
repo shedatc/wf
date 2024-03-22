@@ -1,9 +1,10 @@
 # Units:
 #    Speed: frames per seconds
 
+from .EngineClock import EngineClock
+
 from .arena          import Point
 from .math           import Vector
-from .AnimationClock import AnimationClock
 from .utils          import log_ex
 
 class Translation:
@@ -20,7 +21,7 @@ class Translation:
         self.vector_len  = None
 
         raise NotImplementedError()
-        self.frame_ratio = AnimationClock.singleton().fps / fps
+        self.frame_ratio = EngineClock.singleton().fps / fps
         Translation.log(f"frame_ratio={self.frame_ratio}")
 
     def show(self):
@@ -72,7 +73,7 @@ class Translation:
         raise NotImplementedError()
         if self.is_done():
             return
-        if AnimationClock.singleton().frame_count % self.frame_ratio != 0:
+        if EngineClock.singleton().frame_count % self.frame_ratio != 0:
             return
         self.translate()
         if self.distance is None or self.distance <= 0:

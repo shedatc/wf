@@ -1,8 +1,8 @@
 # Units:
 #    Speed: frames per seconds
 
-from .AnimationClock import AnimationClock
-from .utils          import log_ex
+from .EngineClock import EngineClock
+from .utils       import log_ex
 
 class Rotation:
 
@@ -17,7 +17,7 @@ class Rotation:
         self.step        = step                        # Rotation steps in degrees.
 
         raise NotImplementedError()
-        self.frame_ratio = AnimationClock.singleton().fps / fps
+        self.frame_ratio = EngineClock.singleton().fps / fps
         Rotation.log(f"frame_ratio={self.frame_ratio}")
 
     def show(self):
@@ -56,7 +56,7 @@ class Rotation:
         raise NotImplementedError()
         if self.is_done():
             return
-        if AnimationClock.singleton().frame_count % self.frame_ratio != 0:
+        if EngineClock.singleton().frame_count % self.frame_ratio != 0:
             return
         self.rotate()
         if self.current == self.target:
