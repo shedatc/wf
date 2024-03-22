@@ -52,7 +52,6 @@ class Engine:
             self.profile = None
 
         config       = Config.singleton().load("engine.json")
-        arena_config = config["arena"] # FIXME Should be in some arena.json
 
         pygame.init()
         Screen((config["screen"]["width"], config["screen"]["height"]),
@@ -64,7 +63,7 @@ class Engine:
         self.entities          = []
         self.selected_entities = []
         self.debug_data        = None
-        self.init_arena(arena_config)
+        self.init_arena()
         self.init_scene()
         self.init_input()
 
@@ -175,8 +174,8 @@ class Engine:
         entity.select()
         self.selected_entities.append(entity)
 
-    def init_arena(self, arena_config):
-        a = Arena(arena_config)
+    def init_arena(self):
+        a = Arena()
         Camera(a.surface_rect, a.square_size)
         # Compass(a.obstacles_matrix)
 

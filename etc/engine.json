@@ -6,9 +6,6 @@
     },
     "fps": 24,
     "mouse": false,
-    "arena": {
-        "name": "arena-0"
-    },
     "logs": [
         "Arena",
         "ArenaView",
