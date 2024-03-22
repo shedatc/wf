@@ -57,7 +57,15 @@ class Camera:
     def view_point(self, p):
         return self.rect.collidepoint(p)
 
-    def screen_point(self, p):
-        assert self.view_point(p), "Point {p} is not visible through the camera"
-        (x, y) = p
+    def screen_point(self, world_point):
+        assert self.view_point(world_point), \
+            f"Point {world_point} is not visible through the camera"
+        (x, y) = world_point
         return (x - self.rect.x, y - self.rect.y)
+
+    def world_point(self, screen_point):
+        (x, y)      = screen_point
+        world_point = (x + self.rect.x, y + self.rect.y)
+        assert self.view_point(world_point), \
+            f"Point {world_point} is not visible through the camera"
+        return world_point
