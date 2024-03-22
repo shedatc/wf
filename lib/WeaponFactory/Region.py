@@ -1,9 +1,11 @@
-import pygame
-
-from pygame import Rect
+from pygame      import Rect
+from pygame.draw import rect as draw_rect
 
 from .Arena  import Arena
-from .Square import Square
+from .Camera import Camera
+from .Mouse  import Mouse
+from .Screen import Screen
+from .const  import COLOR_RED, COLOR_WHITE, DEBUG_REGION
 from .utils  import log_ex
 
 class Region:
@@ -13,7 +15,7 @@ class Region:
     @classmethod
     def singleton(cls):
         if cls._singleton is None:
-            cls._singleton = Region()
+            cls()
         return cls._singleton
 
     @classmethod
@@ -21,80 +23,90 @@ class Region:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        self.start      = None
-        self.end        = None
-        self.is_enabled = False
-        Region.log(f"start={self.start} end={self.end} is_enabled={self.is_enabled}")
+        self._anchor     = (0, 0)
+        self._cursor     = (0, 0)
+        self._is_enabled = False
+        self._rect       = Rect((0, 0), (0, 0))
+
+        Region._singleton = self
+
+    def __repr__(self):
+        return "<Region " + " ".join([
+            f"rect={self._rect}",
+            # f"anchor={self._anchor}",
+            # f"cursor={self._cursor}",
+            # f"is_enabled={self._is_enabled}",
+        ]) + ">"
+
+    def square_at_mouse(self):
+        return Arena.singleton().square( Mouse.world_point() )
 
     def enable(self):
-        if self.is_enabled:
-            Region.log("already enabled")
-        else:
-            self.start      = Square(0, 0).from_mouse()
-            self.end        = Square(0, 0).from_mouse()
-            self.is_enabled = True
-            Region.log("enabled")
+        if self._is_enabled:
+            Region.log(f"Already enabled: anchor={self._anchor} cursor={self._cursor}" \
+                       + f" rect={self._rect}")
+            return
 
-    # Return the entities belonging to the region. Return None if already
-    # disabled.
+        mouse_point      = Mouse.screen_point()
+        self._anchor     = mouse_point
+        self._cursor     = mouse_point
+        self._rect       = Rect(self._anchor, (0, 0))
+        self._is_enabled = True
+        Region.log(f"Enabled: anchor={self._anchor} cursor={self._cursor} rect={self._rect}")
+
+    def update_cursor(self):
+        if not self._is_enabled:
+            return
+
+        self._cursor = Mouse.screen_point()
+
+        # Update the rectangle.
+        (ax, ay)   = self._anchor
+        (cx, cy)   = self._cursor
+        (tlx, tly) = ( min(ax, cx),   min(ay, cy) ) # top left corner
+        (brx, bry) = ( max(ax, cx),   max(ay, cy) ) # bottom right corner
+        (w, h)     = ( brx - tlx + 1, bry - tly + 1 )
+        self._rect = Rect((tlx, tly), (w, h))
+
+        assert self._rect.collidepoint(self._anchor), "Anchor must be part of the rectangle"
+        assert self._rect.collidepoint(self._cursor), "Cursor must be part of the rectangle"
+
     def disable(self):
-        if self.is_enabled:
-            Region.log("disabled")
-            entities        = self.get_entities()
-            self.start      = None
-            self.end        = None
-            self.is_enabled = False
-            return entities
-        else:
-            Region.log("already disabled")
+        if not self._is_enabled:
+            Region.log("Already disabled")
             return None
+        rect             = self._rect.copy()
+        self._rect       = Rect((0, 0), (0, 0))
+        self._is_enabled = False
+        Region.log(f"Disabled: rect={rect}")
+        return None
 
-    def is_empty(self):
-        self.end is None or self.start == self.end
-
-    def update(self):
-        if not self.is_enabled:
-            return
-        if self.end is not None:
-            self.end.from_mouse()
-            Region.log(f"start={self.start} end={self.end} is_enabled={self.is_enabled}")
-
-    def get_origin(self):
-        assert self.is_enabled
-        s = self.start
-        e = self.end
-        u = min(s.u, e.u)
-        v = min(s.v, e.v)
-        return Square(u, v)
-
-    def get_width(self):
-        assert self.is_enabled
-        return abs(self.start.u - self.end.u) + 1
-
-    def get_height(self):
-        assert self.is_enabled
-        return abs(self.start.v - self.end.v) + 1
-
-    def blit(self, surface):
-        if not self.is_enabled:
+    def blit(self):
+        if not self._is_enabled:
             return
 
-        # Draw the square-level region
-        o  = self.get_origin().point().screen()
-        Region.log(f"origin={o}")
+        # Display the region.
+        if DEBUG_REGION:
+            Screen.singleton().draw_rect(COLOR_RED, self._rect, 1)
 
-        (square_width, square_height) = Arena.singleton().square_size
-        pixels = Rect((o.x - square_width // 2,         o.y - square_height // 2),
-                      (self.get_width() * square_width, self.get_height() * square_height))
-        pygame.draw.rect(surface, (200, 0, 0), pixels, width=1)
+        # Display the squares that are part of the region.
+        r      = self._rect.inflate(-1, -1)
+        a      = Arena.singleton()
+        tls    = a.square_rect(r.topleft)
+        brs    = a.square_rect(r.bottomright)
+        (w, h) = (brs.x - tls.x + brs.w, brs.y - tls.y + brs.h)
+        Screen.singleton().draw_rect(COLOR_WHITE,
+                                     Rect(tls.topleft, (w, h)),
+                                     1)
 
     # Return the entities that are part of the region.
     def get_entities(self):
+        raise NotImplementedError()
         entities = []
-        o        = self.get_origin()
+        o        = self.origin()
         a        = Arena.singleton()
-        for v in range(o.v, o.v + self.get_height()):
-            for u in range(o.u, o.u + self.get_width()):
+        for v in range(o.v, o.v + self.rect.height):
+            for u in range(o.u, o.u + self.rect.width):
                 e = a.entities_at_square(u, v)
                 Region.log(f"e={e} len(e)={len(e)}")
                 if len(e) >= 1:

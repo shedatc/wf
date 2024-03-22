@@ -18,6 +18,7 @@ from .Square            import Square
 
 from .assets            import Assets
 from .const             import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
+from .const             import DEBUG_REGION, DEBUG_TILE
 from .navigation        import Compass, NavBeacon
 from .utils             import Config, log_ex, sz
 
@@ -213,9 +214,10 @@ class Engine:
 
     def update(self):
         self.input_handler.probe()
-        self.update_scene()
+        self._update_scene()
+        self._update_region()
 
-    def update_scene(self):
+    def _update_scene(self):
         ArenaView.singleton().update()
 
         if False:
@@ -226,9 +228,16 @@ class Engine:
         for entity in self.entities:
             entity.update()
 
+    def _update_region(self):
+        Region.singleton().update_cursor()
+
+    def _blit_region(self):
+        Region.singleton().blit()
+
     def blit(self):
         Screen.singleton().reset()
         self._blit_scene()
+        self._blit_region()
         self._blit_debug()
 
     def _blit_scene(self):
@@ -265,9 +274,12 @@ class Engine:
         self.input_handler.blit()
 
     def _blit_debug(self):
-        self._blit_debug_square_at_mouse()
+        if DEBUG_TILE:
+            self._blit_debug_square_at_mouse()
         self._blit_debug_mouse_coordinates()
         self._blit_debug_camera_coordinates()
+        if DEBUG_REGION:
+            self._blit_debug_region()
         self._blit_debug_square_properties()
         self._blit_debug_mouse_position()
 
@@ -295,6 +307,10 @@ class Engine:
         text = f"CAMERA: {Camera.singleton().rect}"
         self._blit_text(text, (0, 10))
 
+    def _blit_debug_region(self):
+        text = "REGION: " + str(Region.singleton())
+        self._blit_text(text, (0, 20))
+
     def _blit_debug_square_properties(self):
         a = Arena.singleton()
 
@@ -308,7 +324,7 @@ class Engine:
         for k, v in properties.items():
             text.append(f"{k}: {v}")
 
-        self._blit_text(" ".join(text), (0, 20))
+        self._blit_text(" ".join(text), (0, 30))
 
     def _blit_debug_square_at_mouse(self):
         a = Arena.singleton()
