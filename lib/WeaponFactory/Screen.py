@@ -3,7 +3,7 @@ from pygame.display import set_caption, set_mode
 from pygame.draw    import rect as draw_rect
 
 from .const import COLOR_BLACK, DEBUG_BLIT
-from .utils import log_ex, sz
+from .utils import Config, log_ex, sz
 
 class Screen:
 
@@ -11,14 +11,19 @@ class Screen:
 
     @classmethod
     def singleton(cls):
-        assert cls._singleton is not None
+        if cls._singleton is None:
+            cls()
         return cls._singleton
 
     @classmethod
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 
-    def __init__(self, size, caption=None):
+    def __init__(self):
+        config  = Config.singleton().load("screen.json")
+        size    = (config["width"], config["height"])
+        caption = config["caption"]
+
         self._surface = set_mode(size, FULLSCREEN|SCALED)
         rect          = self._surface.get_rect()
         self.size     = rect.size

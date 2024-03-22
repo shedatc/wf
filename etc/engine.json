@@ -1,9 +1,4 @@
 {
-    "caption": "Weapon Factory",
-    "screen": {
-        "width": 512,
-        "height": 384
-    },
     "fps": 24,
     "mouse": false,
     "logs": [

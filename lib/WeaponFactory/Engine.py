@@ -54,8 +54,7 @@ class Engine:
         config       = Config.singleton().load("engine.json")
 
         pygame.init()
-        Screen((config["screen"]["width"], config["screen"]["height"]),
-               caption=config["caption"])
+        Screen()
 
         Mouse.set_visible(config["mouse"])
         Mouse.center()
