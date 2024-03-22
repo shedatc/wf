@@ -20,7 +20,7 @@ from .assets            import Assets
 from .const             import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
 from .const             import DEBUG_REGION, DEBUG_TILE
 from .navigation        import Compass, NavBeacon
-from .utils             import Config, log_ex, sz
+from .utils             import log_ex
 
 EV_NAV = pygame.event.custom_type()
 
