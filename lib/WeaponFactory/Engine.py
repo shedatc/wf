@@ -136,6 +136,14 @@ class Engine:
                            .navigate(entity, self.nav_beacon.square)
         ih.addFunc("tactical_move_to_mouse", tactical_move_to_mouse)
 
+        # WIP
+        def tactical_translate_to_mouse():
+            Engine.log("tactical_translate_to_mouse")
+            if len(self.entities) == 0:
+                return
+            self.entities[0]._physics.move_to( Mouse.world_point() )
+        ih.addFunc("tactical_translate_to_mouse", tactical_translate_to_mouse)
+
         def strategic_move_to_mouse():
             (mx, my) = Mouse.screen_point()
             if self.nav_beacon.try_move( Square(mx, my) ):

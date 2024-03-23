@@ -3,8 +3,7 @@ from pygame.draw import rect as draw_rect
 
 if False:
     from .navigation import Compass, NavPath
-if False:
-    from .Physics    import Physics
+from .Physics    import Physics
 from .Sprite     import Sprite
 from .utils      import Config, Observable, log_ex
 
@@ -14,14 +13,15 @@ from .utils      import Config, Observable, log_ex
 # system (see `NavPath`).
 class Entity(Sprite, Observable):
 
-    def __init__(self, name, orig_point, width, height, rot_step, rot_fps, tr_fps):
-        Sprite.__init__(self, name, orig_point, width, height)
+    def __init__(self, name, position, speed=0.0):
+        Sprite.__init__(self, name, position)
         Observable.__init__(self)
 
         if False:
             self.nav_path     = NavPath(self)
-        if False:
-            self.physics     = Physics(0, rot_fps, orig_point, tr_fps)
+
+        self._physics = Physics(self, speed=speed)
+
         self.moves       = []
         self.is_selected = False
 
@@ -34,39 +34,11 @@ class Entity(Sprite, Observable):
     def unselect(self):
         self.is_selected = False
 
-    def show(self):
-        if False:
-            Entity.log(self, f"moves={len(self.moves)} nav_path={self.nav_path.is_done()}")
-        Entity.log(self, f"square={self.square()} target_square={self.target_square()}")
-        Entity.log(self, f"is_moving={self.is_moving()} is_idle={self.is_idle()}")
-        if False:
-            self.physics.show()
-
     def add_move(self, move):
         self.moves.append(move)
 
     def clear_moves(self):
         self.moves.clear()
-
-    def position(self):
-        raise NotImplementedError()
-        return self.physics.position()
-
-    def target_position(self):
-        raise NotImplementedError()
-        return self.physics.target_position()
-
-    def square(self):
-        raise NotImplementedError()
-        return self.physics.position().square()
-
-    def target_square(self):
-        raise NotImplementedError()
-        p = self.physics.target_position()
-        if p is None:
-            return None
-        else:
-            return p.square()
 
     def is_moving(self):
         raise NotImplementedError()
@@ -135,10 +107,9 @@ class Entity(Sprite, Observable):
         else:
             self.next_hop()
 
-    def update(self):
-        if False:
-            self.physics.update()
-            self.next_move()
+    def add_time(self, t):
+        if self._physics is not None:
+            self._physics.add_time(t)
 
     def blit_selection(self, surface):
         if not self.is_selected:
@@ -162,6 +133,3 @@ class Entity(Sprite, Observable):
         if Config.singleton().must_log("Physics"):
             p = self.position().screen()
             self.physics.blit_at(surface, p.x, p.y)
-
-    def blit(self, surface):
-        Sprite.blit(self, surface)

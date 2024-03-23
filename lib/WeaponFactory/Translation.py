@@ -1,11 +1,6 @@
-# Units:
-#    Speed: frames per seconds
-
 from .EngineClock import EngineClock
-
-from .arena          import Point
-from .math           import Vector
-from .utils          import log_ex
+from .Vector      import Vector
+from .utils       import log_ex
 
 class Translation:
 
@@ -13,69 +8,46 @@ class Translation:
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 
-    def __init__(self, current, fps):
-        self.current     = current
-        self.target      = None
-        self.distance    = None
-        self.vector      = None
-        self.vector_len  = None
+    def __init__(self, entity, speed=0.0):
+        self.entity = entity
+        self.speed  = speed # px/ms
+        self._target = None
+        EngineClock.singleton().register(self)
 
-        raise NotImplementedError()
-        self.frame_ratio = EngineClock.singleton().fps / fps
-        Translation.log(f"frame_ratio={self.frame_ratio}")
+    def move_to(self, position):
+        self._target = position
+        EngineClock.singleton().resume(self)
 
-    def show(self):
-        Translation.log(f"current={self.current}")
-        if self.target is not None:
-            Translation.log(f"target={self.target} distance={self.distance}")
-            Translation.log(f"vector={self.vector} vector_len={self.vector_len}")
-
-    # Post-Conditions:
-    # - is_done() is True
-    def stop(self):
-        Translation.log("stop")
-        self.current    = self.target
-        self.target     = None
-        self.distance   = None
-        self.vector     = None
-        self.vector_len = None
-        assert self.is_done()
+    def finish(self):
+        if self._target is not None:
+            self.entity.position = self._target
+            self._target          = None
 
     def is_done(self):
-        return self.target is None
+        return self._target is None
 
-    def translate(self):
-        Translation.log("translate")
-        assert self.current is not None
-        assert self.vector is not None
-        self.current.x += self.vector.x
-        self.current.y += self.vector.y
-        self.distance  -= self.vector_len
+    def add_time(self, t):
+        if self._target is None:
+            return
+        assert self._target is not None, "Translation already done"
 
-    def move_to(self, point):
-        raise NotImplementedError()
-        assert isinstance(point, Point)
-        Translation.log("move_to")
-        self.target = point
-        v           = Vector(self.target.x - self.current.x,
-                             self.target.y - self.current.y)
-        Translation.log(f"move_to: v={v}")
-        self.distance = v.get_length()
-        if self.distance >= 1:
-            self.vector    = v.get_unit().scale(self.distance // self.frame_ratio)
-            self.vector_len = self.vector.get_length()
-            assert self.vector_len <= self.distance
+        (tx, ty)           = self._target
+        (ex, ey)           = self.entity.position
+        translation_vector = Vector(tx - ex, ty - ey)
+        total_distance     = translation_vector.length()
+        step_vector        = translation_vector.unit().scale(self.speed * t)
+        step_distance      = step_vector.length()
+
+        Translation.log(f"Adding {t} ms to translation:")
+        Translation.log(f"    Translation Vector: {translation_vector}")
+        Translation.log(f"    Total Distance:     {total_distance} pixels")
+        Translation.log(f"    Step Vector:        {step_vector}")
+        Translation.log(f"    Step Distance:      {step_distance} pixels")
+
+        if step_distance < total_distance:
+            self.entity.shift( step_vector.xy() )
+            Translation.log(f"Entity {self.entity} moved to {self.entity.position}")
         else:
-            self.stop()
-        self.show()
+            self.finish()
+            Translation.log(f"Entity {self.entity} stopped at {self.entity.position}")
 
-    def update(self):
-        raise NotImplementedError()
-        if self.is_done():
-            return
-        if EngineClock.singleton().frame_count % self.frame_ratio != 0:
-            return
-        self.translate()
-        if self.distance is None or self.distance <= 0:
-            self.stop()
-        self.show()

@@ -1,6 +1,8 @@
-from .Sprite import Sprite
+from .Entity  import Entity
+from .Physics import Physics
 
-class Monolith(Sprite):
+class Monolith(Entity):
 
-    def __init__(self, point):
-        Sprite.__init__(self, "monolith-0", point)
+    def __init__(self, position):
+        Entity.__init__(self, "monolith-0", position,
+                        speed=0.05)

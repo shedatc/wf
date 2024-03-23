@@ -21,6 +21,12 @@ class Sprite:
     def update(self):
         pass
 
+    # Shift position by the given offset.
+    def shift(self, offset):
+        (ox, oy)      = offset
+        (x, y)        = self.position
+        self.position = (x + ox, y + oy)
+
     def blit_debug_overlay(self):
         if not Config.singleton().must_log("Sprite"):
             return
