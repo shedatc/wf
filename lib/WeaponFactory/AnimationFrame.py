@@ -10,10 +10,10 @@ class AnimationFrame:
 
     def __init__(self, name, surface, rect,
                  duration=100, rotated=False, trimmed=False):
-        self.name      = name
-        self._surface  = surface
-        self._rect     = rect
         self._duration = duration # ms
+        self._rect     = rect
+        self._surface  = surface
+        self.name      = name
 
         self.log(f"Surface:   {surface}")
         self.log(f"Rectangle: {rect}")

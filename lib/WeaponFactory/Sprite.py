@@ -18,9 +18,6 @@ class Sprite:
     def log(self, msg):
         log_ex(msg, category="Sprite", name=self.name)
 
-    def update(self):
-        pass
-
     # Shift position by the given offset.
     def shift(self, offset):
         (ox, oy)      = offset

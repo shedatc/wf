@@ -229,9 +229,6 @@ class Engine:
             self.entities[0].position = mouse_position
             Engine.log(f"Mouse position: {mouse_position}")
 
-        for entity in self.entities:
-            entity.update()
-
     def _update_region(self):
         Region.singleton().update_cursor()
 
@@ -248,34 +245,41 @@ class Engine:
         c  = Camera.singleton()
         av = ArenaView.singleton()
         av.blit(c.rect)
-
-        (cx, cy) = c.rect.topleft
-
         if av.is_tactical:
-            a        = Arena.singleton()
-            entities = []
-            if True:
-                entities = self.entities
-            else:
-                for v in range(c.v, c.v + c.height - 1):
-                    for u in range(c.u, c.u + c.width - 1):
-                        entities.extend( a.entities_at_square(u, v) )
-
-            # Engine.log(f"len(entities)={len(entities)}")
-            if False:
-                for e in entities:
-                    e.blit_nav_path(surface)
-            if False:
-                for e in entities:
-                    e.blit_selection(surface)
-            for e in entities:
-                (x, y)          = e.position
-                screen_position = (x - cx, y - cy)
-                e.blit_at(screen_position)
-            if False:
-                for e in entities:
-                    e.blit_overlay(surface)
+            self._blit_scene_tactical()
+        else:
+            self._blit_scene_strategic()
         self.input_handler.blit()
+
+    def _blit_scene_strategic(self):
+        pass
+
+    def _blit_scene_tactical(self):
+        a        = Arena.singleton()
+        c        = Camera.singleton()
+        (cx, cy) = c.rect.topleft
+        entities = []
+        if True:
+            entities = self.entities
+        else:
+            for v in range(c.v, c.v + c.height - 1):
+                for u in range(c.u, c.u + c.width - 1):
+                    entities.extend( a.entities_at_square(u, v) )
+
+        # Engine.log(f"len(entities)={len(entities)}")
+        if False:
+            for e in entities:
+                e.blit_nav_path(surface)
+        if False:
+            for e in entities:
+                e.blit_selection(surface)
+        for e in entities:
+            (x, y)          = e.position
+            screen_position = (x - cx, y - cy)
+            e.blit_at(screen_position)
+        if True:
+            for e in entities:
+                e.blit_debug()
 
     def _blit_debug(self):
         if DEBUG_TILE:
