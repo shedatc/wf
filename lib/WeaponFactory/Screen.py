@@ -1,8 +1,9 @@
 from pygame         import FULLSCREEN, SCALED
 from pygame.display import set_caption, set_mode
 from pygame.draw    import rect as draw_rect
+from pygame.font    import Font
 
-from .const import COLOR_BLACK, DEBUG_BLIT
+from .const import COLOR_BLACK, COLOR_GREEN, DEBUG_BLIT
 from .utils import Config, log_ex, sz
 
 class Screen:
@@ -29,6 +30,7 @@ class Screen:
         self.size     = rect.size
         if caption is not None:
             set_caption(caption)
+        self._font = Font(None, 15)
         Screen.log(f"Screen:")
         Screen.log(f"    Size:    {sz(rect.size)} ({sz(size)} requested)")
         Screen.log(f"    Caption: {caption}")
@@ -49,3 +51,10 @@ class Screen:
 
     def draw_rect(self, color, rect, width=0):
         draw_rect(self._surface, color, rect, width=width)
+
+    def text(self, text, screen_point):
+        text_surf = self._font.render(text,
+                                      True,            # antialias
+                                      COLOR_GREEN,     # color
+                                      COLOR_BLACK)     # background
+        self.blit(text_surf, screen_point)

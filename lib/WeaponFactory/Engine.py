@@ -305,15 +305,15 @@ class Engine:
             f"world: {mouse_position}",
             f"square: {mouse_square_rect}",
         ])
-        self._blit_text(text, (0, 0))
+        Screen.singleton().text(text, (0, 0))
 
     def _blit_debug_camera_coordinates(self):
         text = f"CAMERA: {Camera.singleton().rect}"
-        self._blit_text(text, (0, 10))
+        Screen.singleton().text(text, (0, 10))
 
     def _blit_debug_region(self):
         text = "REGION: " + str(Region.singleton())
-        self._blit_text(text, (0, 20))
+        Screen.singleton().text(text, (0, 20))
 
     def _blit_debug_square_properties(self):
         a = Arena.singleton()
@@ -328,7 +328,7 @@ class Engine:
         for k, v in properties.items():
             text.append(f"{k}: {v}")
 
-        self._blit_text(" ".join(text), (0, 30))
+        Screen.singleton().text(" ".join(text), (0, 30))
 
     def _blit_debug_square_at_mouse(self):
         a = Arena.singleton()
