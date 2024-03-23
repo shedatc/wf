@@ -29,8 +29,8 @@ class EngineClock:
         EngineClock.log(f"Reset")
 
     def register(self, task):
-        assert task not in self._running
-        assert task not in self._paused
+        assert task not in self._running, "Task already registered and currently running"
+        assert task not in self._paused, "Task already registered and currently paused"
         self._paused.append(task)
         EngineClock.log(f"Registered paused task: {task}")
 
@@ -45,22 +45,35 @@ class EngineClock:
             raise AssertionError("Unknown task")
 
     def pause(self, task):
-        self._running.remove(task)
-        self._paused.append(task)
-        EngineClock.log(f"Paused task: {task}")
+        try:
+            self._running.remove(task)
+        except ValueError:
+            assert task in self._paused, "Trying to pause a task that was not running"
+        if task not in self._paused:
+            self._paused.append(task)
+            EngineClock.log(f"Paused task: {task}")
+        else:
+            EngineClock.log("Trying to pause a task that is already paused")
 
     def resume(self, task):
-        self._paused.remove(task)
-        self._running.append(task)
-        EngineClock.log(f"Resumed task: {task}")
+        try:
+            self._paused.remove(task)
+        except ValueError:
+            assert task in self._running, "Trying to resume a task that was not paused"
+        if task not in self._running:
+            self._running.append(task)
+            EngineClock.log(f"Resumed task: {task}")
+        else:
+            EngineClock.log("Trying to resume a task that is already running")
 
-    # Add time to running animations and return time (ms) since previous tick.
+    # Add time to running tasks and return time (ms) since previous tick.
     def tick(self):
         t = self.clock.tick(self._fps)
         EngineClock.log(f"Tick: {t} ms since previous tick")
         c = 0
         for task in self._running:
             task.add_time(t)
+            EngineClock.log(f"Added {t} ms to task {task}")
             if task.is_done():
                 self.pause(task)
             c += 1
