@@ -11,28 +11,23 @@ class Physics:
     # def __init__(self, orig_angle, rotation_speed, orig_point, translation_speed):
     def __init__(self, entity, speed=0.0, angle=0, angular_speed=0):
         # self.rotation = Rotation(angle, 22.5, rotation_speed)
-        self.translation = Translation(entity, speed)
+        self._entity     = entity
+        self._translation = Translation(entity, speed)
 
     # def orientation(self):
     #     return self.rotation.current
 
     def target_position(self):
-        return self.translation.target
+        return self._translation.target
 
     # def look_at(self, point):
     #     self.rotation.look(self.position(), point)
 
     def move_to(self, position):
-        self.translation.move_to(position)
+        self._translation.move_to(position)
 
-    def is_done(self):
-        raise NotImplementedError()
-        # return self.rotation.is_done() and self.translation.is_done()
-        return self.translation.is_done()
-
-    def add_time(self, t):
-        # self.rotation.update()
-        self.translation.add_time(t)
+    def blit_debug(self):
+        self._translation.blit_debug()
 
     def blit_at(self, surface, x, y):
         if False:

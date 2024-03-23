@@ -128,8 +128,6 @@ class Entity(Sprite, Observable):
         if Config.singleton().must_log("NavPath"):
             self.nav_path.blit(surface)
 
-    def blit_overlay(self, surface):
-        raise NotImplementedError()
+    def blit_debug(self):
         if Config.singleton().must_log("Physics"):
-            p = self.position().screen()
-            self.physics.blit_at(surface, p.x, p.y)
+            self._physics.blit_debug()

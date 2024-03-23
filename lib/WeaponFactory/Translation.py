@@ -1,5 +1,8 @@
+from .Camera      import Camera
 from .EngineClock import EngineClock
+from .Screen      import Screen
 from .Vector      import Vector
+from .const       import DEBUG_TRANSLATION
 from .utils       import log_ex
 
 class Translation:
@@ -50,4 +53,17 @@ class Translation:
         else:
             self.finish()
             Translation.log(f"Entity {self.entity} stopped at {self.entity.position}")
+
+    def blit_debug(self):
+        if self._target is None:
+            return
+        if DEBUG_TRANSLATION:
+            (x, y) = self.entity.position
+            position = (x + 16, y)
+            position = Camera.singleton().screen_point(position)
+            (tx, ty)           = self._target
+            (ex, ey)           = self.entity.position
+            translation_vector = Vector(tx - ex, ty - ey)
+            (vx, vy) = translation_vector.xy()
+            Screen.singleton().text(f"V: ({vx:.2f}, {vy:.2f})", position)
 
