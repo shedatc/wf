@@ -2,6 +2,7 @@ import pygame
 
 from math              import floor
 from pygame            import Rect
+from pytmx             import TiledObjectGroup, TiledTileLayer
 from pytmx.util_pygame import load_pygame as tmx_load
 
 from .Screen import Screen
@@ -52,58 +53,96 @@ class Tilemap:
             self.background_surface = None
         Tilemap.log(f"Background Color: {background_color}")
 
-        layer_index           = 0
-        layers                = tmx.layers.copy()
-        previous_layer_level  = 0
-        self._tile_properties = {}
         self.surface          = pygame.Surface(self.surface_rect.size)
         self.surface.set_colorkey(COLOR_BLACK)
+
+        current_level         = 0
+        layers                = tmx.layers.copy()
+        self._tile_properties = {}
+        self.locations        = {}
+        tile_layer_index      = 0
         while len(layers) > 0:
             layer = layers.pop(0)
-            Tilemap.log(f"Layer '{layer.name}':")
-            Tilemap.log(f"    Properties: {layer.properties}")
+            if type(layer) is TiledTileLayer:
+                current_level = self._handle_tile_layer(layer, current_level, tile_layer_index)
+                tile_layer_index += 1
+            elif type(layer) is TiledObjectGroup:
+                self._handle_object_group(layer)
+            else:
+                Tilemap.log(f"Unknown Layer Type: {layer}")
+        self.tile_layer_count = tile_layer_index
 
-            # Ensure levels are somewhat consistent even if the layer is not
-            # rendered.
-            if "level" in layer.properties:
-                layer_level = layer.properties["level"]
-                if layer_level == previous_layer_level:
-                    pass
-                elif layer_level == previous_layer_level + 1:
-                    previous_layer_level = layer_level
-                else:
-                    Tilemap.log(  f"    WARNING: Unexpected layer level, "
-                                + f"{previous_layer_level} → {layer_level}")
+    def _handle_object_group(self, object_group):
+        assert type(object_group) is TiledObjectGroup
 
-            # Will use layer opacity to set tile surfaces' alpha.
-            layer_alpha = floor(layer.opacity * 255)
-            Tilemap.log(f"    Visible: {layer.visible}")
-            Tilemap.log(f"    Opacity: {layer.opacity} Alpha: {layer_alpha}")
+        Tilemap.log(f"Object Group '{object_group.name}':")
+        Tilemap.log(f"    Properties: {object_group.properties}")
+        Tilemap.log(f"    Objects:")
 
-            # If the layer is visible, blit the tiles onto the surface honoring
-            # layer's opacity.
-            #
-            # Also combine properties as follow:
-            # - tile properties override layer properties for a given layer
-            # - properties (either tile or layer ones) from upper layers
-            #   override the lower ones
-            # - properties of a given layer are used even if the tile is
-            #   missing from that layer
-            tile_count = 0
-            for x, y, tile_surface in layer.tiles():
-                tile_dest = Rect((x * tmx.tilewidth, y * tmx.tileheight),
-                                 tile_surface.get_size())
-                if layer.visible:
-                    tile_surface.set_alpha(layer_alpha)
-                    self.surface.blit(tile_surface, tile_dest)
-                    if DEBUG_BLIT:
-                        Tilemap.log(f"Blit tile ({x}, {y}) to {self.surface}@{tile_dest}")
-                self.apply_tile_properties(x, y, layer.properties)
-                self.apply_tile_properties(x, y, tmx.get_tile_properties(x, y, layer_index))
-                tile_count += 1
-            Tilemap.log(f"    {tile_count} tiles")
-            layer_index += 1
-        self.layer_count = layer_index
+        object_count   = 0
+        location_count = 0
+        for object in object_group:
+            Tilemap.log(f"        Object '{object.name}':")
+            Tilemap.log(f"            Type:       '{object.type}'")
+            Tilemap.log(f"            Properties: {object.properties}")
+            Tilemap.log(f"            Position:   ({object.x}, {object.y})")
+            Tilemap.log(f"            Size:       {object.width}x{object.height} pixels")
+            Tilemap.log(f"            Visible:    {object.visible == 1}")
+            object_count += 1
+
+            if object.type not in self.locations:
+                self.locations[object.type] = {}
+            self.locations[object.type][object.name] = (object.x, object.y)
+            location_count += 1
+        Tilemap.log(f"    {location_count} locations")
+        Tilemap.log(f"    {object_count} objects")
+
+    def _handle_tile_layer(self, tile_layer, current_level, tile_layer_index):
+        assert type(tile_layer) is TiledTileLayer
+
+        Tilemap.log(f"Tile Layer '{tile_layer.name}':")
+        Tilemap.log(f"    Properties: {tile_layer.properties}")
+
+        # Ensure levels are somewhat consistent even if the layer is not
+        # rendered.
+        if "level" in tile_layer.properties:
+            layer_level = tile_layer.properties["level"]
+            if layer_level == current_level:
+                pass
+            elif layer_level == current_level + 1:
+                current_level = layer_level
+            else:
+                Tilemap.log(  f"    WARNING: Unexpected layer level, "
+                              + f"{current_level} → {layer_level}")
+
+        # Will use layer opacity to set tile surfaces' alpha.
+        layer_alpha = floor(tile_layer.opacity * 255)
+        Tilemap.log(f"    Visible: {tile_layer.visible}")
+        Tilemap.log(f"    Opacity: {tile_layer.opacity} Alpha: {layer_alpha}")
+
+        # If the layer is visible, blit the tiles onto the surface honoring
+        # layer's opacity.
+        #
+        # Also combine properties as follow:
+        # - tile properties override layer properties for a given layer
+        # - properties (either tile or layer ones) from upper layers
+        #   override the lower ones
+        # - properties of a given layer are used even if the tile is
+        #   missing from that layer
+        tile_count = 0
+        for x, y, tile_surface in tile_layer.tiles():
+            tile_dest = Rect((x * self._tmx.tilewidth, y * self._tmx.tileheight),
+                             tile_surface.get_size())
+            if tile_layer.visible:
+                tile_surface.set_alpha(layer_alpha)
+                self.surface.blit(tile_surface, tile_dest)
+                if DEBUG_BLIT:
+                    Tilemap.log(f"Blit tile ({x}, {y}) to {self.surface}@{tile_dest}")
+            self.apply_tile_properties(x, y, tile_layer.properties)
+            self.apply_tile_properties(x, y, self._tmx.get_tile_properties(x, y, tile_layer_index))
+            tile_count += 1
+        Tilemap.log(f"    {tile_count} tiles")
+        return current_level
 
     def blit(self, source_rect):
         screen = Screen.singleton()
@@ -155,7 +194,7 @@ class Tilemap:
 
     def have_tile(self, x, y, layer_index=None):
         if layer_index is None:
-            for layer_index in range(self.layer_count):
+            for layer_index in range(self.tile_layer_count):
                 gid = self._tmx.get_tile_gid(x, y, layer_index)
                 if gid > 0:
                     return True

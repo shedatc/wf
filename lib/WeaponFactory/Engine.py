@@ -190,14 +190,10 @@ class Engine:
         # self.nav_beacon = NavBeacon()
 
     def _spawn_monolith(self):
-        if False:
-            # Use mouse position
-            (cx, cy)          = Camera.singleton().rect.topleft
-            (mx, my)          = Mouse.screen_point()
-            monolith_position = (mx + cx, my + cy)
-        else:
-            monolith_position = (290, 130)
-        monolith          = Monolith(monolith_position)
+        monolith_position = Arena.singleton().get_spawn_location("Monolith")
+        if monolith_position is None:
+            return
+        monolith = Monolith(monolith_position)
         # monolith.register_observer(a)
         # monolith.notify_observers("entity-spawned", square=s)
         self.entities.append(monolith)
