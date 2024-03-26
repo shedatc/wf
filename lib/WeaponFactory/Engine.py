@@ -244,7 +244,6 @@ class Engine:
         Screen.singleton().reset()
         self._blit_scene()
         self._blit_region()
-        self._blit_debug()
 
     def _blit_scene(self):
         c  = Camera.singleton()
@@ -362,4 +361,5 @@ class Engine:
             self.update()
             self.blit()
             EngineClock.singleton().tick()
+            self._blit_debug()
             pygame.display.flip()
