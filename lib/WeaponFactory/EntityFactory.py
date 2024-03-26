@@ -12,4 +12,4 @@ class EntityFactory:
         EntityFactory.log(f"Spawning entity:")
         EntityFactory.log(f"    Type:     {type}")
         EntityFactory.log(f"    Position: {position}")
-        return Entity(type, position, speed=0.05)
+        return Entity(type, position)

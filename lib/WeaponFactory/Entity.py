@@ -1,5 +1,4 @@
-from pygame      import Rect
-from pygame.draw import rect as draw_rect
+from os.path     import join as path_join
 
 if False:
     from .navigation import Compass, NavPath
@@ -13,9 +12,16 @@ from .utils      import Config, Observable, log_ex
 # system (see `NavPath`).
 class Entity(Sprite, Observable):
 
-    def __init__(self, name, position, speed=0.0):
+    def __init__(self, name, position):
         Sprite.__init__(self, name, position)
         Observable.__init__(self)
+
+        speed  = 0.0
+        config = Config.singleton().load( path_join(name, "entity.json") )
+        if "speed" in config:
+            speed = config["speed"]
+
+        self.log(f"Speed: {speed} px/ms")
 
         if False:
             self.nav_path     = NavPath(self)

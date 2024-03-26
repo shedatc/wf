@@ -1,3 +1,5 @@
+from os.path import join as path_join
+
 from .AnimationManager import AnimationManager
 from .Camera           import Camera
 from .EngineClock      import EngineClock
@@ -13,6 +15,11 @@ class Sprite:
         self.name        = f"{name}@{hex(id(self))}"
         self.position    = position
         self._animations = AnimationManager(name)
+
+        self.offset = (0, 0)
+        config      = Config.singleton().load( path_join(name, "sprite.json") )
+        if "offset" in config:
+            self.offset = config["offset"]
 
         self.log(f"Sprite '{name}':")
         self.log(f'    Position: {position}')
@@ -36,8 +43,13 @@ class Sprite:
         # pyxel.text(p.x + 5, p.y, self.name, 0)
         raise NotImplementedError("Must replace pyxel.text")
 
+    def blit(self):
+        (px, py) = self.position
+        (ox, oy) = self.offset
+        self._animations.blit_current_at((px + ox, py + oy))
+
     def is_done(self):
         return False
 
     def add_time(self, _):
-        self._animations.blit_current_at(self.position)
+        self.blit()
