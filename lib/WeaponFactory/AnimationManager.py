@@ -4,8 +4,8 @@ from pygame  import Rect
 
 from .Animation      import Animation
 from .AnimationFrame import AnimationFrame
+from .Assets         import Assets
 from .EngineClock    import EngineClock
-from .assets         import Assets
 from .utils          import Config, log_ex
 
 class AnimationManager:

@@ -1,11 +1,8 @@
-import json
-import os
-import os.path
-import pygame
 
-from os      import getcwd, getenv
-from os.path import join           as pjoin
-from pprint  import pprint
+from os           import getenv
+from os.path      import exists as path_exists
+from os.path      import join   as path_join
+from pygame.image import load as image_load
 
 from .utils import Config, log_ex
 
@@ -30,10 +27,10 @@ class Assets:
             return wf_data_dir
         xdg_data_home_dir = getenv("XDG_DATA_HOME")
         if xdg_data_home_dir is not None:
-            return pjoin(xdg_data_home_dir, "wf")
+            return path_join(xdg_data_home_dir, "wf")
         home_dir = getenv("HOME")
         assert home_dir is not None, "Missing HOME environment variable"
-        return pjoin(home_dir, ".local", "share", "wf")
+        return path_join(home_dir, ".local", "share", "wf")
 
     @classmethod
     def locate(cls, asset_type, file_name):
@@ -42,10 +39,10 @@ class Assets:
             raise RuntimeError(f"Invalid asset type: {asset_type}")
         for d in rt_dirs:
             if d[0] == "/":
-                path = os.path.join(d, file_name)
+                path = path_join(d, file_name)
             else:
-                path = pjoin(Assets._dir(), d, file_name)
-            if os.path.exists(path):
+                path = path_join(Assets._dir(), d, file_name)
+            if path_exists(path):
                 return path
         else:
             Assets.log(f'Assets Base Directory: {Assets._dir()}')
@@ -65,7 +62,7 @@ class Assets:
         if path is None:
             raise RuntimeError("Image not found")
 
-        img               = pygame.image.load(path)
+        img               = image_load(path)
         self.images[name] = img
         Assets.log(f"Image:")
         Assets.log(f"    Name: {name}")

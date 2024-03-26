@@ -2,9 +2,9 @@ import pygame
 
 from pygame import Rect
 
+from .Assets     import Assets
 from .Square     import Square
 from .Tilemap    import Tilemap
-from .assets     import Assets
 from .const      import OBSTACLE, WALKABLE
 from .navigation import Compass
 from .utils      import Config, log_ex, sz

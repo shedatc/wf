@@ -7,6 +7,7 @@ if False:
     from .Drone          import Drone
 from .Arena             import Arena
 from .ArenaView         import ArenaView
+from .Assets            import Assets
 from .Camera            import Camera
 from .EngineClock       import EngineClock
 from .EntityFactory     import EntityFactory
@@ -16,7 +17,6 @@ from .Region            import Region
 from .Screen            import Screen
 from .Square            import Square
 
-from .assets            import Assets
 from .const             import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
 from .const             import DEBUG_REGION, DEBUG_TILE
 from .navigation        import Compass, NavBeacon
