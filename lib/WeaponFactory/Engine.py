@@ -87,16 +87,6 @@ class Engine:
 
         ih.addFunc("quit", lambda: self.quit())
 
-        # DEBUG
-        def debug_tile_data_from_mouse():
-            self.debug_data = Arena.singleton().tile_data_from_mouse()
-        ih.addFunc("debug_tile_data_from_mouse", debug_tile_data_from_mouse)
-
-        # DEBUG
-        def debug_square_coordinates_from_mouse():
-            self.debug_data = Square(0, 0).from_mouse()
-        ih.addFunc("debug_square_coordinates_from_mouse", debug_square_coordinates_from_mouse)
-
         # Moving the camera
         def camera_up():
             Camera.singleton().up()
@@ -229,11 +219,6 @@ class Engine:
 
     def _update_scene(self):
         ArenaView.singleton().update()
-
-        if False:
-            (mouse_position)          = Mouse.screen_point()
-            self.entities[0].position = mouse_position
-            Engine.log(f"Mouse position: {mouse_position}")
 
     def _update_region(self):
         Region.singleton().update_cursor()
