@@ -107,10 +107,6 @@ class Entity(Sprite, Observable):
         else:
             self.next_hop()
 
-    def add_time(self, t):
-        if self._physics is not None:
-            self._physics.add_time(t)
-
     def blit_selection(self, surface):
         if not self.is_selected:
             return

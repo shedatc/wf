@@ -9,8 +9,8 @@ from .Arena             import Arena
 from .ArenaView         import ArenaView
 from .Camera            import Camera
 from .EngineClock       import EngineClock
+from .EntityFactory     import EntityFactory
 from .ModalInputHandler import ModalInputHandler
-from .Monolith          import Monolith
 from .Mouse             import Mouse
 from .Region            import Region
 from .Screen            import Screen
@@ -166,6 +166,39 @@ class Engine:
                     self.select(entity)
         ih.addFunc("region_disable", region_disable)
 
+        # Spawning entities
+        a = Arena.singleton()
+        self._spawn_locations = ["Mouse"]+ list(a.spawn_locations().keys())
+        self._current_spawn_location = 0
+        def spawn_location_next():
+            self._current_spawn_location = (self._current_spawn_location + 1) \
+                % len(self._spawn_locations)
+        ih.addFunc("spawn_location_next", spawn_location_next)
+        self._current_entity_type = 0
+        self._entity_types = [
+            "monolith-0",
+            "monolith-1",
+            "monolith-2",
+            "monolith-3",
+        ]
+        def spawn_entity_type_next():
+            self._current_entity_type = (self._current_entity_type + 1) \
+                % len(self._entity_types)
+        ih.addFunc("spawn_entity_type_next", spawn_entity_type_next)
+        def spawn_entity():
+            t = self._entity_types[self._current_entity_type]
+            l = self._spawn_locations[self._current_spawn_location]
+            if l == "Mouse":
+                p = Mouse.world_point()
+            else:
+                p = Arena.singleton().spawn_location(l)
+            Engine.log(f"Spawning entity at location '{l}'")
+            e = EntityFactory.spawn(t, p)
+            # monolith.register_observer(a)
+            # monolith.notify_observers("entity-spawned", square=s)
+            self.entities.append(e)
+        ih.addFunc("spawn_entity", spawn_entity)
+
         ih.configure()
 
         self.input_handler = ih
@@ -185,32 +218,8 @@ class Engine:
         # Compass(a.obstacles_matrix)
 
     def init_scene(self):
-        self._spawn_monolith()
-        # self._spawn_drones()
         # self.nav_beacon = NavBeacon()
-
-    def _spawn_monolith(self):
-        monolith_position = Arena.singleton().get_spawn_location("Monolith")
-        if monolith_position is None:
-            return
-        monolith = Monolith(monolith_position)
-        # monolith.register_observer(a)
-        # monolith.notify_observers("entity-spawned", square=s)
-        self.entities.append(monolith)
-
-    # Spawn some drones
-    def _spawn_drones(self):
-        drones = {
-            "A": Square(5,  10),
-            "B": Square(11, 10),
-            "C": Square(5,  20),
-        }
-        for name, square in drones.items():
-            drone      = Drone(square)
-            drone.name = name
-            drone.register_observer(a)
-            drone.notify_observers("entity-spawned", square=drone.position().square())
-            self.entities.append(drone)
+        pass
 
     def update(self):
         self.input_handler.probe()
@@ -269,11 +278,7 @@ class Engine:
         if False:
             for e in entities:
                 e.blit_selection(surface)
-        for e in entities:
-            (x, y)          = e.position
-            screen_position = (x - cx, y - cy)
-            e.blit_at(screen_position)
-        if True:
+        if False:
             for e in entities:
                 e.blit_debug()
 
@@ -286,6 +291,7 @@ class Engine:
             self._blit_debug_region()
         self._blit_debug_square_properties()
         self._blit_debug_mouse_position()
+        self._blit_debug_spawn_data()
 
     def _blit_text(self, text, screen_point):
         text_surf = pygame.font.Font(None, 15) \
@@ -352,10 +358,16 @@ class Engine:
         (mx, my) = Mouse.screen_point()
         Screen.singleton().draw_rect(COLOR_BLUE, Rect((mx-1, my-1), (3, 3)))
 
+    def _blit_debug_spawn_data(self):
+        h = Camera.singleton().rect.height - 10
+        l = self._spawn_locations[self._current_spawn_location]
+        t = self._entity_types[self._current_entity_type]
+        Screen.singleton().text(f"SPAWN: Location: {l} Type: {t}", (0, h))
+
     def run(self):
         self.is_running = True
         while self.is_running:
             self.update()
             self.blit()
-            pygame.display.flip()
             EngineClock.singleton().tick()
+            pygame.display.flip()

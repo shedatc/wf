@@ -181,8 +181,14 @@ class Arena:
         (x, y) = square
         return self._tm.get_tile_properties(x, y)
 
-    def get_spawn_location(self, name):
+    def spawn_locations(self):
         try:
-            return self._tm.locations['Spawn Location'][name]
+            return self._tm.locations['Spawn Location']
+        except KeyError:
+            return []
+
+    def spawn_location(self, name):
+        try:
+            return self.spawn_locations()[name]
         except KeyError:
             return None
