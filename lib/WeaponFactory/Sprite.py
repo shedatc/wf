@@ -1,9 +1,9 @@
 from os.path import join as path_join
 
 from .AnimationManager import AnimationManager
-from .Camera           import Camera
+from .Config           import Config
 from .EngineClock      import EngineClock
-from .utils            import Config, log_ex
+from .utils            import log_ex
 
 # A sprite is something that is animated.
 #

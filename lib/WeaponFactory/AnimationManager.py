@@ -5,8 +5,9 @@ from pygame  import Rect
 from .Animation      import Animation
 from .AnimationFrame import AnimationFrame
 from .Assets         import Assets
+from .Config         import Config
 from .EngineClock    import EngineClock
-from .utils          import Config, log_ex
+from .utils          import log_ex
 
 class AnimationManager:
 

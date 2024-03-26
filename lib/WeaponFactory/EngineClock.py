@@ -1,6 +1,7 @@
 import pygame
 
-from .utils import Config, log_ex
+from .Config import Config
+from .utils  import log_ex
 
 class EngineClock:
 

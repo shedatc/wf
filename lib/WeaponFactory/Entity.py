@@ -2,9 +2,10 @@ from os.path     import join as path_join
 
 if False:
     from .navigation import Compass, NavPath
+from .Config     import Config
 from .Physics    import Physics
 from .Sprite     import Sprite
-from .utils      import Config, Observable, log_ex
+from .utils      import Observable, log_ex
 
 # An entity is a sprite that somehow obey the laws of physics.
 #

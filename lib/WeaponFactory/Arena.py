@@ -3,11 +3,12 @@ import pygame
 from pygame import Rect
 
 from .Assets     import Assets
+from .Config     import Config
 from .Square     import Square
 from .Tilemap    import Tilemap
 from .const      import OBSTACLE, WALKABLE
 from .navigation import Compass
-from .utils      import Config, log_ex, sz
+from .utils      import log_ex, sz
 
 # An arena is the terrain with all its obstacles.
 class Arena:

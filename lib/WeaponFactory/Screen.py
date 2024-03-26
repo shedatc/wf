@@ -4,8 +4,9 @@ from pygame.draw    import rect as draw_rect
 from pygame.font    import Font
 
 from .Camera import Camera
+from .Config import Config
 from .const  import COLOR_BLACK, COLOR_GREEN, DEBUG_BLIT
-from .utils  import Config, log_ex, sz
+from .utils  import log_ex, sz
 
 class Screen:
 

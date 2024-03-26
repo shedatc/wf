@@ -1,10 +1,9 @@
 import inspect
-import json
 
-from os      import getcwd, getenv
-from os.path import join   as pjoin
-from sys     import stderr
-from time    import time
+from sys  import stderr
+from time import time
+
+from .Config import Config
 
 log_previous_time = None
 
@@ -45,56 +44,6 @@ def log_current_context():
 def sz(size):
     (w, h) = size
     return f"{w}x{h}"
-
-class Config:
-
-    _singleton = None
-
-    @classmethod
-    def singleton(cls):
-        if cls._singleton is None:
-            cls._singleton = Config()
-        return cls._singleton
-
-    @classmethod
-    def _dir(cls):
-        wf_conf_dir = getenv("WF_CONF")
-        if wf_conf_dir is not None:
-            return wf_conf_dir
-        xdg_config_home_dir = getenv("XDG_CONFIG_HOME")
-        if xdg_config_home_dir is not None:
-            return pjoin(xdg_config_home_dir, "wf")
-        home_dir = getenv("HOME")
-        assert home_dir is not None, "Missing HOME environment variable"
-        return pjoin(home_dir, ".config", "wf")
-
-    def __init__(self):
-        self._index          = {}
-        self._log_categories = None
-
-    def load(self, file_name):
-        if file_name not in self._index:
-            path = pjoin(Config._dir(), file_name)
-            log_ex(f"Configuration: {path}")
-            with open(path, "r") as cf:
-                self._index[file_name] = json.loads(cf.read())
-        return self._index[file_name]
-
-    def get(self, file_name, key, default=None):
-        config = self.load(file_name)
-        if key in config:
-            return config[key]
-        else:
-            return default
-
-    def get_log_categories(self):
-        if self._log_categories is None:
-            self._log_categories = list(map(lambda s: s.lower(),
-                                            self.get("engine.json", "logs", default=[])))
-        return self._log_categories
-
-    def must_log(self, category):
-        return category.lower() in self.get_log_categories()
 
 class Observable:
 

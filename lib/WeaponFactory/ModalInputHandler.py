@@ -1,7 +1,8 @@
 from pygame.key import set_repeat
 
+from .Config       import Config
 from .InputHandler import InputHandler
-from .utils        import Config, log_ex
+from .utils        import log_ex
 
 class ModalInputHandler:
 
