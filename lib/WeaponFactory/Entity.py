@@ -1,8 +1,8 @@
 from os.path     import join as path_join
 
-if False:
-    from .navigation import Compass, NavPath
+from .Compass    import Compass
 from .Config     import Config
+from .NavPath    import NavPath
 from .Observable import Observable
 from .Physics    import Physics
 from .Sprite     import Sprite

@@ -9,17 +9,18 @@ from .Arena             import Arena
 from .ArenaView         import ArenaView
 from .Assets            import Assets
 from .Camera            import Camera
+from .Compass           import Compass
 from .EngineClock       import EngineClock
 from .EntityFactory     import EntityFactory
 from .ModalInputHandler import ModalInputHandler
 from .Mouse             import Mouse
+from .NavBeacon         import NavBeacon
 from .Region            import Region
 from .Screen            import Screen
 from .Square            import Square
 
 from .const             import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
 from .const             import DEBUG_REGION, DEBUG_TILE
-from .navigation        import Compass, NavBeacon
 from .utils             import log_ex
 
 EV_NAV = pygame.event.custom_type()

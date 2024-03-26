@@ -2,13 +2,12 @@ import pygame
 
 from pygame import Rect
 
-from .Assets     import Assets
-from .Config     import Config
-from .Square     import Square
-from .Tilemap    import Tilemap
-from .const      import OBSTACLE, WALKABLE
-from .navigation import Compass
-from .utils      import log_ex, sz
+from .Assets  import Assets
+from .Compass import Compass
+from .Config  import Config
+from .Tilemap import Tilemap
+from .const   import OBSTACLE, WALKABLE
+from .utils   import log_ex, sz
 
 # An arena is the terrain with all its obstacles.
 class Arena:
@@ -104,11 +103,6 @@ class Arena:
             for x in range(self.rect.width):
                 self.entities_matrix[y][x] = []
         self.log_entities_matrix()
-
-    def tile_data_from_mouse(self):
-        raise NotImplementedError()
-        return Square(0, 0).from_mouse().tile_data()
-
     def is_obstacle(self, square):
         (x, y) = square
         return self.obstacles_matrix[y][x] == OBSTACLE
