@@ -53,9 +53,11 @@ class Screen:
         screen_point = Camera.singleton().screen_point(world_point)
         if DEBUG_BLIT:
             if source_rect is None:
-                Screen.log(f"Blit {source_surface} to screen at {world_point} → {screen_point}")
+                Screen.log(f"Blit {source_surface} to screen" \
+                           + f" at {world_point} → {screen_point}")
             else:
-                Screen.log(f"Blit {source_rect} from {source_surface} to screen at {world_point} → {screen_point}")
+                Screen.log(f"Blit {source_rect} from {source_surface} to screen" \
+                           + f" at {world_point} → {screen_point}")
         self._surface.blit(source_surface, screen_point, area=source_rect)
 
     def draw_rect(self, color, rect, width=0):

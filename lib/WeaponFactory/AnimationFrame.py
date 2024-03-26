@@ -52,7 +52,6 @@ class AnimationFrame:
         dest_rect        = self._rect.copy()
         dest_rect.center = position
         self.log(f"Blit {self._rect} at {position}")
-        # FIXME Use blit() instead of screen_blit()
-        Screen.singleton().screen_blit(self._surface, dest_rect,
-                                       source_rect=self._rect)
+        Screen.singleton().blit(self._surface, dest_rect.topleft,
+                                source_rect=self._rect)
 

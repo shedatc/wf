@@ -36,18 +36,8 @@ class Sprite:
         # pyxel.text(p.x + 5, p.y, self.name, 0)
         raise NotImplementedError("Must replace pyxel.text")
 
-    def blit_at(self, position):
-        self._animations.blit_current_at(position)
-
     def is_done(self):
         return False
 
-    def add_time(self, t):
-        c               = Camera.singleton()
-        (cx, cy)        = c.rect.topleft
-        (x, y)          = self.position
-        screen_position = (x - cx, y - cy)
-        if False:
-            self.blit_at(self.position)
-        else:
-            self.blit_at(screen_position)
+    def add_time(self, _):
+        self._animations.blit_current_at(self.position)
