@@ -147,8 +147,8 @@ class Tilemap:
     def blit(self, source_rect):
         screen = Screen.singleton()
         if self.background_surface is not None:
-            screen.blit(self.background_surface, (0, 0), source_rect=source_rect)
-        screen.blit(self.surface, (0, 0), source_rect=source_rect)
+            screen.screen_blit(self.background_surface, (0, 0), source_rect=source_rect)
+        screen.screen_blit(self.surface, (0, 0), source_rect=source_rect)
 
     def set_tile_property(self, x, y, prop_key, prop_value):
         tile_key = f"{x}:{y}"

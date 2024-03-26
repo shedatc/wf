@@ -129,4 +129,4 @@ class InputHandler:
         text_surface = font.render(self.abbrev,
                                    False,                 # Antialias
                                    self.foreground_color)
-        screen.blit(text_surface, (x + 2, y + 2))
+        screen.screen_blit(text_surface, (x + 2, y + 2))

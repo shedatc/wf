@@ -293,14 +293,6 @@ class Engine:
         self._blit_debug_mouse_position()
         self._blit_debug_spawn_data()
 
-    def _blit_text(self, text, screen_point):
-        text_surf = pygame.font.Font(None, 15) \
-                               .render(text,
-                                       True,            # antialias
-                                       COLOR_GREEN,     # color
-                                       COLOR_BLACK)     # background
-        Screen.singleton().blit(text_surf, screen_point)
-
     def _blit_debug_mouse_coordinates(self):
         a                 = Arena.singleton()
         mouse_position    = Mouse.world_point()

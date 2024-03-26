@@ -3,8 +3,9 @@ from pygame.display import set_caption, set_mode
 from pygame.draw    import rect as draw_rect
 from pygame.font    import Font
 
-from .const import COLOR_BLACK, COLOR_GREEN, DEBUG_BLIT
-from .utils import Config, log_ex, sz
+from .Camera import Camera
+from .const  import COLOR_BLACK, COLOR_GREEN, DEBUG_BLIT
+from .utils  import Config, log_ex, sz
 
 class Screen:
 
@@ -40,14 +41,22 @@ class Screen:
     def reset(self):
         self._surface.fill(COLOR_BLACK)
 
-    # Dest is a (x, y) tuple.
-    def blit(self, source_surface, dest, source_rect=None):
+    def screen_blit(self, source_surface, screen_point, source_rect=None):
         if DEBUG_BLIT:
             if source_rect is None:
-                Screen.log(f"Blit from {source_surface} to screen@{dest}")
+                Screen.log(f"Blit {source_surface} to screen at {screen_point}")
             else:
-                Screen.log(f"Blit from {source_rect}@{source_surface} to screen@{dest}")
-        self._surface.blit(source_surface, dest, area=source_rect)
+                Screen.log(f"Blit {source_rect} from {source_surface} to screen at {screen_point}")
+        self._surface.blit(source_surface, screen_point, area=source_rect)
+
+    def blit(self, source_surface, world_point, source_rect=None):
+        screen_point = Camera.singleton().screen_point(world_point)
+        if DEBUG_BLIT:
+            if source_rect is None:
+                Screen.log(f"Blit {source_surface} to screen at {world_point} → {screen_point}")
+            else:
+                Screen.log(f"Blit {source_rect} from {source_surface} to screen at {world_point} → {screen_point}")
+        self._surface.blit(source_surface, screen_point, area=source_rect)
 
     def draw_rect(self, color, rect, width=0):
         draw_rect(self._surface, color, rect, width=width)
@@ -57,4 +66,4 @@ class Screen:
                                       True,            # antialias
                                       COLOR_GREEN,     # color
                                       COLOR_BLACK)     # background
-        self.blit(text_surf, screen_point)
+        self.screen_blit(text_surf, screen_point)
