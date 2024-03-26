@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="59" height="60" tilewidth="16" tileheight="8" infinite="0" nextlayerid="9" nextobjectid="3">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="59" height="60" tilewidth="16" tileheight="8" infinite="0" nextlayerid="9" nextobjectid="6">
  <tileset firstgid="1" source="tileset-1.tsx"/>
  <layer id="1" name="niv -1" width="59" height="60">
   <data encoding="csv">
@@ -386,7 +386,25 @@
 </data>
  </layer>
  <objectgroup id="8" name="Spawn Locations">
-  <object id="2" name="Monolith" type="Spawn Location" x="301" y="134.5">
+  <object id="2" name="monolith-0" type="Spawn Location" x="301" y="134.5">
+   <properties>
+    <property name="Hello" value="World!"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" name="monolith-1" type="Spawn Location" x="398" y="282">
+   <properties>
+    <property name="Hello" value="World!"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" name="monolith-2" type="Spawn Location" x="465" y="138">
+   <properties>
+    <property name="Hello" value="World!"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" name="monolith-3" type="Spawn Location" x="640.5" y="202.5">
    <properties>
     <property name="Hello" value="World!"/>
    </properties>
