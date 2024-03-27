@@ -2,6 +2,7 @@ from os.path     import join as path_join
 
 from .Compass    import Compass
 from .Config     import Config
+from .HUD        import HUD
 from .NavPath    import NavPath
 from .Observable import Observable
 from .Physics    import Physics
@@ -115,17 +116,14 @@ class Entity(Sprite, Observable):
         else:
             self.next_hop()
 
-    def blit_selection(self, surface):
+    def blit(self):
+        self._blit_selection()
+        Sprite.blit(self)
+
+    def _blit_selection(self):
         if not self.is_selected:
             return
-
-        p  = self.position().screen()
-        bw = 1
-        w  = self.width  + bw + bw
-        h  = self.height + bw + bw
-        draw_rect(surface, (200, 0, 0),
-                  Rect((p.x - w // 2, p.y - h // 2), (w, h)),
-                  width=bw)
+        HUD.singleton().blit_selected(self.position)
 
     def blit_nav_path(self, surface):
         raise NotImplementedError()

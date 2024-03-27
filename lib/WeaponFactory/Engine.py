@@ -18,7 +18,6 @@ from .NavBeacon         import NavBeacon
 from .Region            import Region
 from .Screen            import Screen
 from .Square            import Square
-
 from .const             import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
 from .const             import DEBUG_REGION, DEBUG_TILE
 from .utils             import log_ex
@@ -64,8 +63,6 @@ class Engine:
         self.init_arena()
         self.init_scene()
         self.init_input()
-
-        self._debug_tm = tmx_load( Assets.locate("tilemap", "debug.tmx") )
 
         Engine.log("Ready")
 
@@ -185,6 +182,7 @@ class Engine:
                 p = Arena.singleton().spawn_location(l)
             Engine.log(f"Spawning entity at location '{l}'")
             e = EntityFactory.spawn(t, p)
+            self.select(e)
             # monolith.register_observer(a)
             # monolith.notify_observers("entity-spawned", square=s)
             self.entities.append(e)
