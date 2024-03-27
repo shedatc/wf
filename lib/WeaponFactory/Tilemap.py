@@ -1,7 +1,5 @@
-import pygame
-
 from math              import floor
-from pygame            import Rect
+from pygame            import Color, Rect, Surface
 from pytmx             import TiledObjectGroup, TiledTileLayer
 from pytmx.util_pygame import load_pygame as tmx_load
 
@@ -27,19 +25,11 @@ class Tilemap:
         #       sharing them between tilemaps.
         tmx       = tmx_load( Assets.locate("tilemap", f"{name}.tmx") )
         self._tmx = tmx
-        Tilemap.log(f"Filename:         {tmx.filename}")
-        Tilemap.log(f"Version:          {tmx.version}")
-        Tilemap.log(f"Tiled Version:    {tmx.tiledversion}")
-        Tilemap.log(f"Orientation:      {tmx.orientation}")
 
         self.rect                 = Rect((0, 0), (tmx.width, tmx.height))             # tiles
         self.tile_rect            = Rect((0, 0), (tmx.tilewidth, tmx.tileheight))     # pixels
         self.surface_rect         = self.rect.scale_by(tmx.tilewidth, tmx.tileheight) # pixels
         self.surface_rect.topleft = (0, 0)
-
-        Tilemap.log(f"Map:              {self.rect} tiles")
-        Tilemap.log(f"Tile:             {self.tile_rect} pixels")
-        Tilemap.log(f"Surface:          {self.surface_rect} pixels")
 
         # FIXME Check Tile Render Order. Only Right Down supported for now.
         #       Does it garantee the order of layers in the TMX file?
@@ -47,13 +37,21 @@ class Tilemap:
 
         background_color = tmx.background_color
         if background_color is not None:
-            self.background_surface = pygame.Surface(self.surface_rect.size)
-            self.background_surface.fill( pygame.Color(background_color) )
+            self.background_surface = Surface(self.surface_rect.size)
+            self.background_surface.fill( Color(background_color) )
         else:
             self.background_surface = None
+
+        Tilemap.log(f"Filename:         {tmx.filename}")
+        Tilemap.log(f"Version:          {tmx.version}")
+        Tilemap.log(f"Tiled Version:    {tmx.tiledversion}")
+        Tilemap.log(f"Orientation:      {tmx.orientation}")
+        Tilemap.log(f"Map:              {self.rect} tiles")
+        Tilemap.log(f"Tile:             {self.tile_rect} pixels")
+        Tilemap.log(f"Surface:          {self.surface_rect} pixels")
         Tilemap.log(f"Background Color: {background_color}")
 
-        self.surface          = pygame.Surface(self.surface_rect.size)
+        self.surface = Surface(self.surface_rect.size)
         self.surface.set_colorkey(COLOR_BLACK)
 
         current_level         = 0
