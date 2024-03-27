@@ -123,8 +123,8 @@ class InputHandler:
         (screen_width, screen_height) = screen.size
         (x, y)                        = (screen_width - width, screen_height - height)
         rect                          = Rect((x, y), (width, height))
-        screen.draw_rect(self.background_color, rect)
-        screen.draw_rect(self.foreground_color, rect, width=1)
+        screen.screen_draw_rect(self.background_color, rect)
+        screen.screen_draw_rect(self.foreground_color, rect, width=1)
         font         = pygame.font.Font(None, 15)
         text_surface = font.render(self.abbrev,
                                    False,                 # Antialias

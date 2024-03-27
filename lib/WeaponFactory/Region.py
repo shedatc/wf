@@ -85,9 +85,11 @@ class Region:
         if not self._is_enabled:
             return
 
+        screen = Screen.singleton()
+
         # Display the region.
         if DEBUG_REGION:
-            Screen.singleton().draw_rect(COLOR_RED, self._rect, 1)
+            screen.screen_draw_rect(COLOR_RED, self._rect, 1)
 
         # Display the squares that are part of the region.
         r      = self._rect.inflate(-1, -1)
@@ -95,9 +97,9 @@ class Region:
         tls    = a.square_rect(r.topleft)
         brs    = a.square_rect(r.bottomright)
         (w, h) = (brs.x - tls.x + brs.w, brs.y - tls.y + brs.h)
-        Screen.singleton().draw_rect(COLOR_WHITE,
-                                     Rect(tls.topleft, (w, h)),
-                                     1)
+        screen.screen_draw_rect(COLOR_WHITE,
+                                Rect(tls.topleft, (w, h)),
+                                1)
 
     # Return the entities that are part of the region.
     def get_entities(self):

@@ -61,8 +61,13 @@ class Screen:
                            + f" at {world_point} → {screen_point}")
         self._surface.blit(source_surface, screen_point, area=source_rect)
 
-    def draw_rect(self, color, rect, width=0):
-        draw_rect(self._surface, color, rect, width=width)
+    def screen_draw_rect(self, color, screen_rect, width=0):
+        draw_rect(self._surface, color, screen_rect, width=width)
+
+    def draw_rect(self, color, world_rect, width=0):
+        screen_rect        = world_rect.copy()
+        screen_rect.center = Camera.singleton().screen_point(world_rect.center),
+        draw_rect(self._surface, color, screen_rect, width=width)
 
     def text(self, text, screen_point):
         text_surf = self._font.render(text,

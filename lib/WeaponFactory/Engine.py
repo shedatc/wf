@@ -329,11 +329,11 @@ class Engine:
         else:
             color = COLOR_GREEN
 
-        Screen.singleton().draw_rect(color, mouse_square_rect, width=1)
+        Screen.singleton().screen_draw_rect(color, mouse_square_rect, width=1)
 
     def _blit_debug_mouse_position(self):
         (mx, my) = Mouse.screen_point()
-        Screen.singleton().draw_rect(COLOR_BLUE, Rect((mx-1, my-1), (3, 3)))
+        Screen.singleton().screen_draw_rect(COLOR_BLUE, Rect((mx-1, my-1), (3, 3)))
 
     def _blit_debug_spawn_data(self):
         h = Camera.singleton().rect.height - 10
