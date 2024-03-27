@@ -1,0 +1,50 @@
+{ "frames": [
+   {
+    "filename": "entity 0.ase",
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 16 },
+    "sourceSize": { "w": 32, "h": 16 },
+    "duration": 300
+   },
+   {
+    "filename": "entity 1.ase",
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 16 },
+    "sourceSize": { "w": 32, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "entity 2.ase",
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 16 },
+    "sourceSize": { "w": 32, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "entity 3.ase",
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 16 },
+    "sourceSize": { "w": 32, "h": 16 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://github.com/LibreSprite/LibreSprite/",
+  "version": "1.0",
+  "image": "entity.png",
+  "format": "I8",
+  "size": { "w": 128, "h": 16 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "Selected", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

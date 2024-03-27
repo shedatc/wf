@@ -93,7 +93,7 @@
  "meta": {
   "app": "https://github.com/LibreSprite/LibreSprite/",
   "version": "1.0",
-  "image": "/home/sheda/c/github/shedatc/wf/assets/sprites/monolith-0/src/monolith-0.png",
+  "image": "monolith-0.png",
   "format": "I8",
   "size": { "w": 320, "h": 64 },
   "scale": "1",

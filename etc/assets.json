@@ -1,10 +1,10 @@
 {
     "image": [
         "assets/images",
-        "assets/sprites/monolith-0"
+        "assets/animations/monolith-0"
     ],
-    "sprite": [
-        "assets/sprites/monolith-0"
+    "animation": [
+        "assets/animations/monolith-0"
     ],
     "tilemap": [
         "assets/tilemaps/arena-0",

@@ -15,11 +15,11 @@ class AnimationManager:
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 
-    def __init__(self, sprite_name):
+    def __init__(self, animation_name):
         self.current    = None
         self.animations = {}
 
-        path = Assets.locate("sprite", f"{sprite_name}.json")
+        path = Assets.locate("animation", f"{animation_name}.json")
         with open(path, "r") as cf:
             conf             = json_load(cf.read())
             spritesheet_load = None
