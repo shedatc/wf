@@ -12,17 +12,35 @@ from .utils           import log_ex
 class Sprite:
 
     def __init__(self, name, position):
-        self.name        = f"{name}@{hex(id(self))}"
-        self.position    = position
-        self._animations = AnimationPlayer(name)
+        self.name     = f"{name}@{hex(id(self))}"
+        self.position = position
 
-        self.offset = (0, 0)
-        config      = Config.singleton().load( path_join(name, "sprite.json") )
-        if "offset" in config:
-            self.offset = config["offset"]
+        config = Config.singleton().load( path_join(name, "sprite.json") )
 
         self.log(f"Sprite '{name}':")
         self.log(f'    Position: {position}')
+        self.log(f'    Animations:')
+        self._animations      = {}
+        self._animation_order = []
+        for animation_config in config["animations"]:
+            offset           = animation_config["offset"]
+            name             = animation_config["name"]
+            select           = animation_config["select"]
+            enable           = animation_config["enable"]
+            animation_player = AnimationPlayer(name, select=select)
+            if enable:
+                animation_player.resume()
+                e = "enabled"
+            else:
+                e = "disabled"
+            o = len(self._animation_order)
+            self.log(f"        #{o} {name} at {offset} '{select}' {e}")
+            self._animations[name] = {
+                "offset":           offset,
+                "animation_player": animation_player,
+                "enable":           enable
+            }
+            self._animation_order.append(name)
 
         EngineClock.singleton().register(self)
         EngineClock.singleton().resume(self)
@@ -36,6 +54,9 @@ class Sprite:
         (x, y)        = self.position
         self.position = (x + ox, y + oy)
 
+    def set_animation_state(self, name, enable):
+        self._animations[name]["enable"] = enable
+
     def blit_debug_overlay(self):
         if not Config.singleton().must_log("Sprite"):
             return
@@ -45,8 +66,12 @@ class Sprite:
 
     def blit(self):
         (px, py) = self.position
-        (ox, oy) = self.offset
-        self._animations.blit_current_at((px + ox, py + oy))
+        for name in self._animation_order:
+            a = self._animations[name]
+            if not a["enable"]:
+                continue
+            (ox, oy) = a["offset"]
+            a["animation_player"].blit_current_at((px + ox, py + oy))
 
     def is_done(self):
         return False

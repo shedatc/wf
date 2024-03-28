@@ -35,7 +35,9 @@ class AnimationPlayer:
 
         for a in self.animations.values():
             EngineClock.singleton().register(a)
-        self.select(select)
+
+        # Select
+        self.current = self.animations[select]
 
     def _load_spritesheet_libresprite(self, conf):
         meta    = conf["meta"]

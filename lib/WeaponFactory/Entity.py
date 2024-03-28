@@ -38,9 +38,11 @@ class Entity(Sprite, Observable):
 
     def select(self):
         self.is_selected = True
+        self.set_animation_state("entity", True)
 
     def unselect(self):
         self.is_selected = False
+        self.set_animation_state("entity", False)
 
     def add_move(self, move):
         self.moves.append(move)

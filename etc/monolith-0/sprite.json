@@ -1,3 +1,6 @@
 {
-    "offset": [0, -23]
+    "animations": [
+        { "offset": [0, 0],   "name": "entity",     "select": "Selected", "enable": false },
+        { "offset": [0, -23], "name": "monolith-0", "select": "Idle",     "enable": true }
+    ]
 }
