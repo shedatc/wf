@@ -9,13 +9,13 @@ from .Config         import Config
 from .EngineClock    import EngineClock
 from .utils          import log_ex
 
-class AnimationManager:
+class AnimationPlayer:
 
     @classmethod
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 
-    def __init__(self, animation_name):
+    def __init__(self, animation_name, select="Idle"):
         self.current    = None
         self.animations = {}
 
@@ -35,7 +35,7 @@ class AnimationManager:
 
         for a in self.animations.values():
             EngineClock.singleton().register(a)
-        self.select("Idle")
+        self.select(select)
 
     def _load_spritesheet_libresprite(self, conf):
         meta    = conf["meta"]
@@ -43,9 +43,9 @@ class AnimationManager:
         version = meta["version"]
         format  = meta["format"]
         image   = meta["image"]
-        AnimationManager.log(f"Application: {app}")
-        AnimationManager.log(f"Version:     {version}")
-        AnimationManager.log(f"Format:      {format}")
+        AnimationPlayer.log(f"Application: {app}")
+        AnimationPlayer.log(f"Version:     {version}")
+        AnimationPlayer.log(f"Format:      {format}")
 
         if version != "1.0":
             raise RuntimeError("Libresprite spritesheet version not supported")
@@ -75,9 +75,9 @@ class AnimationManager:
                                                  duration=frame["duration"])
                 frames.append(animation_frame)
 
-            AnimationManager.log(f"Animation '{name}':")
-            AnimationManager.log(f"    Direction:   {direction}")
-            AnimationManager.log(f"    Frames:      {start}..{end}, {len(frames)} frames")
+            AnimationPlayer.log(f"Animation '{name}':")
+            AnimationPlayer.log(f"    Direction:   {direction}")
+            AnimationPlayer.log(f"    Frames:      {start}..{end}, {len(frames)} frames")
 
             self.animations[name] = Animation(name, frames)
 
@@ -87,17 +87,17 @@ class AnimationManager:
         self.current = self.animations[name]
         self.current.rewind()
         EngineClock.singleton().resume(self.current)
-        AnimationManager.log(f"Selected animation: {name}")
+        AnimationPlayer.log(f"Selected animation: {name}")
 
     def pause(self):
         assert self.current is not None
         EngineClock.singleton().pause(self.current)
-        AnimationManager.log(f"Paused animation: {self.current.name}")
+        AnimationPlayer.log(f"Paused animation: {self.current.name}")
 
     def resume(self):
         assert self.current is not None
         EngineClock.singleton().resume(self.current)
-        AnimationManager.log(f"Resumed animation: {self.current.name}")
+        AnimationPlayer.log(f"Resumed animation: {self.current.name}")
 
     def name(self):
         assert self.current is not None

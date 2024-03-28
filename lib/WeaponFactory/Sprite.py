@@ -1,9 +1,9 @@
 from os.path import join as path_join
 
-from .AnimationManager import AnimationManager
-from .Config           import Config
-from .EngineClock      import EngineClock
-from .utils            import log_ex
+from .AnimationPlayer import AnimationPlayer
+from .Config          import Config
+from .EngineClock     import EngineClock
+from .utils           import log_ex
 
 # A sprite is something that is animated.
 #
@@ -14,7 +14,7 @@ class Sprite:
     def __init__(self, name, position):
         self.name        = f"{name}@{hex(id(self))}"
         self.position    = position
-        self._animations = AnimationManager(name)
+        self._animations = AnimationPlayer(name)
 
         self.offset = (0, 0)
         config      = Config.singleton().load( path_join(name, "sprite.json") )

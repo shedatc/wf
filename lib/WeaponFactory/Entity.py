@@ -1,13 +1,12 @@
 from os.path     import join as path_join
 
-from .Compass    import Compass
-from .Config     import Config
-from .HUD        import HUD
-from .NavPath    import NavPath
-from .Observable import Observable
-from .Physics    import Physics
-from .Sprite     import Sprite
-from .utils      import log_ex
+from .Compass          import Compass
+from .Config           import Config
+from .NavPath          import NavPath
+from .Observable       import Observable
+from .Physics          import Physics
+from .Sprite           import Sprite
+from .utils            import log_ex
 
 # An entity is a sprite that somehow obey the laws of physics.
 #
@@ -115,15 +114,6 @@ class Entity(Sprite, Observable):
             move()
         else:
             self.next_hop()
-
-    def blit(self):
-        self._blit_selection()
-        Sprite.blit(self)
-
-    def _blit_selection(self):
-        if not self.is_selected:
-            return
-        HUD.singleton().blit_selected(self.position)
 
     def blit_nav_path(self, surface):
         raise NotImplementedError()
