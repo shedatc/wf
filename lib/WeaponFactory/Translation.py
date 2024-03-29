@@ -2,7 +2,7 @@ from .Camera      import Camera
 from .EngineClock import EngineClock
 from .Screen      import Screen
 from .Vector      import Vector
-from .const       import DEBUG_TRANSLATION
+from .debug       import DEBUG_TRANSLATION
 from .utils       import log_ex
 
 class Translation:

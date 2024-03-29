@@ -3,11 +3,3 @@ COLOR_BLUE  = (0,   0,   200)
 COLOR_GREEN = (0,   200, 0)
 COLOR_RED   = (200, 0,   0)
 COLOR_WHITE = (255, 255, 255)
-
-DEBUG_BLIT        = False
-DEBUG_REGION      = False
-DEBUG_TILE        = False
-DEBUG_TRANSLATION = False
-
-OBSTACLE = 0
-WALKABLE = 1

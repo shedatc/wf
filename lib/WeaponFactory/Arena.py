@@ -6,8 +6,10 @@ from .Assets  import Assets
 from .Compass import Compass
 from .Config  import Config
 from .Tilemap import Tilemap
-from .const   import OBSTACLE, WALKABLE
 from .utils   import log_ex, sz
+
+OBSTACLE = 0
+WALKABLE = 1
 
 # An arena is the terrain with all its obstacles.
 class Arena:

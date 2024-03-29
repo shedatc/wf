@@ -18,8 +18,8 @@ from .NavBeacon         import NavBeacon
 from .Region            import Region
 from .Screen            import Screen
 from .Square            import Square
-from .const             import COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK
-from .const             import DEBUG_REGION, DEBUG_TILE
+from .colors            import COLOR_RED, COLOR_GREEN, COLOR_BLUE
+from .debug             import DEBUG_REGION, DEBUG_TILE
 from .utils             import log_ex
 
 EV_NAV = pygame.event.custom_type()

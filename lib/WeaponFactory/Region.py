@@ -5,7 +5,8 @@ from .Arena  import Arena
 from .Camera import Camera
 from .Mouse  import Mouse
 from .Screen import Screen
-from .const  import COLOR_RED, COLOR_WHITE, DEBUG_REGION
+from .colors import COLOR_RED, COLOR_WHITE
+from .debug  import DEBUG_REGION
 from .utils  import log_ex
 
 class Region:

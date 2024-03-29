@@ -5,7 +5,8 @@ from pytmx.util_pygame import load_pygame as tmx_load
 
 from .Assets import Assets
 from .Screen import Screen
-from .const  import COLOR_BLACK, DEBUG_BLIT
+from .colors import COLOR_BLACK
+from .debug  import DEBUG_BLIT
 from .utils  import log_ex
 
 DEBUG_PROPERTIES = False # Log setting/getting properties
