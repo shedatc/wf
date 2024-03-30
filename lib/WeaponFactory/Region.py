@@ -75,12 +75,12 @@ class Region:
     def disable(self):
         if not self._is_enabled:
             Region.log("Already disabled")
-            return None
+            return Rect((0, 0), (0, 0))
         rect             = self._rect.copy()
         self._rect       = Rect((0, 0), (0, 0))
         self._is_enabled = False
         Region.log(f"Disabled: rect={rect}")
-        return None
+        return rect
 
     def blit(self):
         if not self._is_enabled:
@@ -101,20 +101,3 @@ class Region:
         screen.screen_draw_rect(COLOR_WHITE,
                                 Rect(tls.topleft, (w, h)),
                                 1)
-
-    # Return the entities that are part of the region.
-    def get_entities(self):
-        raise NotImplementedError()
-        entities = []
-        o        = self.origin()
-        a        = Arena.singleton()
-        for v in range(o.v, o.v + self.rect.height):
-            for u in range(o.u, o.u + self.rect.width):
-                e = a.entities_at_square(u, v)
-                Region.log(f"e={e} len(e)={len(e)}")
-                if len(e) >= 1:
-                    # If at least one entity is on the square, add only the
-                    # first one to handle stacking.
-                    entities.append(e[0])
-        Region.log(f"entities={entities}")
-        return entities
