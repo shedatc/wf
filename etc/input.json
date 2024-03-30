@@ -39,25 +39,25 @@
             },
             "keys": {
                 "pressed": {
-                    "KEY_F1":            "debug_tile_data_from_mouse",
-                    "KEY_F2":            "debug_square_coordinates_from_mouse",
-                    "KEY_Q":             "quit",
-                    "KEY_ESCAPE":        "quit",
-                    "MOUSE_BUTTON_LEFT": "region_enable",
-                    "MOUSE_BUTTON_MIDDLE": "camera_to_mouse",
-                    "KEY_A":             "camera_left",
-                    "KEY_LEFT":          "camera_left",
-                    "KEY_U":             "camera_up",
-                    "KEY_UP":            "camera_up",
-                    "KEY_I":             "camera_down",
-                    "KEY_DOWN":          "camera_down",
-                    "KEY_E":             "camera_right",
-                    "KEY_RIGHT":         "camera_right"
+                    "MOUSE_BUTTON_LEFT":  "region_enable",
+                    "KEY_A":              "camera_left",
+                    "KEY_LEFT":           "camera_left",
+                    "KEY_U":              "camera_up",
+                    "KEY_UP":             "camera_up",
+                    "KEY_I":              "camera_down",
+                    "KEY_DOWN":           "camera_down",
+                    "KEY_E":              "camera_right",
+                    "KEY_RIGHT":          "camera_right"
                 },
                 "released": {
+                    "KEY_F1":             "spawn_location_next",
+                    "KEY_F2":             "spawn_entity_type_next",
+                    "KEY_F3":             "spawn_entity",
+                    "KEY_Q":              "quit",
+                    "KEY_ESCAPE":         "quit",
                     "KEY_O":              "arena_view_toggle",
                     "MOUSE_BUTTON_LEFT":  "region_disable",
-                    "MOUSE_BUTTON_RIGHT": "tactical_move_to_mouse"
+                    "MOUSE_BUTTON_RIGHT": "tactical_translate_to_mouse"
                 }
             }
         }

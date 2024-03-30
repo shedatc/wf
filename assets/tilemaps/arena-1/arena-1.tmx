@@ -386,7 +386,7 @@
 </data>
  </layer>
  <objectgroup id="8" name="Spawn Locations">
-  <object id="2" name="monolith-0" type="Spawn Location" x="301" y="134.5">
+  <object id="2" name="monolith-0" type="Spawn Location" x="299.5" y="150">
    <properties>
     <property name="Hello" value="World!"/>
    </properties>

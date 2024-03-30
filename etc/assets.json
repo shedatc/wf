@@ -1,9 +1,11 @@
 {
     "image": [
-        "assets/images",
-        "assets/animations/monolith-0"
+        "assets/animations/entity",
+        "assets/animations/monolith-0",
+        "assets/images"
     ],
     "animation": [
+        "assets/animations/entity",
         "assets/animations/monolith-0"
     ],
     "tilemap": [

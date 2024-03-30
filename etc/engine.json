@@ -1,15 +1,26 @@
 {
-    "fps": 24,
+    "fps": 60,
     "logs": [
+        "OFF_Animation",
+        "OFF_AnimationFrame",
+        "OFF_AnimationPlayer",
         "Arena",
-        "ArenaView",
-        "Camera",
-        "Compass",
+        "OFF_ArenaView",
+        "OFF_Assets",
+        "OFF_Camera",
+        "OFF_Compass",
         "Engine",
+        "OFF_EngineClock",
         "Entity",
-        "NavBeacon",
-        "NavPath",
+        "EntityFactory",
+        "OFF_Mouse",
+        "OFF_NavBeacon",
+        "OFF_NavPath",
+        "OFF_Physics",
+        "Region",
+        "OFF_Screen",
         "Sprite",
-        "Tilemap"
+        "OFF_Translation",
+        "OFF_Tilemap"
     ]
 }
