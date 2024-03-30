@@ -146,7 +146,7 @@ class Arena:
             raise AssertionError(f"Event not supported: {event}")
 
     def entity_spawned(self, entity, square):
-        Arena.log(f"Entity {entity.name} spawned on {square}")
+        Arena.log(f"Entity {entity.name} spawned at {square}")
 
         (u, v) = (square.u, square.v)
         self.entities_matrix[v][u].append(entity)

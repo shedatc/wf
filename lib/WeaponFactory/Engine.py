@@ -1,6 +1,7 @@
 import pygame
 
-from pygame            import Rect
+from pygame            import init, Rect
+from pygame.display    import flip as display_flip
 from pytmx.util_pygame import load_pygame as tmx_load
 
 if False:
@@ -51,7 +52,7 @@ class Engine:
         else:
             self.profile = None
 
-        pygame.init()
+        init()
         Screen()
 
         Mouse.set_visible(False)
@@ -155,13 +156,15 @@ class Engine:
         ih.addFunc("region_disable", region_disable)
 
         # Spawning entities
-        a = Arena.singleton()
-        self._spawn_locations = ["Mouse"]+ list(a.spawn_locations().keys())
+        a                            = Arena.singleton()
+        self._spawn_locations        = ["Mouse"]+ list(a.spawn_locations().keys())
         self._current_spawn_location = 0
+
         def spawn_location_next():
             self._current_spawn_location = (self._current_spawn_location + 1) \
                 % len(self._spawn_locations)
         ih.addFunc("spawn_location_next", spawn_location_next)
+
         self._current_entity_type = 0
         self._entity_types = [
             "monolith-0",
@@ -169,18 +172,21 @@ class Engine:
             "monolith-2",
             "monolith-3",
         ]
+
         def spawn_entity_type_next():
             self._current_entity_type = (self._current_entity_type + 1) \
                 % len(self._entity_types)
         ih.addFunc("spawn_entity_type_next", spawn_entity_type_next)
+
         def spawn_entity():
             t = self._entity_types[self._current_entity_type]
             l = self._spawn_locations[self._current_spawn_location]
             if l == "Mouse":
                 p = Mouse.world_point()
+                Engine.log(f"Spawning entity at mouse: {p}")
             else:
                 p = Arena.singleton().spawn_location(l)
-            Engine.log(f"Spawning entity at location '{l}'")
+                Engine.log(f"Spawning entity at location '{l}': {p}")
             e = EntityFactory.spawn(t, p)
             self.select(e)
             # monolith.register_observer(a)
@@ -346,4 +352,4 @@ class Engine:
             self.blit()
             EngineClock.singleton().tick()
             self._blit_debug()
-            pygame.display.flip()
+            display_flip()
