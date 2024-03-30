@@ -78,5 +78,6 @@ class EngineClock:
             if task.is_done():
                 self.pause(task)
             c += 1
-        EngineClock.log(f"Added {t} ms to {c} tasks")
+        if c > 0:
+            EngineClock.log(f"Added {t} ms to {c} tasks")
         return t
