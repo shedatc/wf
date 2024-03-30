@@ -67,6 +67,10 @@ class Arena:
         self.rect         = Rect((0, 0), self._tm.rect.size) # squares
         self.surface_rect = self._tm.surface_rect            # pixels
 
+        self._spawn_locations = {}
+        if "Spawn Location" in self._tm.locations:
+            self._fetch_spawn_locations(self._tm.locations["Spawn Location"])
+
         Arena.log(f"Arena '{self.name}':")
         Arena.log(f"    Rectangle:    {sz(self.rect.size)} squares")
         Arena.log(f"    Square Size:  {sz(self.square_size)} pixels")
@@ -105,21 +109,25 @@ class Arena:
             for x in range(self.rect.width):
                 self.entities_matrix[y][x] = []
         self.log_entities_matrix()
+
     def is_obstacle(self, square):
         (x, y) = square
         return self.obstacles_matrix[y][x] == OBSTACLE
 
+    # Return the point in world coordinates corresponding to the center of the
+    # given square.
     def point(self, square):
-        raise NotImplementedError()
+        (x, y)                        = square
         (square_width, square_height) = self.square_size
-        return Point(square.u * square_width  + square_width  // 2,
-                     square.v * square_height + square_height // 2)
+        return (x * square_width  + square_width  // 2,
+                y * square_height + square_height // 2)
 
     # Return the square to which the point belong.
     def square(self, world_point):
-        (x, y) = world_point
-        (w, h) = self.square_size
-        return (x // w, y // h)
+        (x, y)   = world_point
+        (w, h)   = self.square_size
+        (sx, sy) = (int(x // w), int(y // h))
+        return (sx, sy)
 
     # Return the rectangle corresponding to the square to which the point
     # belong. The point must be in world coordinates. The returned rectangle is
@@ -178,11 +186,16 @@ class Arena:
         (x, y) = square
         return self._tm.get_tile_properties(x, y)
 
+    def _fetch_spawn_locations(self, locations):
+        for name, world_point in locations.items():
+            # Normalize the coordinates: they must be at the center of a square.
+            orig_world_point            = world_point
+            world_point                 = self.point( self.square(orig_world_point) )
+            self._spawn_locations[name] = world_point
+            Arena.log(f"Spawn Location '{name}': {orig_world_point} → {world_point}")
+
     def spawn_locations(self):
-        try:
-            return self._tm.locations['Spawn Location']
-        except KeyError:
-            return []
+        return self._spawn_locations
 
     def spawn_location(self, name):
         try:
