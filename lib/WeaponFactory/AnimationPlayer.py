@@ -18,6 +18,7 @@ class AnimationPlayer:
     def __init__(self, animation_name, select="Idle"):
         self.current    = None
         self.animations = {}
+        self.visible    = False
 
         path = Assets.locate("animation", f"{animation_name}.json")
         with open(path, "r") as cf:
@@ -83,6 +84,12 @@ class AnimationPlayer:
 
             self.animations[name] = Animation(name, frames)
 
+    def show(self):
+        self.visible = True
+
+    def hide(self):
+        self.visible = False
+
     def select(self, name):
         if self.current is not None:
             EngineClock.singleton().pause(self.current)
@@ -109,10 +116,6 @@ class AnimationPlayer:
     def blit_current_at(self, position):
         if self.current is None:
             return
+        if not self.visible:
+            return
         self.current.blit_at(position)
-
-        if False:
-            if Config.singleton().must_log("Animation"):
-                # FIXME
-                # pyxel.text(x + 20, y + 1, f"A: {self.current.name}", 0)
-                raise NotImplementedError("Must replace pyxel.text")

@@ -30,6 +30,7 @@ class Sprite:
             animation_player = AnimationPlayer(name, select=select)
             if enable:
                 animation_player.resume()
+                animation_player.show()
                 e = "enabled"
             else:
                 e = "disabled"
@@ -56,6 +57,13 @@ class Sprite:
 
     def set_animation_state(self, name, enable):
         self._animations[name]["enable"] = enable
+        player = self._animations[name]["animation_player"]
+        if enable:
+            player.resume()
+            player.show()
+        else:
+            player.pause()
+            player.hide()
 
     def blit_debug_overlay(self):
         if not Config.singleton().must_log("Sprite"):
