@@ -52,7 +52,7 @@ class AnimationPlayer:
 
         if version != "1.0":
             raise RuntimeError("Libresprite spritesheet version not supported")
-        if format != "I8":
+        if format not in ["I8", "RGBA8888"]:
             raise RuntimeError("Libresprite spritesheet format not supported")
 
         # Ignore all but the filename from the image path

@@ -1,18 +1,12 @@
 {
     "image": [
-        "assets/animations/entity",
-        "assets/animations/monolith-0",
+        "assets/animations",
         "assets/images"
     ],
     "animation": [
-        "assets/animations/entity",
-        "assets/animations/monolith-0"
+        "assets/animations"
     ],
     "tilemap": [
-        "assets/tilemaps/arena-0",
-        "assets/tilemaps/arena-1",
-        "assets/tilemaps/chessboard",
-        "assets/tilemaps/debug",
-        "assets/tilemaps/sandbox"
+        "assets/tilemaps/"
     ]
 }

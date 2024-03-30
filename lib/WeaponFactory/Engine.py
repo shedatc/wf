@@ -11,6 +11,7 @@ from .ArenaView         import ArenaView
 from .Assets            import Assets
 from .Camera            import Camera
 from .Compass           import Compass
+from .Config            import Config
 from .EngineClock       import EngineClock
 from .EntityFactory     import EntityFactory
 from .ModalInputHandler import ModalInputHandler
@@ -165,13 +166,13 @@ class Engine:
                 % len(self._spawn_locations)
         ih.addFunc("spawn_location_next", spawn_location_next)
 
+        game_config     = Config.singleton().load("game.json")
+        players         = game_config["players"]
+        player0_faction = players["player-0"]["faction"]
+        faction         = game_config["factions"][player0_faction]
+
         self._current_entity_type = 0
-        self._entity_types = [
-            "monolith-0",
-            "monolith-1",
-            "monolith-2",
-            "monolith-3",
-        ]
+        self._entity_types        = faction["entities"]
 
         def spawn_entity_type_next():
             self._current_entity_type = (self._current_entity_type + 1) \

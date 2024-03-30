@@ -35,10 +35,11 @@ class Assets:
 
     @classmethod
     def locate(cls, asset_type, file_name):
-        rt_dirs = Config.singleton().get("assets.json", asset_type)
-        if rt_dirs is None:
+        Assets.log(f"Looking for {asset_type}: {file_name}")
+        asset_dirs = Config.singleton().get("assets.json", asset_type)
+        if asset_dirs is None:
             raise RuntimeError(f"Invalid asset type: {asset_type}")
-        for d in rt_dirs:
+        for d in asset_dirs:
             if d[0] == "/":
                 path = path_join(d, file_name)
             else:
@@ -46,8 +47,8 @@ class Assets:
             if path_exists(path):
                 return path
         else:
-            Assets.log(f'Assets Base Directory: {Assets._dir()}')
-            Assets.log(f'{asset_type} Directories: {rt_dirs}')
+            Assets.log(f"Assets Base Directory: {Assets._dir()}")
+            Assets.log(f"{asset_type} Directories: {asset_dirs}")
             raise RuntimeError(f"Missing {asset_type} asset: {file_name}")
 
     def __init__(self):

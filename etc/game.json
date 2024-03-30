@@ -1,0 +1,20 @@
+{
+    "players": {
+        "player-0": {
+            "faction": "foo"
+        }
+    },
+    "factions": {
+        "foo": {
+            "entities": [
+                "monolith-0",
+                "monolith-1",
+                "monolith-2",
+                "monolith-3",
+                "monolith-4",
+                "monolith-5",
+                "monolith-6"
+            ]
+        }
+    }
+}
