@@ -51,7 +51,7 @@ class Region:
         mouse_point      = Mouse.screen_point()
         self._anchor     = mouse_point
         self._cursor     = mouse_point
-        self._rect       = Rect(self._anchor, (0, 0))
+        self._rect       = Rect(self._anchor, (1, 1))
         self._is_enabled = True
         Region.log(f"Enabled: anchor={self._anchor} cursor={self._cursor} rect={self._rect}")
 

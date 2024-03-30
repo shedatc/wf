@@ -141,10 +141,12 @@ class Arena:
     # Return the rectangle in squares, correponding to the given rectangle in
     # world coordinates.
     def world_squares(self, world_rect):
+        assert world_rect.width > 0
+        assert world_rect.height > 0
         topleft                       = self.square(world_rect.topleft)
         (square_width, square_height) = self.square_size
-        w                             = world_rect.width  // square_width
-        h                             = world_rect.height // square_height
+        w                             = 1 + world_rect.width  // square_width
+        h                             = 1 + world_rect.height  // square_height
         return Rect(topleft, (w, h))
 
     def entities(self, world_rect):
@@ -157,13 +159,6 @@ class Arena:
         Arena.log(f"Rect:     {world_rect} → {rect}")
         Arena.log(f"Entities: {entities}")
         return entities
-
-    def entities_at_square(self, u, v):
-        raise NotImplementedError()
-        try:
-            return self.entities_matrix[v][u]
-        except IndexError:
-            return []
 
     def notify(self, event, observable, **kwargs):
         if event == "entity-spawned":

@@ -148,12 +148,11 @@ class Engine:
         ih.addFunc("region_enable", region_enable)
         def region_disable():
             screen_rect = Region.singleton().disable()
+            self.clear_selection()
             if screen_rect:
                 world_rect = Camera.singleton().world_rect(screen_rect)
                 for entity in Arena.singleton().entities(world_rect):
                     self.select(entity)
-            else:
-                self.clear_selection()
         ih.addFunc("region_disable", region_disable)
 
         # Spawning entities
