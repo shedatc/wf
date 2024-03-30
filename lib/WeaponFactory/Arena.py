@@ -138,6 +138,26 @@ class Arena:
         return Rect((x * w, y * h),
                     self.square_size)
 
+    # Return the rectangle in squares, correponding to the given rectangle in
+    # world coordinates.
+    def world_squares(self, world_rect):
+        topleft                       = self.square(world_rect.topleft)
+        (square_width, square_height) = self.square_size
+        w                             = world_rect.width  // square_width
+        h                             = world_rect.height // square_height
+        return Rect(topleft, (w, h))
+
+    def entities(self, world_rect):
+        rect     = self.world_squares(world_rect)
+        entities = []
+        for y in range(rect.y, rect.y + rect.height):
+            for x in range(rect.x, rect.x + rect.width):
+                assert type(self.entities_matrix[y][x]) is list
+                entities += self.entities_matrix[y][x]
+        Arena.log(f"Rect:     {world_rect} → {rect}")
+        Arena.log(f"Entities: {entities}")
+        return entities
+
     def entities_at_square(self, u, v):
         raise NotImplementedError()
         try:
@@ -156,29 +176,32 @@ class Arena:
     def entity_spawned(self, entity, square):
         Arena.log(f"Entity {entity.name} spawned at {square}")
 
-        (u, v) = (square.u, square.v)
-        self.entities_matrix[v][u].append(entity)
-        self.obstacles_matrix[v][u] = OBSTACLE
-        Compass.singleton().set_obstacle(square)
+        (x, y) = square
+        self.entities_matrix[y][x].append(entity)
+        self.obstacles_matrix[y][x] = OBSTACLE
+        if False:
+            Compass.singleton().set_obstacle(square)
         Arena.log(f"Obstacle at square {square}")
         self.log_entities_matrix()
 
     def entity_moved(self, entity, old_square, new_square):
         Arena.log(f"Entity {entity.name} moved from {old_square} to {new_square}")
 
-        (ou, ov) = (old_square.u, old_square.v)
-        self.entities_matrix[ov][ou].remove(entity)
-        if (len(self.entities_matrix[ov][ou]) == 0):
-            self.obstacles_matrix[ov][ou] = WALKABLE
-            Compass.singleton().set_walkable(old_square)
+        (ox, oy) = old_square
+        self.entities_matrix[oy][ox].remove(entity)
+        if (len(self.entities_matrix[oy][ox]) == 0):
+            self.obstacles_matrix[oy][ox] = WALKABLE
+            if False:
+                Compass.singleton().set_walkable(old_square)
             Arena.log(f"No more obstacle at square {old_square}")
 
-        (nu, nv) = (new_square.u, new_square.v)
-        self.entities_matrix[nv][nu].append(entity)
-        assert len(self.entities_matrix[nv][nu]) == 1, "Stacking not allowed for now"
+        (nx, ny) = new_square
+        self.entities_matrix[ny][nx].append(entity)
+        assert len(self.entities_matrix[ny][nx]) == 1, "Stacking not allowed for now"
 
-        self.obstacles_matrix[nv][nu] = OBSTACLE
-        Compass.singleton().set_obstacle(new_square)
+        self.obstacles_matrix[ny][nx] = OBSTACLE
+        if False:
+            Compass.singleton().set_obstacle(new_square)
         Arena.log(f"Obstacle at square {new_square}")
         self.log_entities_matrix()
 

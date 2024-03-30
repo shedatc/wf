@@ -147,12 +147,13 @@ class Engine:
             Region.singleton().enable()
         ih.addFunc("region_enable", region_enable)
         def region_disable():
-            entities = Region.singleton().disable()
-            if entities is None:
-                self.clear_selection()
-            else:
-                for entity in entities:
+            screen_rect = Region.singleton().disable()
+            if screen_rect:
+                world_rect = Camera.singleton().world_rect(screen_rect)
+                for entity in Arena.singleton().entities(world_rect):
                     self.select(entity)
+            else:
+                self.clear_selection()
         ih.addFunc("region_disable", region_disable)
 
         # Spawning entities
@@ -189,8 +190,8 @@ class Engine:
                 Engine.log(f"Spawning entity at location '{l}': {p}")
             e = EntityFactory.spawn(t, p)
             self.select(e)
-            # monolith.register_observer(a)
-            # monolith.notify_observers("entity-spawned", square=s)
+            e.register_observer(a)
+            e.notify_observers("entity-spawned", square=a.square(p))
             self.entities.append(e)
         ih.addFunc("spawn_entity", spawn_entity)
 
@@ -285,12 +286,13 @@ class Engine:
     def _blit_debug_mouse_coordinates(self):
         a                 = Arena.singleton()
         mouse_position    = Mouse.world_point()
+        mouse_square      = a.square(mouse_position)
         mouse_square_rect = a.square_rect(mouse_position)
         text = " ".join([
             f"MOUSE:",
             f"screen: {Mouse.screen_point()}",
             f"world: {mouse_position}",
-            f"square: {mouse_square_rect}",
+            f"square: {mouse_square} {mouse_square_rect}",
         ])
         Screen.singleton().text(text, (0, 0))
 
