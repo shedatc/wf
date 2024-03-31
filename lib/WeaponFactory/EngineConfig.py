@@ -5,3 +5,4 @@ class EngineConfig:
 
     def __init__(self):
         self.action = EXIT_ENGINE
+        self.arena  = None

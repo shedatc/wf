@@ -28,6 +28,7 @@ class MainMenu:
     def play(self):
         MainMenu.log(f"PLAY")
         self.engine_config.action = START_GAME
+        self.engine_config.arena  = "arena-1"
         self.menu.disable()
 
     def exit(self):

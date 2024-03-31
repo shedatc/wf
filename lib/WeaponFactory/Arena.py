@@ -58,12 +58,11 @@ class Arena:
     def blit(self, source_rect):
         self._tm.blit(source_rect)
 
-    def __init__(self):
+    def __init__(self, name):
         assert Arena._singleton is None
         Arena._singleton = self
 
-        config    = Config.singleton().load("arena.json")
-        self.name = config["name"]
+        self.name = name
 
         # Tilemap
         self._tm          = Tilemap(self.name)

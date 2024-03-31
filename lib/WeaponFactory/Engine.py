@@ -81,7 +81,7 @@ class Engine:
         Compass.delete_singleton()
         EngineClock.delete_singleton()
 
-    def init(self):
+    def init(self, config):
         Engine.log(f"Initializing game…")
         self.reset_state()
 
@@ -91,7 +91,7 @@ class Engine:
         self.entities          = []
         self.selected_entities = []
         self.debug_data        = None
-        self.init_arena()
+        self.init_arena(config.arena)
         self.init_scene()
         self.init_input()
 
@@ -225,8 +225,8 @@ class Engine:
         entity.select()
         self.selected_entities.append(entity)
 
-    def init_arena(self):
-        a = Arena()
+    def init_arena(self, name):
+        a = Arena(name)
         Camera(a.surface_rect, a.square_size)
         # Compass(a.obstacles_matrix)
 
@@ -347,7 +347,7 @@ class Engine:
                 Engine.log(f"Game cancelled")
                 continue
 
-            self.init()
+            self.init(config)
 
             Engine.log(f"Running game…")
             self.is_running = True
