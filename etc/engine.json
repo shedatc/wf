@@ -1,4 +1,8 @@
 {
+    "arena_list": [
+        { "name": "arena-0", "label": "Arena 0" },
+        { "name": "arena-1", "label": "Arena 1" }
+    ],
     "fps": 60,
     "logs": [
         "OFF_Animation",
@@ -13,6 +17,7 @@
         "OFF_EngineClock",
         "Entity",
         "EntityFactory",
+        "MainMenu",
         "OFF_Mouse",
         "OFF_NavBeacon",
         "OFF_NavPath",
