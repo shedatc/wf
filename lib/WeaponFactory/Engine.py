@@ -1,8 +1,8 @@
-import pygame
-
-from pygame            import init, Rect
-from pygame.display    import flip as display_flip
-from pytmx.util_pygame import load_pygame as tmx_load
+from pygame             import Rect
+from pygame             import init as pygame_init
+from pygame.display     import flip as display_flip
+from pygame.event       import custom_type as custom_event_type
+from pytmx.util_pygame  import load_pygame as tmx_load
 
 if False:
     from .Drone          import Drone
@@ -24,7 +24,7 @@ from .colors            import COLOR_RED, COLOR_GREEN, COLOR_BLUE
 from .debug             import DEBUG_REGION, DEBUG_TILE
 from .utils             import log_ex
 
-EV_NAV = pygame.event.custom_type()
+EV_NAV = custom_event_type()
 
 class Engine:
 
@@ -53,7 +53,7 @@ class Engine:
         else:
             self.profile = None
 
-        init()
+        pygame_init()
         Screen()
 
         Mouse.set_visible(False)
@@ -152,6 +152,7 @@ class Engine:
             self.clear_selection()
             if screen_rect:
                 world_rect = Camera.singleton().world_rect(screen_rect)
+                Engine.log(f"Selecting entities in {world_rect}")
                 for entity in Arena.singleton().entities(world_rect):
                     self.select(entity)
         ih.addFunc("region_disable", region_disable)
@@ -166,6 +167,7 @@ class Engine:
                 % len(self._spawn_locations)
         ih.addFunc("spawn_location_next", spawn_location_next)
 
+        # FIXME
         game_config     = Config.singleton().load("game.json")
         players         = game_config["players"]
         player0_faction = players["player-0"]["faction"]
@@ -200,6 +202,7 @@ class Engine:
         self.input_handler = ih
 
     def clear_selection(self):
+        Engine.log(f"Clearing selection…")
         for entity in self.selected_entities:
             entity.unselect()
         self.selected_entities = []
@@ -240,37 +243,10 @@ class Engine:
         c  = Camera.singleton()
         av = ArenaView.singleton()
         av.blit(c.rect)
-        if av.is_tactical:
-            self._blit_scene_tactical()
-        else:
-            self._blit_scene_strategic()
         self.input_handler.blit()
 
     def _blit_scene_strategic(self):
-        pass
-
-    def _blit_scene_tactical(self):
-        a        = Arena.singleton()
-        c        = Camera.singleton()
-        (cx, cy) = c.rect.topleft
-        entities = []
-        if True:
-            entities = self.entities
-        else:
-            for v in range(c.v, c.v + c.height - 1):
-                for u in range(c.u, c.u + c.width - 1):
-                    entities.extend( a.entities_at_square(u, v) )
-
-        # Engine.log(f"len(entities)={len(entities)}")
-        if False:
-            for e in entities:
-                e.blit_nav_path(surface)
-        if False:
-            for e in entities:
-                e.blit_selection(surface)
-        if False:
-            for e in entities:
-                e.blit_debug()
+        raise NotImplementedError()
 
     def _blit_debug(self):
         if DEBUG_TILE:
