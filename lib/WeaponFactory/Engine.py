@@ -14,6 +14,7 @@ from .Compass           import Compass
 from .Config            import Config
 from .EngineClock       import EngineClock
 from .EntityFactory     import EntityFactory
+from .MainMenu          import EXIT_ENGINE, MainMenu, START_GAME
 from .ModalInputHandler import ModalInputHandler
 from .Mouse             import Mouse
 from .NavBeacon         import NavBeacon
@@ -55,18 +56,11 @@ class Engine:
 
         pygame_init()
         Screen()
+        self.main_menu = MainMenu()
 
-        Mouse.set_visible(False)
-        Mouse.center()
-
-        self.entities          = []
-        self.selected_entities = []
-        self.debug_data        = None
-        self.init_arena()
-        self.init_scene()
-        self.init_input()
-
-        Engine.log("Ready")
+    def configure(self):
+        Engine.log(f"Configuring…")
+        return self.main_menu.run()
 
     def quit(self):
         if self.profile is not None:
@@ -80,6 +74,26 @@ class Engine:
             with open("wf.pstats", "w") as f:
                 f.write(s.getvalue())
         self.is_running = False
+
+    def reset_state(self):
+        Arena.delete_singleton()
+        ArenaView.delete_singleton()
+        Compass.delete_singleton()
+        EngineClock.delete_singleton()
+
+    def init(self):
+        Engine.log(f"Initializing game…")
+        self.reset_state()
+
+        Mouse.set_visible(False)
+        Mouse.center()
+
+        self.entities          = []
+        self.selected_entities = []
+        self.debug_data        = None
+        self.init_arena()
+        self.init_scene()
+        self.init_input()
 
     def init_input(self):
         ih = ModalInputHandler()
@@ -324,10 +338,24 @@ class Engine:
         Screen.singleton().text(f"SPAWN: Location: {l} Type: {t}", (0, h))
 
     def run(self):
-        self.is_running = True
-        while self.is_running:
-            self.update()
-            self.blit()
-            EngineClock.singleton().tick()
-            self._blit_debug()
-            display_flip()
+        while True:
+            config = self.configure()
+            if config.action == EXIT_ENGINE:
+                Engine.log(f"Exit engine")
+                break
+            elif config.action != START_GAME:
+                Engine.log(f"Game cancelled")
+                continue
+
+            self.init()
+
+            Engine.log(f"Running game…")
+            self.is_running = True
+            while self.is_running:
+                self.update()
+                self.blit()
+                EngineClock.singleton().tick()
+                self._blit_debug()
+                display_flip()
+            Engine.log(f"Game Over")
+

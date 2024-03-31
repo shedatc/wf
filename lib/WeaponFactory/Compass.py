@@ -15,6 +15,10 @@ class Compass:
         return cls._singleton
 
     @classmethod
+    def delete_singleton(cls):
+        cls._singleton = None
+
+    @classmethod
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 

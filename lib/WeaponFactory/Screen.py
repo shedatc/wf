@@ -28,9 +28,9 @@ class Screen:
         size    = (config["width"], config["height"])
         caption = config["caption"]
 
-        self._surface = set_mode(size, FULLSCREEN|SCALED)
-        rect          = self._surface.get_rect()
-        self.size     = rect.size
+        self.surface = set_mode(size, FULLSCREEN|SCALED)
+        rect         = self.surface.get_rect()
+        self.size    = rect.size
         if caption is not None:
             set_caption(caption)
         self._font = Font(None, 15)
@@ -41,7 +41,7 @@ class Screen:
         Screen._singleton = self
 
     def reset(self):
-        self._surface.fill(COLOR_BLACK)
+        self.surface.fill(COLOR_BLACK)
 
     def screen_blit(self, source_surface, screen_point, source_rect=None):
         if DEBUG_BLIT:
@@ -49,7 +49,7 @@ class Screen:
                 Screen.log(f"Blit {source_surface} to screen at {screen_point}")
             else:
                 Screen.log(f"Blit {source_rect} from {source_surface} to screen at {screen_point}")
-        self._surface.blit(source_surface, screen_point, area=source_rect)
+        self.surface.blit(source_surface, screen_point, area=source_rect)
 
     def blit(self, source_surface, world_point, source_rect=None):
         screen_point = Camera.singleton().screen_point(world_point)
@@ -60,15 +60,15 @@ class Screen:
             else:
                 Screen.log(f"Blit {source_rect} from {source_surface} to screen" \
                            + f" at {world_point} → {screen_point}")
-        self._surface.blit(source_surface, screen_point, area=source_rect)
+        self.surface.blit(source_surface, screen_point, area=source_rect)
 
     def screen_draw_rect(self, color, screen_rect, width=0):
-        draw_rect(self._surface, color, screen_rect, width=width)
+        draw_rect(self.surface, color, screen_rect, width=width)
 
     def draw_rect(self, color, world_rect, width=0):
         screen_rect        = world_rect.copy()
         screen_rect.center = Camera.singleton().screen_point(world_rect.center),
-        draw_rect(self._surface, color, screen_rect, width=width)
+        draw_rect(self.surface, color, screen_rect, width=width)
 
     def text(self, text, screen_point):
         text_surf = self._font.render(text,
