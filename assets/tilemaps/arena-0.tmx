@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="240" height="98" tilewidth="8" tileheight="8" infinite="0" nextlayerid="14" nextobjectid="1">
  <tileset firstgid="1" source="tileset-0.tsx"/>
- <tileset firstgid="1025" source="../arena-1/tileset-1.tsx"/>
+ <tileset firstgid="1025" source="tileset-1.tsx"/>
  <layer id="2" name="Underground" width="240" height="98">
   <properties>
    <property name="is_obstacle" type="bool" value="true"/>
