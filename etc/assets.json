@@ -8,5 +8,8 @@
     ],
     "tilemap": [
         "assets/tilemaps/"
+    ],
+    "font": [
+        "assets/fonts/"
     ]
 }
