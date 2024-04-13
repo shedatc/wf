@@ -18,8 +18,14 @@ class Entity(Sprite, Observable):
         Sprite.__init__(self, name, position)
         Observable.__init__(self)
 
-        speed  = 0.0
+        orig_angle    = 0.0
+        angular_speed = 0.0
+        speed         = 0.0
         config = Config.singleton().load( path_join(name, "entity.json") )
+        if "orig_angle" in config:
+            orig_angle = config["orig_angle"]
+        if "angular_speed" in config:
+            angular_speed = config["angular_speed"]
         if "speed" in config:
             speed = config["speed"]
 
@@ -28,9 +34,11 @@ class Entity(Sprite, Observable):
         if False:
             self.nav_path     = NavPath(self)
 
-        self._physics = Physics(self, speed=speed)
 
         self.moves       = []
+        self._physics    = Physics(self,
+                                   speed=speed,
+                                   orig_angle=orig_angle, angular_speed=angular_speed)
         self.is_selected = False
 
     def log(self, msg):
@@ -51,8 +59,7 @@ class Entity(Sprite, Observable):
         self.moves.clear()
 
     def is_moving(self):
-        raise NotImplementedError()
-        return self.physics.target_position() is not None
+        return self._physics.is_translating()
 
     def look_at(self, hop):
         raise NotImplementedError()
@@ -117,11 +124,14 @@ class Entity(Sprite, Observable):
         else:
             self.next_hop()
 
+    def blit(self):
+        self.blit_debug()
+        Sprite.blit(self)
+
     def blit_nav_path(self, surface):
         raise NotImplementedError()
         if Config.singleton().must_log("NavPath"):
             self.nav_path.blit(surface)
 
     def blit_debug(self):
-        if Config.singleton().must_log("Physics"):
-            self._physics.blit_debug()
+        self._physics.blit_debug()
