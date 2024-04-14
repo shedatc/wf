@@ -17,17 +17,23 @@ class Physics:
     def orientation(self):
         return self._rotation.current_angle
 
-    def look_at(self, point):
-        self._rotation.look_at(point)
-
     def target_position(self):
         return self._translation.target_position
 
-    def is_translating(self):
-       return not self._translation.is_done()
+    def look_at(self, point):
+        self._rotation.look_at(point)
 
     def move_to(self, position):
         self._translation.move_to(position)
+
+    def is_translating(self):
+        return not self._translation.is_done()
+
+    def is_rotating(self):
+        return not self._rotation.is_done()
+
+    def is_done(self):
+        return self._translation.is_done() and self._rotation.is_done()
 
     def blit_debug(self):
         if not Config.singleton().must_log("Physics"):

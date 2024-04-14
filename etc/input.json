@@ -57,7 +57,7 @@
                     "KEY_ESCAPE":         "quit",
                     "KEY_O":              "arena_view_toggle",
                     "MOUSE_BUTTON_LEFT":  "region_disable",
-                    "MOUSE_BUTTON_RIGHT": "tactical_translate_to_mouse"
+                    "MOUSE_BUTTON_RIGHT": "tactical_navigate_to_mouse"
                 }
             }
         }

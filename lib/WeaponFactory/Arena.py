@@ -132,6 +132,14 @@ class Arena:
         (sx, sy) = (int(x // w), int(y // h))
         return (sx, sy)
 
+    # Convert a list of squares (in world coordinates) into a list of points
+    # (in world coordinates too).
+    def positions(self, world_squares):
+        ps = []
+        for s in world_squares:
+            ps.append( self.point(s) )
+        return ps
+
     # Return the rectangle corresponding to the square to which the point
     # belong. The point must be in world coordinates. The returned rectangle is
     # also in world coordinates.
@@ -167,7 +175,7 @@ class Arena:
         if event == "entity-spawned":
             self.entity_spawned(observable, kwargs["square"])
         elif event == "entity-moved":
-            self.entity_moved(observable, kwargs["old_square"], kwargs["new_square"])
+            self.entity_moved(observable, kwargs["old_position"], kwargs["new_position"])
         else:
             raise AssertionError(f"Event not supported: {event}")
 
@@ -177,13 +185,17 @@ class Arena:
         (x, y) = square
         self.entities_matrix[y][x].append(entity)
         self.obstacles_matrix[y][x] = OBSTACLE
-        if False:
-            Compass.singleton().set_obstacle(square)
+        Compass.singleton().set_obstacle(square)
         Arena.log(f"Obstacle at square {square}")
         self.log_entities_matrix()
 
-    def entity_moved(self, entity, old_square, new_square):
-        Arena.log(f"Entity {entity.name} moved from {old_square} to {new_square}")
+    def entity_moved(self, entity, old_position, new_position):
+        Arena.log(f"Entity {entity.name} moved from {old_position} to {new_position}")
+
+        old_square = self.square(old_position)
+        new_square = self.square(new_position)
+        if old_square == new_square:
+            return
 
         (ox, oy) = old_square
         self.entities_matrix[oy][ox].remove(entity)
@@ -198,8 +210,7 @@ class Arena:
         assert len(self.entities_matrix[ny][nx]) == 1, "Stacking not allowed for now"
 
         self.obstacles_matrix[ny][nx] = OBSTACLE
-        if False:
-            Compass.singleton().set_obstacle(new_square)
+        Compass.singleton().set_obstacle(new_square)
         Arena.log(f"Obstacle at square {new_square}")
         self.log_entities_matrix()
 

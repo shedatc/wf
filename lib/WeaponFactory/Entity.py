@@ -1,12 +1,13 @@
-from os.path     import join as path_join
+from os.path import join as path_join
 
-from .Compass          import Compass
-from .Config           import Config
-from .NavPath          import NavPath
-from .Observable       import Observable
-from .Physics          import Physics
-from .Sprite           import Sprite
-from .utils            import log_ex
+from .Arena      import Arena
+from .Compass    import Compass
+from .Config     import Config
+from .NavPath    import NavPath
+from .Observable import Observable
+from .Physics    import Physics
+from .Sprite     import Sprite
+from .utils      import log_ex
 
 # An entity is a sprite that somehow obey the laws of physics.
 #
@@ -31,15 +32,15 @@ class Entity(Sprite, Observable):
 
         self.log(f"Speed: {speed} px/ms")
 
-        if False:
-            self.nav_path     = NavPath(self)
-
-
-        self.moves       = []
+        self._nav_path   = NavPath(self)
         self._physics    = Physics(self,
                                    speed=speed,
                                    orig_angle=orig_angle, angular_speed=angular_speed)
+        self._moves      = []
         self.is_selected = False
+
+    def target_position(self):
+        return self._physics.target_position()
 
     def log(self, msg):
         log_ex(msg, category="Entity", name=self.name)
@@ -52,74 +53,63 @@ class Entity(Sprite, Observable):
         self.is_selected = False
         self.set_animation_state("entity", False)
 
-    def add_move(self, move):
-        self.moves.append(move)
-
-    def clear_moves(self):
-        self.moves.clear()
-
     def is_moving(self):
         return self._physics.is_translating()
 
-    def look_at(self, hop):
-        raise NotImplementedError()
+    # Queue a rotation aiming to look at the given world point (hop) .
+    def _look_at(self, world_point):
         def look_at_hop():
-            self.physics.look_at(hop.point())
-        self.add_move(look_at_hop)
+            self._physics.look_at(world_point)
+        self._moves.append(look_at_hop)
 
-    def move_to(self, hop):
-        raise NotImplementedError()
-        def move_to_hop():
-            p = hop.point()
-            if Compass.singleton().is_obstacle(hop):
-                Entity.log(self, f"move_to_hop: Cannot move, obstacle at target hop {hop}")
-            else:
-                self.physics.move_to(p)
-                self.notify_observers("entity-moved",
-                                      old_square=self.square(), new_square=hop)
-        self.add_move(move_to_hop)
+    # Queue a straight line move to the given world point (hop) .
+    def _jump_to(self, world_point):
+        world_square = Arena.singleton().square(world_point)
+        def jump_to_hop():
+            if Compass.singleton().is_obstacle(world_square):
+                Entity.log(self, f"jump_to_hop: Cannot jump, obstacle at target square {world_square}")
+                return
+            self._physics.move_to(world_point)
+            self.notify_observers("entity-moved",
+                                  old_position=self.position, new_position=world_point)
+        self._moves.append(jump_to_hop)
 
     def is_idle(self):
-        raise NotImplementedError()
-        return self.physics.is_done() and len(self.moves) == 0
+        return self._physics.is_done() and self._moves == []
 
     def stop(self):
-        raise NotImplementedError()
         Entity.log(self, "stop")
-        self.clear_moves()
-        self.nav_path.clear()
+        self._moves.clear()
+        self._nav_path.clear()
 
+    # hops must be a list of positions in world coordinates.
     def navigate(self, hops):
-        raise NotImplementedError()
         assert len(hops) >= 1
         Entity.log(self, "navigate")
-        self.clear_moves()
-        self.nav_path.set(hops)
-        self.look_at(self.nav_path.hop)
-        self.move_to(self.nav_path.hop)
-        self.show()
+        self._moves.clear()
+        self._nav_path.set(hops)
+        self._look_at(self._nav_path.hop)
+        self._jump_to(self._nav_path.hop)
 
     def next_hop(self):
-        raise NotImplementedError()
-        if self.nav_path.is_done():
+        if self._nav_path.is_done():
             return
 
-        self.nav_path.next_hop()
-        if self.nav_path.is_done():
-            Entity.log(self, f"next_hop: Destination {self.square()} reached")
+        self._nav_path.next_hop()
+        if self._nav_path.is_done():
+            Entity.log(self, f"next_hop: Destination {self.position} reached")
         else:
-            nh = self.nav_path.hop
+            nh = self._nav_path.hop
             Entity.log(self, f"next_hop: Moving to hop {nh}")
-            self.look_at(nh)
-            self.move_to(nh)
+            self._look_at(nh)
+            self._jump_to(nh)
 
     def next_move(self):
-        raise NotImplementedError()
-        if not self.physics.is_done():
+        if not self._physics.is_done():
             return
 
-        if len(self.moves) >= 1:
-            move = self.moves.pop(0)
+        if len(self._moves) >= 1:
+            move = self._moves.pop(0)
             move()
         else:
             self.next_hop()
@@ -128,10 +118,8 @@ class Entity(Sprite, Observable):
         self.blit_debug()
         Sprite.blit(self)
 
-    def blit_nav_path(self, surface):
-        raise NotImplementedError()
-        if Config.singleton().must_log("NavPath"):
-            self.nav_path.blit(surface)
-
     def blit_debug(self):
+        if not Config.singleton().must_log("Entity"):
+            return
         self._physics.blit_debug()
+        self._nav_path.blit_debug()

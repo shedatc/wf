@@ -17,7 +17,6 @@ from .EntityFactory     import EntityFactory
 from .MainMenu          import EXIT_ENGINE, MainMenu, START_GAME
 from .ModalInputHandler import ModalInputHandler
 from .Mouse             import Mouse
-from .NavBeacon         import NavBeacon
 from .Region            import Region
 from .Screen            import Screen
 from .Square            import Square
@@ -132,23 +131,34 @@ class Engine:
                 ih.enterMode("strategic/select")
         ih.addFunc("arena_view_toggle", arena_view_toggle)
 
-        def tactical_move_to_mouse():
-            self.nav_beacon.from_mouse()
-            if self.nav_beacon.is_enabled:
-                for entity in self.selected_entities:
-                    Compass.singleton() \
-                           .navigate(entity, self.nav_beacon.square)
-        ih.addFunc("tactical_move_to_mouse", tactical_move_to_mouse)
+        def tactical_navigate_to_mouse():
+            a         = Arena.singleton()
+            to_square = a.square( Mouse.world_point() )
+            if a.is_obstacle(to_square):
+                return
+            for entity in self.selected_entities:
+                from_square = a.square(entity.position)
+                hops        = Compass.singleton().find_path(from_square, to_square)
+                positions   = a.positions(hops)
+                entity.navigate(positions)
+        ih.addFunc("tactical_navigate_to_mouse", tactical_navigate_to_mouse)
 
-        # WIP
+        # DEBUG
         def tactical_translate_to_mouse():
             Engine.log("tactical_translate_to_mouse")
-            if len(self.entities) == 0:
-                return
-            self.entities[0]._physics.move_to( Mouse.world_point() )
+            for entity in self.selected_entities:
+                entity._physics.move_to( Mouse.world_point() )
         ih.addFunc("tactical_translate_to_mouse", tactical_translate_to_mouse)
 
+        # DEBUG
+        def tactical_rotate_to_mouse():
+            Engine.log("tactical_rotate_to_mouse")
+            for entity in self.selected_entities:
+                entity._physics.look_at( Mouse.world_point() )
+        ih.addFunc("tactical_rotate_to_mouse", tactical_rotate_to_mouse)
+
         def strategic_move_to_mouse():
+            raise NotImplementedError()
             (mx, my) = Mouse.screen_point()
             if self.nav_beacon.try_move( Square(mx, my) ):
                 for entity in self.selected_entities:
@@ -222,16 +232,16 @@ class Engine:
         self.selected_entities = []
 
     def select(self, entity):
+        Engine.log(f"Add entity to selection: {entity}")
         entity.select()
         self.selected_entities.append(entity)
 
     def init_arena(self, name):
         a = Arena(name)
         Camera(a.surface_rect, a.square_size)
-        # Compass(a.obstacles_matrix)
+        Compass(a.obstacles_matrix)
 
     def init_scene(self):
-        # self.nav_beacon = NavBeacon()
         pass
 
     def update(self):
@@ -325,11 +335,11 @@ class Engine:
         else:
             color = COLOR_GREEN
 
-        Screen.singleton().screen_draw_rect(color, mouse_square_rect, width=1)
+        Screen.singleton().screen_draw_rect(mouse_square_rect, color=color, width=1)
 
     def _blit_debug_mouse_position(self):
         (mx, my) = Mouse.screen_point()
-        Screen.singleton().screen_draw_rect(COLOR_BLUE, Rect((mx-1, my-1), (3, 3)))
+        Screen.singleton().screen_draw_rect(Rect((mx-1, my-1), (3, 3)), color=COLOR_BLUE)
 
     def _blit_debug_spawn_data(self):
         h = Camera.singleton().rect.height - 10

@@ -87,10 +87,10 @@ class Screen:
         screen_point = Camera.singleton().screen_point(world_point),
         self.screen_text(text, screen_point, color=color, bgcolor=bgcolor)
 
-    def draw_point(self, world_point, name=None, color=COLOR_BLACK, stats=False):
-        rect = Rect((0, 0), (5, 5))
+    def draw_point(self, world_point, name=None, color=COLOR_BLACK, stats=False, width=1):
+        rect = Rect((0, 0), (width, width))
         rect.center = world_point
-        self.draw_rect(rect, color=color)
+        self.draw_rect(rect, color=color, width=width)
         (tx, ty) = rect.bottomright
         tx += 10
         if name is None:
