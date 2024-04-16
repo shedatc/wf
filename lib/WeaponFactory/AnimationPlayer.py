@@ -40,6 +40,10 @@ class AnimationPlayer:
         # Select
         self.current = self.animations[select]
 
+    def __del__(self):
+        for a in self.animations.values():
+            EngineClock.singleton().unregister(a)
+
     def _load_spritesheet_libresprite(self, conf):
         meta    = conf["meta"]
         app     = meta["app"]
@@ -86,9 +90,11 @@ class AnimationPlayer:
 
     def show(self):
         self.visible = True
+        return self
 
     def hide(self):
         self.visible = False
+        return self
 
     def select(self, name):
         if self.current is not None:
@@ -97,16 +103,19 @@ class AnimationPlayer:
         self.current.rewind()
         EngineClock.singleton().resume(self.current)
         AnimationPlayer.log(f"Selected animation: {name}")
+        return self
 
     def pause(self):
         assert self.current is not None
         EngineClock.singleton().pause(self.current)
         AnimationPlayer.log(f"Paused animation: {self.current.name}")
+        return self
 
     def resume(self):
         assert self.current is not None
         EngineClock.singleton().resume(self.current)
         AnimationPlayer.log(f"Resumed animation: {self.current.name}")
+        return self
 
     def name(self):
         assert self.current is not None
