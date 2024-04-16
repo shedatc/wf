@@ -42,9 +42,13 @@ class Screen:
         Screen.log(f"    Size:    {sz(rect.size)} ({sz(size)} requested)")
         Screen.log(f"    Caption: {caption}")
 
+        self.blit_count = 0
+
         Screen._singleton = self
 
     def reset(self):
+        Screen.log(f"Reset")
+        self.blit_count = 0
         self.surface.fill(COLOR_BLACK)
 
     def screen_blit(self, source_surface, screen_point, source_rect=None):
@@ -54,6 +58,7 @@ class Screen:
             else:
                 Screen.log(f"Blit {source_rect} from {source_surface} to screen at {screen_point}")
         self.surface.blit(source_surface, screen_point, area=source_rect)
+        self.blit_count += 1
 
     def blit(self, source_surface, world_point, source_rect=None):
         screen_point = Camera.singleton().screen_point(world_point)
@@ -65,6 +70,7 @@ class Screen:
                 Screen.log(f"Blit {source_rect} from {source_surface} to screen" \
                            + f" at {world_point} → {screen_point}")
         self.surface.blit(source_surface, screen_point, area=source_rect)
+        self.blit_count += 1
 
     def screen_draw_rect(self, screen_rect, color=COLOR_BLACK, width=0):
         draw_rect(self.surface, color, screen_rect, width=width)

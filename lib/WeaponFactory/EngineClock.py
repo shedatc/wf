@@ -73,7 +73,10 @@ class EngineClock:
 
     # Add time to running tasks and return time (ms) since previous tick.
     def tick(self):
-        t = self.clock.tick(self._fps)
+        if self._fps == 0:
+            t = self.clock.tick()
+        else:
+            t = self.clock.tick(self._fps)
         EngineClock.log(f"Tick: {t} ms since previous tick")
         c = 0
         for task in self._running:
