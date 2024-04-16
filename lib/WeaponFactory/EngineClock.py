@@ -88,3 +88,9 @@ class EngineClock:
 
     def fps(self):
         return self.clock.get_fps()
+
+    def running_task_count(self):
+        return len(self._running)
+
+    def paused_task_count(self):
+        return len(self._paused)
