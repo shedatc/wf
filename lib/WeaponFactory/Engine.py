@@ -4,6 +4,8 @@ from pygame.display     import flip as display_flip
 from pygame.event       import custom_type as custom_event_type
 from pytmx.util_pygame  import load_pygame as tmx_load
 
+from math import floor
+
 if False:
     from .Drone          import Drone
 from .Arena             import Arena
@@ -365,6 +367,9 @@ class Engine:
                 self.update()
                 self.blit()
                 EngineClock.singleton().tick()
+                fps = EngineClock.singleton().fps()
+                if Config.singleton().must_log("Engine"):
+                    Screen.singleton().screen_text(f"FPS: {floor(fps)}", (0,  0))
                 self._blit_debug()
                 display_flip()
             Engine.log(f"Game Over")

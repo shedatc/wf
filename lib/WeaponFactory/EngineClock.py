@@ -85,3 +85,6 @@ class EngineClock:
         if c > 0:
             EngineClock.log(f"Added {t} ms to {c} tasks")
         return t
+
+    def fps(self):
+        return self.clock.get_fps()
