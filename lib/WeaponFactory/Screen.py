@@ -51,12 +51,23 @@ class Screen:
         self.blit_count = 0
         self.surface.fill(COLOR_BLACK)
 
+    def _blit_needed(self, source_surface, screen_point, source_rect=None):
+        if source_rect is None:
+            source_rect = source_surface.get_rect()
+        screen_rect       = self.surface.get_rect()
+        dest_rect         = Rect(screen_point, source_rect.size)
+        clipped_dest_rect = screen_rect.clip(dest_rect)
+        return clipped_dest_rect
+
     def screen_blit(self, source_surface, screen_point, source_rect=None):
         if DEBUG_BLIT:
             if source_rect is None:
                 Screen.log(f"Blit {source_surface} to screen at {screen_point}")
             else:
                 Screen.log(f"Blit {source_rect} from {source_surface} to screen at {screen_point}")
+
+        if not self._blit_needed(source_surface, screen_point, source_rect=source_rect):
+            return
         self.surface.blit(source_surface, screen_point, area=source_rect)
         self.blit_count += 1
 
@@ -69,6 +80,8 @@ class Screen:
             else:
                 Screen.log(f"Blit {source_rect} from {source_surface} to screen" \
                            + f" at {world_point} → {screen_point}")
+        if not self._blit_needed(source_surface, screen_point, source_rect=source_rect):
+            return
         self.surface.blit(source_surface, screen_point, area=source_rect)
         self.blit_count += 1
 
