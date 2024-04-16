@@ -296,15 +296,15 @@ class Engine:
             f"world: {mouse_position}",
             f"square: {mouse_square} {mouse_square_rect}",
         ])
-        Screen.singleton().text(text, (0, 0))
+        Screen.singleton().screen_text(text, (0, 0))
 
     def _blit_debug_camera_coordinates(self):
         text = f"CAMERA: {Camera.singleton().rect}"
-        Screen.singleton().text(text, (0, 10))
+        Screen.singleton().screen_text(text, (0, 10))
 
     def _blit_debug_region(self):
         text = "REGION: " + str(Region.singleton())
-        Screen.singleton().text(text, (0, 20))
+        Screen.singleton().screen_text(text, (0, 20))
 
     def _blit_debug_square_properties(self):
         a = Arena.singleton()
@@ -319,7 +319,7 @@ class Engine:
         for k, v in properties.items():
             text.append(f"{k}: {v}")
 
-        Screen.singleton().text(" ".join(text), (0, 30))
+        Screen.singleton().screen_text(" ".join(text), (0, 30))
 
     def _blit_debug_square_at_mouse(self):
         a = Arena.singleton()
@@ -347,7 +347,7 @@ class Engine:
         h = Camera.singleton().rect.height - 10
         l = self._spawn_locations[self._current_spawn_location]
         t = self._entity_types[self._current_entity_type]
-        Screen.singleton().text(f"SPAWN: Location: {l} Type: {t}", (0, h))
+        Screen.singleton().screen_text(f"SPAWN: Location: {l} Type: {t}", (0, h))
 
     def run(self):
         while True:
@@ -372,8 +372,8 @@ class Engine:
                     rtc = EngineClock.singleton().running_task_count()
                     ptc = EngineClock.singleton().paused_task_count()
                     screen = Screen.singleton()
-                    screen.screen_text(f"FPS: {floor(fps)}", (0,  0))
-                    screen.screen_text(f"Tasks: {rtc} running {ptc} paused", (0,  10))
+                    screen.screen_text(f"FPS: {floor(fps)}", (0,  40))
+                    screen.screen_text(f"Tasks: {rtc} running {ptc} paused", (0,  50))
                 self._blit_debug()
                 display_flip()
             Engine.log(f"Game Over")
