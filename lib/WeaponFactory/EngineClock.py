@@ -24,7 +24,10 @@ class EngineClock:
     def __init__(self):
         config    = Config.singleton().load("engine.json")
         self._fps = config["fps"]
-        EngineClock.log(f"FPS: {self._fps}")
+        if self._fps == 0:
+            EngineClock.log(f"FPS: ∞")
+        else:
+            EngineClock.log(f"FPS: {self._fps}")
         self._running = []
         self._paused  = []
         self.reset_clock()

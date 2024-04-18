@@ -45,6 +45,7 @@ class Assets:
             else:
                 path = path_join(Assets._dir(), d, file_name)
             if path_exists(path):
+                Assets.log(f"Found {asset_type} {file_name}: {path}")
                 return path
         else:
             Assets.log(f"Assets Base Directory: {Assets._dir()}")
