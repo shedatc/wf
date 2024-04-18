@@ -77,6 +77,8 @@ class EngineClock:
             t = self.clock.tick()
         else:
             t = self.clock.tick(self._fps)
+        if len(self._running) == 0:
+            return t
         EngineClock.log(f"Tick: {t} ms since previous tick")
         c = 0
         for task in self._running:
