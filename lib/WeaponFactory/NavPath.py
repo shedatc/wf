@@ -80,4 +80,4 @@ class NavPath:
         if self.is_done():
             return
         for (hop, ap) in self._build_animations():
-            ap.blit_current_at(hop)
+            ap.blit_at(hop)

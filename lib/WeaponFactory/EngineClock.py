@@ -1,6 +1,7 @@
 import pygame
 
 from .Config import Config
+from .debug  import DEBUG_CLOCK
 from .utils  import log_ex
 
 class EngineClock:
@@ -41,6 +42,7 @@ class EngineClock:
         assert task not in self._paused, "Task already registered and currently paused"
         self._paused.append(task)
         EngineClock.log(f"Registered paused task: {task}")
+        return self
 
     def unregister(self, task):
         if task in self._running:
@@ -51,6 +53,7 @@ class EngineClock:
             EngineClock.log(f"Unregistered paused task: {task}")
         else:
             raise AssertionError("Unknown task")
+        return self
 
     def pause(self, task):
         try:
@@ -62,6 +65,7 @@ class EngineClock:
             EngineClock.log(f"Paused task: {task}")
         else:
             EngineClock.log("Trying to pause a task that is already paused")
+        return self
 
     def resume(self, task):
         try:
@@ -73,6 +77,7 @@ class EngineClock:
             EngineClock.log(f"Resumed task: {task}")
         else:
             EngineClock.log("Trying to resume a task that is already running")
+        return self
 
     # Add time to running tasks and return time (ms) since previous tick.
     def tick(self):
@@ -80,9 +85,15 @@ class EngineClock:
             t = self.clock.tick()
         else:
             t = self.clock.tick(self._fps)
-        if len(self._running) == 0:
-            return t
+        if t == 0:
+            if DEBUG_CLOCK:
+                EngineClock.log(f"No time elapsed")
+            return 0
         EngineClock.log(f"Tick: {t} ms since previous tick")
+        if len(self._running) == 0:
+            if DEBUG_CLOCK:
+                EngineClock.log(f"No running task")
+            return t
         c = 0
         for task in self._running:
             task.add_time(t)

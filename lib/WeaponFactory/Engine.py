@@ -362,12 +362,13 @@ class Engine:
             self.init(config)
 
             Engine.log(f"Running game…")
-            self.is_running = True
             blit_counts     = []
+            clock           = EngineClock.singleton()
+            self.is_running = True
             while self.is_running:
                 self.update()
                 self.blit()
-                EngineClock.singleton().tick()
+                clock.tick()
 
                 screen = Screen.singleton()
                 blit_counts.append(screen.blit_count)
@@ -375,9 +376,9 @@ class Engine:
                     blit_counts.pop(0)
 
                 if Config.singleton().must_log("Engine"):
-                    fps      = EngineClock.singleton().fps()
-                    rtc      = EngineClock.singleton().running_task_count()
-                    ptc      = EngineClock.singleton().paused_task_count()
+                    fps      = clock.fps()
+                    rtc      = clock.running_task_count()
+                    ptc      = clock.paused_task_count()
                     blit_avg = floor( sum(blit_counts) / 10 )
                     screen.screen_text(f"FPS: {floor(fps)}",                 (0,  40))
                     screen.screen_text(f"Tasks: {rtc} running {ptc} paused", (0,  50))

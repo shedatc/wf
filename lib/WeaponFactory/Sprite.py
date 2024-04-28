@@ -17,9 +17,6 @@ class Sprite:
 
         config = Config.singleton().load( path_join(name, "sprite.json") )
 
-        self.log(f"Sprite '{name}':")
-        self.log(f'    Position: {position}')
-        self.log(f'    Animations:')
         self._animations      = {}
         self._animation_order = []
         for animation_config in config["animations"]:
@@ -35,7 +32,6 @@ class Sprite:
             else:
                 e = "disabled"
             o = len(self._animation_order)
-            self.log(f"        #{o} {name} at {offset} '{select}' {e}")
             self._animations[name] = {
                 "offset":           offset,
                 "animation_player": animation_player,
@@ -43,8 +39,23 @@ class Sprite:
             }
             self._animation_order.append(name)
 
-        EngineClock.singleton().register(self)
-        EngineClock.singleton().resume(self)
+        # Log some data
+        self.log(f"Sprite '{name}':")
+        self.log(f'    Position: {position}')
+        self.log(f'    Animations:')
+        o = 0
+        for name, a in self._animations.items():
+            enable = a["enable"]
+            offset = a["offset"]
+            select = a["animation_player"].current.name
+            if enable:
+                e = "enabled"
+            else:
+                e = "disabled"
+            self.log(f"        #{o} {name} at {offset} '{select}' {e}")
+            o += 1
+
+        EngineClock.singleton().register(self).resume(self)
 
     def log(self, msg):
         log_ex(msg, category="Sprite", name=self.name)
@@ -79,7 +90,7 @@ class Sprite:
             if not a["enable"]:
                 continue
             (ox, oy) = a["offset"]
-            a["animation_player"].blit_current_at((px + ox, py + oy))
+            a["animation_player"].blit_at((px + ox, py + oy))
 
     def is_done(self):
         return False
