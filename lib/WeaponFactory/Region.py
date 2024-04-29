@@ -1,8 +1,6 @@
-from pygame      import Rect
-from pygame.draw import rect as draw_rect
+from pygame import Rect
 
 from .Arena  import Arena
-from .Camera import Camera
 from .Mouse  import Mouse
 from .Screen import Screen
 from .colors import COLOR_RED, COLOR_WHITE
@@ -16,7 +14,7 @@ class Region:
     @classmethod
     def singleton(cls):
         if cls._singleton is None:
-            cls()
+            cls._singleton = cls()
         return cls._singleton
 
     @classmethod
@@ -28,8 +26,6 @@ class Region:
         self._cursor     = (0, 0)
         self._is_enabled = False
         self._rect       = Rect((0, 0), (0, 0))
-
-        Region._singleton = self
 
     def __repr__(self):
         return "<Region " + " ".join([

@@ -21,7 +21,7 @@ class Screen:
     @classmethod
     def singleton(cls):
         if cls._singleton is None:
-            cls()
+            cls._singleton = cls()
         return cls._singleton
 
     @classmethod
@@ -44,8 +44,6 @@ class Screen:
         Screen.log(f"    Caption: {caption}")
 
         self.blit_count = StatCounter()
-
-        Screen._singleton = self
 
     def reset(self):
         Screen.log(f"Reset")

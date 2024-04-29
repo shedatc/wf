@@ -14,7 +14,7 @@ class ArenaView:
     @classmethod
     def singleton(cls):
         if cls._singleton is None:
-            cls._singleton = ArenaView()
+            cls._singleton = cls()
         return cls._singleton
 
     @classmethod

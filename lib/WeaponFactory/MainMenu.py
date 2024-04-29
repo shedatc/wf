@@ -68,8 +68,7 @@ class MainMenu:
         return w
 
     def __init__(self):
-        screen                        = Screen.singleton()
-        (screen_width, screen_height) = screen.size
+        (screen_width, screen_height) = Screen.singleton().size
 
         self.menu = Menu("",
                          screen_width, screen_height,

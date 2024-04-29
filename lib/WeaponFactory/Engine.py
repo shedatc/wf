@@ -41,7 +41,6 @@ class Engine:
 
     def __init__(self, profiling=False):
         assert Engine._singleton is None
-        Engine._singleton = self
 
         # FIXME Log things like SDL version, etc…
 
@@ -56,6 +55,8 @@ class Engine:
         pygame_init()
         Screen()
         self.main_menu = MainMenu()
+
+        Engine._singleton = self
 
     def configure(self):
         Engine.log(f"Configuring…")

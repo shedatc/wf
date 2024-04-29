@@ -60,7 +60,6 @@ class Arena:
 
     def __init__(self, name):
         assert Arena._singleton is None
-        Arena._singleton = self
 
         self.name = name
 
@@ -112,6 +111,8 @@ class Arena:
             for x in range(self.rect.width):
                 self.entities_matrix[y][x] = []
         self.log_entities_matrix()
+
+        Arena._singleton = self
 
     def is_obstacle(self, square):
         (x, y) = square

@@ -25,13 +25,14 @@ class Compass:
 
     def __init__(self, obstacles_matrix):
         assert Compass._singleton is None
-        Compass._singleton = self
 
         # FIXME Make time_limit configurable
         self.grid   = Grid(matrix=obstacles_matrix)
         self.finder = AStarFinder(diagonal_movement=DiagonalMovement.always,
                                   time_limit=0.5)
         Compass.log(f"Finder: {self.finder.__class__}")
+
+        Compass._singleton = self
 
     def set_walkable(self, square):
         (x, y) = square
