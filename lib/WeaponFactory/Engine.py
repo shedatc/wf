@@ -2,7 +2,6 @@ from pygame             import Rect
 from pygame             import init as pygame_init
 from pygame.display     import flip as display_flip
 from pygame.event       import custom_type as custom_event_type
-from pytmx.util_pygame  import load_pygame as tmx_load
 
 from math import floor
 
@@ -10,7 +9,6 @@ if False:
     from .Drone          import Drone
 from .Arena             import Arena
 from .ArenaView         import ArenaView
-from .Assets            import Assets
 from .Camera            import Camera
 from .Compass           import Compass
 from .Config            import Config
