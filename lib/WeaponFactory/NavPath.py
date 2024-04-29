@@ -17,6 +17,10 @@ class NavPath:
         self.hop    = None
         self.hops   = []
 
+        self._next_hop = AnimationPlayer("nav-point", select ="Next Hop")
+        self._hop      = AnimationPlayer("nav-point", select ="Hop")
+        self._last_hop = AnimationPlayer("nav-point", select ="Last Hop")
+
     def log(self, msg):
         log_ex(msg, name=self.entity.name, category="NavPath")
 
@@ -61,17 +65,13 @@ class NavPath:
     def _build_animations(self):
         animations = []
         if len(self.hops) >= 1:
-            ap = AnimationPlayer("nav-point", select="Next Hop").show().resume()
-            animations.append((self.hops[-1], ap))
+            animations.append((self.hops[-1], self._next_hop.show().resume()))
             for hop in self.hops[0:-1]:
-                ap = AnimationPlayer("nav-point", select="Hop").show().resume()
-                animations.append((hop, ap))
+                animations.append((hop, self._hop.show().resume()))
             hop = self.hops[-1]
-            ap  = AnimationPlayer("nav-point", select ="Last Hop").show().resume()
-            animations.append((hop, ap))
+            animations.append((hop, self._last_hop.show().resume()))
         else:
-            ap  = AnimationPlayer("nav-point", select ="Last Hop").show().resume()
-            animations.append((self.hop, ap))
+            animations.append((self.hop, self._last_hop.show().resume()))
         return animations
 
     def blit_debug(self):

@@ -19,6 +19,9 @@ class AnimationState:
 
         EngineClock.singleton().register(self)
 
+    def __str__(self):
+        return f"<AnimationState {self.current_frame_index} in 0..{self._last_frame_index}>"
+
     def __del__(self):
         EngineClock.singleton().unregister(self)
 

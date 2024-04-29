@@ -39,6 +39,9 @@ class Entity(Sprite, Observable):
         self._moves      = []
         self.is_selected = False
 
+    def __str__(self):
+        return f"<Entity {self.name}>"
+
     def target_position(self):
         return self._physics.target_position()
 

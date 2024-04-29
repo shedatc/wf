@@ -57,6 +57,9 @@ class Sprite:
 
         EngineClock.singleton().register(self).resume(self)
 
+    def __del__(self):
+        EngineClock.singleton().unregister(self)
+
     def log(self, msg):
         log_ex(msg, category="Sprite", name=self.name)
 

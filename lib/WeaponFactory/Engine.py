@@ -214,7 +214,7 @@ class Engine:
             else:
                 p = Arena.singleton().spawn_location(l)
                 Engine.log(f"Spawning entity at location '{l}': {p}")
-            e = EntityFactory.spawn(t, p)
+            e = EntityFactory.singleton().spawn(t, p)
             self.select(e)
             e.register_observer(a)
             e.notify_observers("entity-spawned", square=a.square(p))
@@ -368,13 +368,16 @@ class Engine:
                 self.blit()
                 clock.tick()
 
+                # Counters
                 if Config.singleton().must_log("Engine"):
                     fps      = clock.fps()
                     rtc      = clock.running_task_count()
                     ptc      = clock.paused_task_count()
-                    screen.screen_text(f"FPS: {floor(fps)}",                 (0,  40))
-                    screen.screen_text(f"Tasks: {rtc} running {ptc} paused", (0,  50))
-                    screen.screen_text(f"Blits: {screen.blits.avg()}",              (0,  60))
+                    screen.screen_text(f"Counters:",     (0, 50))
+                    screen.screen_text(f"    FPS:",      (0, 60)); screen.screen_text(f"{floor(fps)}",                                   (70, 60))
+                    screen.screen_text(f"    Tasks:",    (0, 70)); screen.screen_text(f"{rtc} running {ptc} paused",                     (70, 70))
+                    screen.screen_text(f"    Blits:",    (0, 80)); screen.screen_text(f"{screen.blit_count.avg()}",                      (70, 80))
+                    screen.screen_text(f"    Entities:", (0, 90)); screen.screen_text(f"{EntityFactory.singleton().entity_count.avg()}", (70, 90))
 
                 self._blit_debug()
 

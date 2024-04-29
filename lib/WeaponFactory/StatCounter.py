@@ -26,4 +26,7 @@ class StatCounter:
         return self
 
     def avg(self):
-        return floor( sum(self._values) / len(self._values) )
+        if len(self._values) > 0:
+            return floor( sum(self._values) / len(self._values) )
+        else:
+            return self.current

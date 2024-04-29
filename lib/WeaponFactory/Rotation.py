@@ -25,6 +25,9 @@ class Rotation:
         self.target_angle  = orig_angle    # °
         EngineClock.singleton().register(self)
 
+    def __del__(self):
+        EngineClock.singleton().unregister(self)
+
     def _angle_from_vector(self, v):
         assert type(v) is Vector2
         u        = v / v.length()

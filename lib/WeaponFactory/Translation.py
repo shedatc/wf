@@ -20,6 +20,9 @@ class Translation:
 
         self.debug_step_vectors = []
 
+    def __del__(self):
+        EngineClock.singleton().unregister(self)
+
     def move_to(self, position):
         self.target_position = position
         EngineClock.singleton().resume(self)
