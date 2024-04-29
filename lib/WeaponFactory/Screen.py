@@ -7,11 +7,12 @@ from pygame.draw    import rect as draw_rect
 from pygame.font    import Font
 from pygame.math    import Vector2
 
-from .Camera import Camera
-from .Config import Config
-from .colors import COLOR_BLACK, COLOR_GREEN
-from .debug  import DEBUG_BLIT
-from .utils  import log_ex, sz
+from .Camera      import Camera
+from .Config      import Config
+from .StatCounter import StatCounter
+from .colors      import COLOR_BLACK, COLOR_GREEN
+from .debug       import DEBUG_BLIT
+from .utils       import log_ex, sz
 
 class Screen:
 
@@ -42,13 +43,13 @@ class Screen:
         Screen.log(f"    Size:    {sz(rect.size)} ({sz(size)} requested)")
         Screen.log(f"    Caption: {caption}")
 
-        self.blit_count = 0
+        self.blits = StatCounter()
 
         Screen._singleton = self
 
     def reset(self):
         Screen.log(f"Reset")
-        self.blit_count = 0
+        self.blits.reset()
         self.surface.fill(COLOR_BLACK)
 
     def _blit_needed(self, source_surface, screen_point, source_rect=None):
@@ -69,7 +70,7 @@ class Screen:
         if not self._blit_needed(source_surface, screen_point, source_rect=source_rect):
             return
         self.surface.blit(source_surface, screen_point, area=source_rect)
-        self.blit_count += 1
+        self.blits += 1
 
     def blit(self, source_surface, world_point, source_rect=None):
         screen_point = Camera.singleton().screen_point(world_point)
@@ -83,7 +84,7 @@ class Screen:
         if not self._blit_needed(source_surface, screen_point, source_rect=source_rect):
             return
         self.surface.blit(source_surface, screen_point, area=source_rect)
-        self.blit_count += 1
+        self.blits += 1
 
     def screen_draw_rect(self, screen_rect, color=COLOR_BLACK, width=0):
         draw_rect(self.surface, color, screen_rect, width=width)

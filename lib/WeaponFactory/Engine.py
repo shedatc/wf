@@ -261,7 +261,6 @@ class Engine:
         Region.singleton().blit()
 
     def blit(self):
-        Screen.singleton().reset()
         self._blit_scene()
         self._blit_region()
 
@@ -362,27 +361,22 @@ class Engine:
             self.init(config)
 
             Engine.log(f"Running game…")
-            blit_counts     = []
             clock           = EngineClock.singleton()
+            screen          = Screen.singleton()
             self.is_running = True
             while self.is_running:
                 self.update()
+                screen.reset()
                 self.blit()
                 clock.tick()
-
-                screen = Screen.singleton()
-                blit_counts.append(screen.blit_count)
-                if len(blit_counts) == 11:
-                    blit_counts.pop(0)
 
                 if Config.singleton().must_log("Engine"):
                     fps      = clock.fps()
                     rtc      = clock.running_task_count()
                     ptc      = clock.paused_task_count()
-                    blit_avg = floor( sum(blit_counts) / 10 )
                     screen.screen_text(f"FPS: {floor(fps)}",                 (0,  40))
                     screen.screen_text(f"Tasks: {rtc} running {ptc} paused", (0,  50))
-                    screen.screen_text(f"Blits: {blit_avg}",                 (0,  60))
+                    screen.screen_text(f"Blits: {screen.blits.avg()}",              (0,  60))
 
                 self._blit_debug()
 
