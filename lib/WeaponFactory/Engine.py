@@ -53,7 +53,6 @@ class Engine:
             self.profile = None
 
         pygame_init()
-        Screen()
         self.main_menu = MainMenu()
 
         Engine._singleton = self

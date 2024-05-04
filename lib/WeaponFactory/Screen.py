@@ -40,7 +40,7 @@ class Screen:
             set_caption(caption)
         self._font = Font(None, 15)
         Screen.log(f"Screen:")
-        Screen.log(f"    Size:    {sz(rect.size)} ({sz(size)} requested)")
+        Screen.log(f"    Size:    {sz(size)} → {sz(rect.size)}")
         Screen.log(f"    Caption: {caption}")
 
         self.blit_count = StatCounter()
