@@ -1,6 +1,7 @@
 import pygame
 
-from pygame import Rect
+from pygame         import Rect
+from pygame.display import set_mode
 
 from .Assets  import Assets
 from .Compass import Compass
@@ -85,8 +86,8 @@ class Arena:
             new_screen_width  = min(screen_width, tm_width)
             new_screen_height = min(screen_height, tm_height)
             Arena.log(f"Resizing screen: {screen_width}x{screen_height} → {new_screen_width}x{new_screen_height}")
-            self.screen = pygame.display.set_mode((new_screen_width, new_screen_height),
-                                                  pygame.FULLSCREEN | pygame.SCALED)
+            self.screen = set_mode((new_screen_width, new_screen_height),
+                                   pygame.FULLSCREEN | pygame.SCALED)
 
         # Strategic View
         if False:
