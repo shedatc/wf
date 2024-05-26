@@ -29,19 +29,23 @@ class Screen:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self):
-        config  = Config.singleton().load("screen.json")
-        size    = (config["width"], config["height"])
-        caption = config["caption"]
+        config = Config.singleton().load("screen.json")
+        size   = (config["width"], config["height"])
 
-        self.surface = set_mode(size, FULLSCREEN|SCALED)
+        flags = 0
+        if "fullscreen" in config and config["fullscreen"] is True:
+            flags |= FULLSCREEN
+        if "scaled" in config and config["scaled"] is True:
+            flags |= SCALED
+        self.surface = set_mode(size, flags)
         rect         = self.surface.get_rect()
         self.size    = rect.size
-        if caption is not None:
-            set_caption(caption)
+        if "caption" in config:
+            set_caption(config["caption"])
         self._font = Font(None, 15)
         Screen.log(f"Screen:")
         Screen.log(f"    Size:    {sz(size)} → {sz(rect.size)}")
-        Screen.log(f"    Caption: {caption}")
+        Screen.log(f"    Caption: {config['caption']}")
 
         self.blit_count = StatCounter()
 

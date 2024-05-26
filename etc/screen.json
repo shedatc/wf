@@ -1,5 +1,7 @@
 {
     "caption": "Weapon Factory",
-    "width": 512,
-    "height": 384
+    "fullscreen": true,
+    "scaled": false,
+    "width": 800,
+    "height": 600
 }
