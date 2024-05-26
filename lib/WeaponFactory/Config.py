@@ -1,4 +1,5 @@
 from json    import loads as json_loads
+from json    import dumps as json_dumps
 from os      import getenv
 from os.path import join as path_join
 from sys     import stderr
@@ -26,8 +27,8 @@ class Config:
         return path_join(home_dir, ".config", "wf")
 
     def __init__(self):
-        self._index          = {}
-        self._log_categories = None
+        self._index = {}
+        # self._load_log_categories()
 
     def load(self, file_name):
         if file_name not in self._index:
@@ -37,6 +38,14 @@ class Config:
                 self._index[file_name] = json_loads(cf.read())
         return self._index[file_name]
 
+    def save(self, file_name):
+        assert file_name in self._index
+        config = self._index[file_name]
+        path   = path_join(Config._dir(), file_name)
+        print(f"- Config - Saving {path}…", file=stderr)
+        with open(path, "w") as cf:
+            cf.write( json_dumps(config) )
+
     def get(self, file_name, key, default=None):
         config = self.load(file_name)
         if key in config:
@@ -45,10 +54,7 @@ class Config:
             return default
 
     def get_log_categories(self):
-        if self._log_categories is None:
-            self._log_categories = list(map(lambda s: s.lower(),
-                                            self.get("engine.json", "logs", default=[])))
-        return self._log_categories
+        return self.load("engine.json")["logs"]
 
     def must_log(self, category):
-        return category.lower() in self.get_log_categories()
+        return self.get_log_categories()[category]
