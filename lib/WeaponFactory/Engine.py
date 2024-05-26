@@ -13,6 +13,7 @@ from .Camera            import Camera
 from .Compass           import Compass
 from .Config            import Config
 from .EngineClock       import EngineClock
+from .EngineConfig      import EngineConfig
 from .EntityFactory     import EntityFactory
 from .ui.MainMenu       import MainMenu
 from .ModalInputHandler import ModalInputHandler
@@ -349,10 +350,10 @@ class Engine:
     def run(self):
         while True:
             config = self.configure()
-            if config.action == EXIT_ENGINE:
+            if config.action == EngineConfig.ACTION_EXIT:
                 Engine.log(f"Exit engine")
                 break
-            elif config.action != START_GAME:
+            elif config.action != EngineConfig.ACTION_PLAY:
                 Engine.log(f"Game cancelled")
                 continue
 
