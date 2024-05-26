@@ -3,4 +3,5 @@
 from WeaponFactory import Engine as WF
 
 if __name__ == "__main__":
-    WF.Engine(profiling=False).run()
+    import sys
+    sys.exit( WF.Engine(profiling=False).run() )

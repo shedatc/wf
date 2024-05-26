@@ -383,4 +383,5 @@ class Engine:
 
                 display_flip()
             Engine.log(f"Game Over")
+        return 0
 
