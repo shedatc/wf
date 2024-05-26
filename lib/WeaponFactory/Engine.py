@@ -14,7 +14,7 @@ from .Compass           import Compass
 from .Config            import Config
 from .EngineClock       import EngineClock
 from .EntityFactory     import EntityFactory
-from .MainMenu          import EXIT_ENGINE, MainMenu, START_GAME
+from .ui.MainMenu       import MainMenu
 from .ModalInputHandler import ModalInputHandler
 from .Mouse             import Mouse
 from .Region            import Region
