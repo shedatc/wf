@@ -1,1 +1,42 @@
-{"arena_list": [{"name": "arena-0", "label": "Arena 0"}, {"name": "arena-1", "label": "Arena 1"}], "fps": 0, "logs": {"Animation": false, "AnimationFactory": true, "AnimationFrame": false, "AnimationPlayer": true, "Arena": false, "ArenaView": false, "Assets": true, "Camera": false, "Compass": false, "Engine": true, "EngineClock": true, "Entity": true, "EntityFactory": false, "MainMenu": true, "Mouse": false, "NavPath": true, "Physics": true, "Region": false, "Rotation": true, "Screen": true, "Sprite": true, "Tilemap": false, "Translation": true, "WidgetConf": true}}
+{
+  "arena_list": [
+    {
+      "name": "arena-0",
+      "label": "Arena 0"
+    },
+    {
+      "name": "arena-1",
+      "label": "Arena 1"
+    }
+  ],
+  "fps": 0,
+  "logs": {
+    "AnimationState": false,
+    "Animation": false,
+    "AnimationFactory": true,
+    "AnimationFrame": false,
+    "AnimationPlayer": true,
+    "Arena": false,
+    "ArenaView": false,
+    "Assets": true,
+    "Camera": false,
+    "Compass": false,
+    "Engine": true,
+    "EngineClock": true,
+    "Entity": true,
+    "EntityFactory": false,
+    "InputHandler": false,
+    "MainMenu": true,
+    "ModalInputHandler": false,
+    "Mouse": false,
+    "NavPath": true,
+    "Physics": true,
+    "Region": false,
+    "Rotation": true,
+    "Screen": true,
+    "Sprite": true,
+    "Tilemap": false,
+    "Translation": true,
+    "WidgetConf": true
+  }
+}
