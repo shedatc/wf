@@ -1,0 +1,24 @@
+* Assets
+** Animations
+Source files are in =assets/animations/src/*.ase=.
+
+Created using LibreSprite v1.0 using the /Export Sprite Sheet/ feature as follow:
+
+| Parameter                     | Value            | Notes                       |
+|-------------------------------+------------------+-----------------------------|
+| Sheet Type                    | Horizontal Strip |                             |
+| Padding                       | no               |                             |
+| Layers                        | Visible layers   |                             |
+| Frames                        | All frames       |                             |
+| Output File → Select File     | foo.png          |                             |
+| JSON Data → Select File       | foo.json         |                             |
+| JSON Data → Type              | Array            |                             |
+| JSON Data → Meta → Layers     | no               |                             |
+| JSON Data → Meta → Frame Tags | yes              | Used to name the animations |
+| Open generated sprite sheet   | no               |                             |
+
+Once exported, edit =foo.json= to adjust the meta → image property. It usually
+contains an absolute path to the underlying image. Remove the path to only leave
+the image name:
+
+: /path/to/foo.png → foo.png
