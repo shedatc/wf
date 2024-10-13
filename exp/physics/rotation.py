@@ -1,10 +1,11 @@
-from pygame         import K_ESCAPE, K_q, K_SPACE, init, KEYUP, MOUSEBUTTONUP, QUIT, Rect
+from pygame         import K_ESCAPE, K_q, K_RETURN, K_SPACE, init, KEYUP, KMOD_SHIFT, MOUSEBUTTONUP, QUIT, Rect
 from pygame.display import flip, set_mode
 from pygame.draw    import arc  as draw_arc
 from pygame.draw    import line as draw_line
 from pygame.draw    import rect as draw_rect
 from pygame.event   import get  as events_get
 from pygame.font    import Font
+from pygame.key     import get_mods
 from pygame.math    import Vector2
 from pygame.mouse   import get_pos     as mouse_pos
 from pygame.mouse   import set_visible as mouse_set_visible
@@ -119,22 +120,38 @@ class Rotation:
             ccw = 360 - cw
         if ccw <= cw:
             self.direction = Rotation.CCW
+            if self.target_angle == 0.0:
+                self.target_angle = 360.0
         else:
             self.direction = Rotation.CW
+            if self.target_angle == 360.0:
+                self.target_angle = 0.0
+
+        # Handle the 0° == 360° aspect.
+        if self.direction == Rotation.CCW:
+            if self.target_angle == 0.0:
+                self.target_angle = 360.0
+        else: # self.direction == Rotation.CW
+            if self.target_angle == 360.0:
+                self.target_angle = 0.0
 
     def is_done(self):
         return self.target_angle == self.current_angle
 
     def add_time(self, t):
         assert self.current_angle != self.target_angle
-        new_angle = self.current_angle + t * self.direction * self.angular_speed
-        i         = min(new_angle, self.current_angle)
-        a         = max(new_angle, self.current_angle)
-        if i <= self.target_angle  and self.target_angle <= a:
+        new_angle      = self.current_angle + t * self.direction * self.angular_speed
+        i              = min(new_angle, self.current_angle)
+        a              = max(new_angle, self.current_angle)
+        target_crossed = i <= self.target_angle  and self.target_angle <= a
+
+        if target_crossed:
             self.current_angle = self.target_angle
+            print(f"| {new_angle:.2f} | {i:.2f} | {a:.2f} | {target_crossed} | {self.current_angle:.2f} | {self.target_angle:.2f}")
             assert self.is_done()
             return
         self.current_angle = new_angle % 360
+        print(f"| {new_angle:.2f} | {i:.2f} | {a:.2f} | {target_crossed} | {self.current_angle:.2f} | {self.target_angle:.2f}")
 
     def blit(self):
         rect        = Rect((0, 0), (200, 200))
@@ -177,6 +194,10 @@ def main(argv=[]):
 
     clock = Clock()
 
+    # Gather data.
+    print("| new_angle | i | a | target_crossed | current_angle | target_angle")
+    print("|----")
+
     e              = Entity((screen_width // 2, screen_height // 2))
     r              = Rotation(e, 0, 0.03)
     current_vector = Vector2(250, 0)
@@ -190,12 +211,17 @@ def main(argv=[]):
             elif event.type == KEYUP:
                 if event.key == K_SPACE:
                     is_playing = not is_playing
+                elif event.key == K_RETURN:
+                    is_playing = not is_playing
                 elif event.key in [K_ESCAPE, K_q]:
                     return 0
             elif event.type == MOUSEBUTTONUP:
                 is_playing = False
                 if event.button == 1:
-                    target        = mouse_pos()
+                    if get_mods() & KMOD_SHIFT:
+                        target = (0.75 * screen_width, screen_height // 2)
+                    else:
+                        target = mouse_pos()
                     (ex, ey)      = e.position
                     (tx, ty)      = target
                     target_vector = Vector2(tx - ex, ty - ey)
@@ -228,11 +254,12 @@ def main(argv=[]):
             draw_vector(e.position, target_vector,  color=BLACK, width=2, name="Target")
         r.blit()
 
-        text(f"Keys:",           (30, 500))
-        text(f"    SPACE",       (30, 510)); text(f"Play the rotation",      (130, 510))
-        text(f"    LEFT CLICK",  (30, 520)); text(f"Move the target angle",  (130, 520))
-        text(f"    RIGHT CLICK", (30, 530)); text(f"Move the current angle", (130, 530))
-        text(f"    Q/ESC",       (30, 540)); text(f"Exit",                   (130, 540))
+        text(f"Keys:",                (30, 500))
+        text(f"    SPACE",            (30, 510)); text(f"Play the rotation",             (230, 510))
+        text(f"    LEFT CLICK",       (30, 520)); text(f"Move the target angle",         (230, 520))
+        text(f"    SHIFT+LEFT CLICK", (30, 530)); text(f"Move the target angle to 360°", (230, 530))
+        text(f"    RIGHT CLICK",      (30, 540)); text(f"Move the current angle",        (230, 540))
+        text(f"    Q/ESC",            (30, 550)); text(f"Exit",                          (230, 550))
 
         flip()
 
