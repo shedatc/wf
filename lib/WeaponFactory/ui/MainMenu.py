@@ -50,13 +50,30 @@ class MainMenu:
             SelectorConf("ARENA", items=arena_list, id="arena"),
         )
 
-        def create_save_func(log_category):
-            def save(_, enabled):
+        def update_fullscreen(_, enabled):
+            config               = Config.singleton().load("screen.json")
+            orig_value           = config["fullscreen"]
+            config["fullscreen"] = enabled
+            MainMenu.log(f"screen.fullscreen: {orig_value} → {enabled}")
+
+        def save_screen_conf(menu, *args, **kwargs):
+            config = Config.singleton()
+            config.save("screen.json")
+            menu.reset(1)
+
+        graphics_menu_conf = [
+            CheckboxConf("FULLSCREEN",
+                         enable=Config.singleton().load("screen.json")["fullscreen"],
+                         action=update_fullscreen)
+        ]
+
+        def create_update_func(log_category):
+            def update(_, enabled):
                 config                       = Config.singleton().load("engine.json")
-                orig_value                   = config["logs"][log_category] = enabled
+                orig_value                   = config["logs"][log_category]
                 config["logs"][log_category] = enabled
                 MainMenu.log(f"logs.{log_category}: {orig_value} → {enabled}")
-            return save
+            return update
 
         logging_menu_conf = []
         for log_category, enable in Config.singleton().get_log_categories().items():
@@ -64,13 +81,15 @@ class MainMenu:
                 CheckboxConf(log_category.upper(),
                              enable=enable,
                              id=f"logging_{log_category}",
-                             action=create_save_func(log_category)) )
+                             action=create_update_func(log_category)) )
 
         def save_logging_conf(menu, *args, **kwargs):
             Config.singleton().save("engine.json")
             menu.reset(1)
 
         options_menu_conf = (
+            MenuConf("GRAPHICS", conf=graphics_menu_conf,
+                     back_action=save_screen_conf),
             MenuConf("LOGGING", conf=logging_menu_conf,
                      back_action=save_logging_conf),
         )
