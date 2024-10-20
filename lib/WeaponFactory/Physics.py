@@ -5,10 +5,6 @@ from .utils       import log_ex
 
 class Physics:
 
-    @classmethod
-    def log(cls, msg):
-        log_ex(msg, category=cls.__name__)
-
     def __init__(self, entity, speed=0.0, orig_angle=0.0, angular_speed=0.0):
         self._entity      = entity
         self._translation = Translation(entity, speed)

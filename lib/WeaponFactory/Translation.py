@@ -8,9 +8,8 @@ from .utils       import log_ex
 
 class Translation:
 
-    @classmethod
-    def log(cls, msg):
-        log_ex(msg, category=cls.__name__)
+    def log(self, msg):
+        log_ex(msg, name=self.entity.name, category="Translation")
 
     def __init__(self, entity, speed=0.0):
         self.entity          = entity
@@ -25,7 +24,8 @@ class Translation:
 
     def move_to(self, position):
         self.target_position = position
-        EngineClock.singleton().resume(self)
+        if self.entity.position != self.target_position:
+            EngineClock.singleton().resume(self)
 
         self.debug_orig_position = self.entity.position
         self.debug_step_vectors.clear()
@@ -43,19 +43,19 @@ class Translation:
         step_vector        = (translation_vector / total_distance) * (self.speed * t)
         step_distance      = step_vector.length()
 
-        Translation.log(f"Adding {t} ms to translation:")
-        Translation.log(f"    Translation Vector: {translation_vector}")
-        Translation.log(f"    Total Distance:     {total_distance} px")
-        Translation.log(f"    Step Vector:        {step_vector}")
-        Translation.log(f"    Step Distance:      {step_distance} px")
+        self.log(f"Adding {t} ms to translation:")
+        self.log(f"    Translation Vector: {translation_vector}")
+        self.log(f"    Total Distance:     {total_distance} px")
+        self.log(f"    Step Vector:        {step_vector}")
+        self.log(f"    Step Distance:      {step_distance} px")
 
         if step_distance < total_distance:
             self.entity.shift( step_vector.xy )
-            Translation.log(f"Entity {self.entity} moved to {self.entity.position}")
+            self.log(f"Entity {self.entity} moved to {self.entity.position}")
             self.debug_step_vectors.append(step_vector)
         else:
             self.entity.position = self.target_position
-            Translation.log(f"Entity {self.entity} stopped at {self.entity.position}")
+            self.log(f"Entity {self.entity} stopped at {self.entity.position}")
             self.debug_step_vectors.clear()
 
     def blit_debug(self):
