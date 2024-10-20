@@ -44,7 +44,12 @@ class Compass:
 
     def is_obstacle(self, square):
         (x, y) = square
-        return self.grid.node(x, y).walkable is False
+        try:
+            n = self.grid.node(x, y)
+        except IndexError:
+            Compass.log(f"No node at ({x}, {y})")
+            raise
+        return n.walkable is False
 
     def is_next_to(self, a, b):
         (ax, ay) = a
