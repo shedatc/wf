@@ -64,7 +64,7 @@ class EngineClock:
             self._paused.append(task)
             EngineClock.log(f"Paused task: {task}")
         else:
-            EngineClock.log("Trying to pause a task that is already paused")
+            EngineClock.log(f"Trying to pause a task that is already paused: {task}")
         return self
 
     def resume(self, task):
@@ -76,7 +76,7 @@ class EngineClock:
             self._running.append(task)
             EngineClock.log(f"Resumed task: {task}")
         else:
-            EngineClock.log("Trying to resume a task that is already running")
+            EngineClock.log(f"Trying to resume a task that is already running: {task}")
         return self
 
     # Add time to running tasks and return time (ms) since previous tick.
