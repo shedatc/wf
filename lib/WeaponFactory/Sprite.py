@@ -7,8 +7,8 @@ from .utils           import log_ex
 
 # A sprite is something that is animated.
 #
-# A sprite's coordinates are expressed in pixels (via its `point` property, of
-# type Point). There's no direct relationship between a sprite and a square.
+# A sprite's coordinates are expressed in pixels (via its `position` property.
+# There's no direct relationship between a sprite and a square.
 class Sprite:
 
     def __init__(self, name, position):
@@ -98,5 +98,5 @@ class Sprite:
     def is_done(self):
         return False
 
-    def add_time(self, _):
+    def add_time(self, t):
         self.blit()
