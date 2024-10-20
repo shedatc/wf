@@ -2,6 +2,7 @@ from pygame      import Rect
 from pygame.draw import rect as draw_rect
 
 from .AnimationPlayer import AnimationPlayer
+from .Arena           import Arena
 from .Compass         import Compass
 from .Config          import Config
 from .EngineClock     import EngineClock
@@ -32,6 +33,10 @@ class NavPath:
         assert len(hops) >= 1
         self.hop  = hops[0]
         self.hops = hops[1:]
+        self.log(f"Navigation path:")
+        self.log(f"    {self.hop} ★")
+        for h in self.hops:
+            self.log(f"    {h}")
 
     def next_hop(self):
         if len(self.hops) == 0:
@@ -39,25 +44,30 @@ class NavPath:
             self.hop  = None
             return
 
-        self.hop  = self.hops[0]
-        self.hops = self.hops[1:]
-
-        c = Compass.singleton()
-        if not c.is_obstacle(self.hop):
+        self.hop   = self.hops[0]
+        self.hops  = self.hops[1:]
+        c          = Compass.singleton()
+        a          = Arena.singleton()
+        hop_square = a.square(self.hop)
+        if not c.is_obstacle(hop_square):
             return
         if len(self.hops) == 0:
-            self.log(f"Obstacle at destination {self.hop}; stop here")
+            self.log(f"Obstacle at destination {hop_square} ({self.hop}); stop here")
             self.hop = None
             return
-        self.log(f"Obstacle at next hop {self.hop}; renavigate")
-        c.find_path(self.entity, self.destination())
+        self.log(f"Obstacle at next hop {hop_square} ({self.hop}); renavigate")
+        c.find_path(self.entity_square(), self.destination_square())
 
-    def destination(self):
+    def entity_square(self):
+        return Arena.singleton().square(self.entity.position)
+
+    def destination_square(self):
         assert not self.is_done()
         if len(self.hops) >= 1:
-            return self.hops[-1]
+            hop = self.hops[-1]
         elif self.hop is not None:
-            return self.hop
+            hop = self.hop
+        return Arena.singleton().square(hop)
 
     def is_done(self):
         return self.hop is None
