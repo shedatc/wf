@@ -69,8 +69,9 @@ class Entity(Sprite, Observable):
     def _jump_to(self, world_point):
         world_square = Arena.singleton().square(world_point)
         def jump_to_hop():
+            Entity.log(self, f"_jump_to_hop: {world_point} → {world_square}")
             if Compass.singleton().is_obstacle(world_square):
-                Entity.log(self, f"jump_to_hop: Cannot jump, obstacle at target square {world_square}")
+                Entity.log(self, f"_jump_to_hop: Cannot jump, obstacle at target square {world_square}")
                 return
             self._physics.move_to(world_point)
             self.notify_observers("entity-moved",
@@ -118,11 +119,18 @@ class Entity(Sprite, Observable):
             self.next_hop()
 
     def blit(self):
-        self.blit_debug()
         Sprite.blit(self)
+        self.blit_debug()
 
     def blit_debug(self):
         if not Config.singleton().must_log("Entity"):
             return
         self._physics.blit_debug()
         self._nav_path.blit_debug()
+
+    def is_done(self):
+        return Sprite.is_done(self) and self._physics.is_done() and self._moves == []
+
+    def add_time(self, t):
+        Sprite.add_time(self, t)
+        self.next_move()
