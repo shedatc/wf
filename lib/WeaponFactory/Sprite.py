@@ -24,9 +24,8 @@ class Sprite:
             name             = animation_config["name"]
             select           = animation_config["select"]
             enable           = animation_config["enable"]
-            animation_player = AnimationPlayer(name, select=select)
+            animation_player = AnimationPlayer(name, select=select, enable=enable)
             if enable:
-                animation_player.resume()
                 animation_player.show()
                 e = "enabled"
             else:
