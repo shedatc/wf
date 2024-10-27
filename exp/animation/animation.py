@@ -6,7 +6,7 @@ from os      import getcwd
 from os.path import basename
 from os.path import join as path_join
 
-from pygame         import K_ESCAPE, K_F1, K_q, init, KEYUP, MOUSEBUTTONUP, QUIT, Rect
+from pygame         import K_DOWN, K_ESCAPE, K_F1, K_SPACE, K_UP, K_q, init, KEYUP, MOUSEBUTTONUP, QUIT, Rect
 from pygame         import Rect
 from pygame.display import flip, set_mode
 from pygame.event   import get  as events_get
@@ -16,14 +16,16 @@ from pygame.mouse   import get_pos     as mouse_pos
 from pygame.mouse   import set_visible as mouse_set_visible
 from pygame.time    import Clock
 
-RED   = (200,   0,   0)
-GREEN = (0,   200,   0)
-BLUE  = (0,     0, 200)
 BLACK = (0,     0,   0)
+BLUE  = (0,     0, 200)
+GREEN = (0,   200,   0)
+GREY  = (128, 128, 128)
+RED   = (200,   0,   0)
 WHITE = (250, 250, 250)
 
 font      = None
 log_level = 1
+text_y    = None
 
 def log(msg, prefix="", level=1):
     global log_level
@@ -35,7 +37,7 @@ def log(msg, prefix="", level=1):
         prefix = f"{type(prefix).__name__}   "
     print(f"{prefix:>20s}{msg}")
 
-def text(msg, point, color=BLACK):
+def text(msg, x, color=BLACK, nl=False):
     global font
     if font is None:
         font = Font(None, 15)
@@ -43,7 +45,11 @@ def text(msg, point, color=BLACK):
                             True,  # antialias
                             color,
                             WHITE) # background
-    Screen.singleton().screen_blit(text_surf, point)
+    global text_y
+    assert text_y is not None
+    Screen.singleton().screen_blit(text_surf, (x, text_y))
+    if nl:
+        text_y += 10
 
 def conf_load(conf_path):
     with open(conf_path, "r") as cf:
@@ -408,12 +414,15 @@ class AnimationFactory:
 
 class AnimationPlayer:
 
-    def __init__(self, group_name, select="Idle"):
+    def __init__(self, group_name, select="Idle", enable=False):
         self._current = None
         self.visible  = False
 
         (self.surface, self.animations) = AnimationFactory.singleton().load(group_name)
-        self.select(select)
+        self.current = self.animations[select]
+        if enable:
+            self.current.resume()
+            log(f"Now playing animation '{select}'", level=1, prefix=self)
 
     def show(self):
         self.visible = True
@@ -466,9 +475,8 @@ class Sprite:
             name             = animation_config["name"]
             select           = animation_config["select"]
             enable           = animation_config["enable"]
-            animation_player = AnimationPlayer(name, select=select)
+            animation_player = AnimationPlayer(name, select=select, enable=enable)
             if enable:
-                animation_player.resume()
                 animation_player.show()
                 e = "enabled"
             else:
@@ -537,15 +545,19 @@ def main(argv=[]):
     Screen.singleton()
     mouse_set_visible(True)
 
-    Sprite("monolith-0", (400, 270))
+    first_sprite = Sprite("monolith-0", (400, 270))
     sprite_count = 1
 
     af     = AnimationFactory.singleton()
     clock  = EngineClock.singleton()
     screen = Screen.singleton()
 
+    animation_count    = 0
+    selected_animation = 0
+
     global log_level
     while True:
+        toggle_animation_state = None
         events = events_get()
         for event in events:
             if event.type == QUIT:
@@ -555,28 +567,82 @@ def main(argv=[]):
                     return 0
                 elif event.key == K_F1:
                     log_level = (log_level + 1) % 4
+                elif event.key == K_SPACE:
+                    toggle_animation_state = True
+
+                if animation_count > 0:
+                    if event.key == K_UP:
+                        selected_animation = (selected_animation - 1) % animation_count
+                    elif event.key == K_DOWN:
+                        selected_animation = (selected_animation + 1) % animation_count
             elif event.type == MOUSEBUTTONUP:
-                if event.button == 1:
+                if event.button != 1: # Middle/Right Click
                     Sprite("monolith-0", mouse_pos())
                     sprite_count += 1
 
         screen.reset(WHITE)
         clock.tick()
 
-        y = 30
-        text("Engine Clock:",       (30, y))
-        text("    FPS:",            (30, y+10)); text(f"{clock.fps()}",                (130, y+10))
-        text("    Running Tasks:",  (30, y+20)); text(f"{clock.running_task_count()}", (130, y+20))
-        text("    Paused Tasks:",   (30, y+30)); text(f"{clock.paused_task_count()}",  (130, y+30))
-        text("Counters:",           (30, y+40))
-        text("    Sprite:",         (30, y+50)); text(f"{sprite_count}",               (130, y+50))
-        text("    Blit:",           (30, y+60)); text(f"{screen.blit_count}",          (130, y+60))
-        text("    Animation Load:", (30, y+70)); text(f"{af.load_count}",              (130, y+70))
+        global text_y
+        text_y = 30
+        text("Engine Clock:",       30, nl=True)
+        text("    FPS:",            30); text(f"{clock.fps()}",                130, nl=True)
+        text("    Running Tasks:",  30); text(f"{clock.running_task_count()}", 130, nl=True)
+        text("    Paused Tasks:",   30); text(f"{clock.paused_task_count()}",  130, nl=True)
+        text("Counters:",           30, nl=True)
+        text("    Sprite:",         30); text(f"{sprite_count}",               130, nl=True)
+        text("    Blit:",           30); text(f"{screen.blit_count}",          130, nl=True)
+        text("    Animation Load:", 30); text(f"{af.load_count}",              130, nl=True)
 
-        text("Log Level:",         (30, y+100)); text(f"{log_level}",                 (130, y+100))
+        text_y = 130
+        text("Log Level:",          30); text(f"{log_level}",                  130)
 
-        text(f"Keys:",           (30, 530))
-        text(f"    Q/ESC",       (30, 540)); text(f"Exit", (130, 540))
+
+        text_y = 30
+        text("Ordered Animations:", 200, nl=True)
+        order = 0
+        for name in first_sprite._animation_order:
+            config = first_sprite._animations[name]
+            offset = config["offset"]
+            enable = config["enable"]
+            player = config["animation_player"]
+
+            is_selected = selected_animation == order
+
+            if is_selected and toggle_animation_state in [True, False]:
+                first_sprite.animation(name, enable=not enable)
+                toggle_animation_state = None
+
+            if enable:
+                text_color = BLACK
+            else:
+                text_color = GREY
+            if is_selected:
+                name_color = BLUE
+            else:
+                name_color = text_color
+
+            text(f"[{order}] {name}", 230, color=name_color, nl=True)
+
+            text("Enable:", 260, color=text_color)
+            text(f"{enable}", 320, color=text_color, nl=True)
+
+            text("Offset:", 260, color=text_color)
+            text(f"{offset}", 320, color=text_color, nl=True)
+
+            for group_name, animation in player.animations.items():
+                text(f"{group_name}:", 260, color=text_color)
+                text(f"{animation}", 320, color=text_color, nl=True)
+
+            order += 1
+        animation_count = order
+
+        text_y = 530
+        text(f"Keys:",                30, nl=True)
+        text("    Q/ESC",             30); text("Exit",                     200, nl=True)
+        text("    UP/DOWN",           30); text("Select another animation", 200, nl=True)
+        text("    SPACE",             30); text("Enable/disable animation", 200, nl=True)
+        text("    MOUSE RIGHT CLICK", 30); text("Spawn another sprite",     200, nl=True)
 
         flip()
 
