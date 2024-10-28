@@ -6,8 +6,9 @@ from os      import getcwd
 from os.path import basename
 from os.path import join as path_join
 
-from pygame         import K_DOWN, K_ESCAPE, K_F1, K_SPACE, K_UP, K_q, init, KEYUP, MOUSEBUTTONUP, QUIT, Rect
-from pygame         import Rect
+
+from pygame         import K_DOWN, K_ESCAPE, K_F1, K_F2, K_SPACE, K_UP, K_q
+from pygame         import init, KEYUP, MOUSEBUTTONUP, QUIT, Rect
 from pygame.display import flip, set_mode
 from pygame.event   import get  as events_get
 from pygame.font    import Font
@@ -546,7 +547,8 @@ def main(argv=[]):
     mouse_set_visible(True)
 
     first_sprite = Sprite("monolith-0", (400, 270))
-    sprite_count = 1
+    sprites      = []
+    sprites.append(first_sprite)
 
     af     = AnimationFactory.singleton()
     clock  = EngineClock.singleton()
@@ -567,6 +569,8 @@ def main(argv=[]):
                     return 0
                 elif event.key == K_F1:
                     log_level = (log_level + 1) % 4
+                elif event.key == K_F2:
+                    sprites.append( Sprite("monolith-0", mouse_pos()) )
                 elif event.key == K_SPACE:
                     toggle_animation_state = True
 
@@ -576,9 +580,10 @@ def main(argv=[]):
                     elif event.key == K_DOWN:
                         selected_animation = (selected_animation + 1) % animation_count
             elif event.type == MOUSEBUTTONUP:
-                if event.button != 1: # Middle/Right Click
-                    Sprite("monolith-0", mouse_pos())
-                    sprite_count += 1
+                if event.button == 1: # Left Click
+                    pass
+                else:                 # Middle/Right Click
+                    pass
 
         screen.reset(WHITE)
         clock.tick()
@@ -590,7 +595,7 @@ def main(argv=[]):
         text("    Running Tasks:",  30); text(f"{clock.running_task_count()}", 130, nl=True)
         text("    Paused Tasks:",   30); text(f"{clock.paused_task_count()}",  130, nl=True)
         text("Counters:",           30, nl=True)
-        text("    Sprite:",         30); text(f"{sprite_count}",               130, nl=True)
+        text("    Sprite:",         30); text(f"{len(sprites)}",               130, nl=True)
         text("    Blit:",           30); text(f"{screen.blit_count}",          130, nl=True)
         text("    Animation Load:", 30); text(f"{af.load_count}",              130, nl=True)
 
@@ -638,11 +643,12 @@ def main(argv=[]):
         animation_count = order
 
         text_y = 530
-        text(f"Keys:",                30, nl=True)
-        text("    Q/ESC",             30); text("Exit",                     200, nl=True)
-        text("    UP/DOWN",           30); text("Select another animation", 200, nl=True)
-        text("    SPACE",             30); text("Enable/disable animation", 200, nl=True)
-        text("    MOUSE RIGHT CLICK", 30); text("Spawn another sprite",     200, nl=True)
+        text(f"Keys:",      30, nl=True)
+        text("    Q/ESC",   30); text("Exit",                          200, nl=True)
+        text("    F1",      30); text("Increase log verbosity",        200, nl=True)
+        text("    F2",      30); text("Spawn another sprite at mouse", 200, nl=True)
+        text("    UP/DOWN", 30); text("Select another animation",      200, nl=True)
+        text("    SPACE",   30); text("Enable/disable animation",      200, nl=True)
 
         flip()
 
