@@ -29,8 +29,8 @@
  ],
  "meta": {
   "app": "https://github.com/LibreSprite/LibreSprite/",
-  "version": "1.0",
-  "image": "/home/sheda/c/github/shedatc/wf/assets/animations/src/nav-point.png",
+  "version": "1.1-dev",
+  "image": "nav-point.png",
   "format": "I8",
   "size": { "w": 48, "h": 16 },
   "scale": "1",
