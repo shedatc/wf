@@ -1,6 +1,7 @@
-from .Entity      import Entity
-from .StatCounter import StatCounter
-from .utils       import log_ex
+from .Entity        import Entity
+from .SpriteFactory import SpriteFactory
+from .StatCounter   import StatCounter
+from .utils         import log_ex
 
 class EntityFactory:
 
@@ -23,5 +24,10 @@ class EntityFactory:
         EntityFactory.log(f"Spawning entity:")
         EntityFactory.log(f"    Type:     {type}")
         EntityFactory.log(f"    Position: {position}")
+        e = Entity(type, position)
         self.entity_count += 1
-        return Entity(type, position)
+
+        # Entities are sprites too, so notify their factory.
+        SpriteFactory.singleton().add_sprite(e)
+
+        return e

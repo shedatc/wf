@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from pygame             import Rect
 from pygame             import init as pygame_init
 from pygame.display     import flip as display_flip
@@ -20,6 +22,7 @@ from .ModalInputHandler import ModalInputHandler
 from .Mouse             import Mouse
 from .Region            import Region
 from .Screen            import Screen
+from .SpriteFactory     import SpriteFactory
 from .Square            import Square
 from .colors            import COLOR_RED, COLOR_GREEN, COLOR_BLUE
 from .debug             import DEBUG_REGION, DEBUG_TILE
@@ -368,6 +371,14 @@ class Engine:
                 screen.reset()
                 self.blit()
                 clock.tick()
+
+                # Sort and blit sprites and derived.
+                # Sprites are sorted using their y coordinate, i.e., a sprite
+                # with a higher y will overwrite a sprite with a lower y.
+                sorted_sprites = sorted(SpriteFactory.singleton().sprites,
+                                        key=attrgetter("y"))
+                for s in sorted_sprites:
+                    s.blit()
 
                 # Counters
                 if Config.singleton().must_log("Engine"):

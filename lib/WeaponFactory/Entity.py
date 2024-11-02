@@ -1,13 +1,14 @@
 from os.path import join as path_join
 
-from .Arena      import Arena
-from .Compass    import Compass
-from .Config     import Config
-from .NavPath    import NavPath
-from .Observable import Observable
-from .Physics    import Physics
-from .Sprite     import Sprite
-from .utils      import log_ex
+from .Arena       import Arena
+from .Compass     import Compass
+from .Config      import Config
+from .EngineClock import EngineClock
+from .NavPath     import NavPath
+from .Observable  import Observable
+from .Physics     import Physics
+from .Sprite      import Sprite
+from .utils       import log_ex
 
 # An entity is a sprite that somehow obey the laws of physics.
 #
@@ -38,6 +39,11 @@ class Entity(Sprite, Observable):
                                    orig_angle=orig_angle, angular_speed=angular_speed)
         self._moves      = []
         self.is_selected = False
+
+        EngineClock.singleton().register(self).resume(self)
+
+    def __del__(self):
+        EngineClock.singleton().unregister(self)
 
     def __str__(self):
         return f"<Entity {self.name}>"
@@ -94,6 +100,7 @@ class Entity(Sprite, Observable):
         self._nav_path.set(hops)
         self._look_at(self._nav_path.hop)
         self._jump_to(self._nav_path.hop)
+        EngineClock.singleton().resume(self)
 
     def next_hop(self):
         if self._nav_path.is_done():
@@ -129,8 +136,7 @@ class Entity(Sprite, Observable):
         self._nav_path.blit_debug()
 
     def is_done(self):
-        return Sprite.is_done(self) and self._physics.is_done() and self._moves == []
+        return self._physics.is_done() and self._moves == []
 
-    def add_time(self, t):
-        Sprite.add_time(self, t)
+    def add_time(self, _):
         self.next_move()

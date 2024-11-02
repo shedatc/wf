@@ -2,7 +2,6 @@ from os.path import join as path_join
 
 from .AnimationPlayer import AnimationPlayer
 from .Config          import Config
-from .EngineClock     import EngineClock
 from .utils           import log_ex
 
 # A sprite is something that is animated.
@@ -54,10 +53,13 @@ class Sprite:
             self.log(f"        #{o} {name} at {offset} '{select}' {e}")
             o += 1
 
-        EngineClock.singleton().register(self).resume(self)
-
-    def __del__(self):
-        EngineClock.singleton().unregister(self)
+    def __getattr__(self, name):
+        if name == "x":
+            return self.position[0]
+        elif name == "y":
+            return self.position[1]
+        else:
+            raise AttributeError()
 
     def log(self, msg):
         log_ex(msg, category="Sprite", name=self.name)
@@ -65,8 +67,7 @@ class Sprite:
     # Shift position by the given offset.
     def shift(self, offset):
         (ox, oy)      = offset
-        (x, y)        = self.position
-        self.position = (x + ox, y + oy)
+        self.position = (self.x + ox, self.y + oy)
 
     def set_animation_state(self, name, enable):
         self._animations[name]["enable"] = enable
@@ -86,16 +87,9 @@ class Sprite:
         raise NotImplementedError("Must replace pyxel.text")
 
     def blit(self):
-        (px, py) = self.position
         for name in self._animation_order:
             a = self._animations[name]
             if not a["enable"]:
                 continue
             (ox, oy) = a["offset"]
-            a["animation_player"].blit_at((px + ox, py + oy))
-
-    def is_done(self):
-        return False
-
-    def add_time(self, t):
-        self.blit()
+            a["animation_player"].blit_at((self.x + ox, self.y + oy))
