@@ -44,7 +44,7 @@ class Config:
         path   = path_join(Config._dir(), file_name)
         print(f"- Config - Saving {path}…", file=stderr)
         with open(path, "w") as cf:
-            cf.write( json_dumps(config) )
+            cf.write( json_dumps(config, indent="\t") )
 
     def get(self, file_name, key, default=None):
         config = self.load(file_name)
