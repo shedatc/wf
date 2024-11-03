@@ -143,8 +143,10 @@ class Engine:
             for entity in self.selected_entities:
                 from_square = a.square(entity.position)
                 hops        = Compass.singleton().find_path(from_square, to_square)
-                positions   = a.positions(hops)
-                entity.navigate(positions)
+                if hops is None:
+                    Engine.log(f"Navigation failed for {entity}")
+                    continue
+                entity.navigate( a.positions(hops) )
         ih.addFunc("tactical_navigate_to_mouse", tactical_navigate_to_mouse)
 
         # DEBUG
