@@ -1,12 +1,13 @@
 from math              import floor
 from pygame            import Color, Rect, Surface
+from pygame.draw       import line as draw_line
 from pytmx             import TiledObjectGroup, TiledTileLayer
 from pytmx.util_pygame import load_pygame as tmx_load
 
 from .Assets import Assets
 from .Screen import Screen
-from .colors import COLOR_BLACK
-from .debug  import DEBUG_BLIT
+from .colors import COLOR_BLACK, COLOR_BLUE
+from .debug  import DEBUG_BLIT, DEBUG_GRID
 from .utils  import log_ex
 
 DEBUG_PROPERTIES = False # Log setting/getting properties
@@ -70,6 +71,25 @@ class Tilemap:
             else:
                 Tilemap.log(f"Unknown Layer Type: {layer}")
         self.tile_layer_count = tile_layer_index
+
+        if DEBUG_GRID:
+            grid = Surface(self.surface_rect.size)
+
+            # Draw horizontals…
+            for y in range(0, self.surface_rect.bottom, self.tile_rect.height):
+                start_pos = (                      0, y)
+                end_pos   = (self.surface_rect.right, y)
+                draw_line(grid, COLOR_BLUE, start_pos, end_pos)
+            # … and verticals.
+            for x in range(0, self.surface_rect.right, self.tile_rect.width):
+                start_pos = (x, 0)
+                end_pos   = (x, self.surface_rect.bottom)
+                draw_line(grid, COLOR_BLUE, start_pos, end_pos)
+
+            grid.set_alpha(50)
+            grid.set_colorkey(COLOR_BLACK)
+
+            self.surface.blit(grid, Rect((0, 0), self.surface_rect.size))
 
     def _handle_object_group(self, object_group):
         assert type(object_group) is TiledObjectGroup

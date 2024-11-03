@@ -1,4 +1,5 @@
 DEBUG_BLIT   = False
 DEBUG_CLOCK  = False
+DEBUG_GRID   = False
 DEBUG_REGION = False
-DEBUG_TILE   = False
+DEBUG_TILE   = True
