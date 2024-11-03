@@ -133,7 +133,8 @@ class Entity(Sprite, Observable):
         if not Config.singleton().must_log("Entity"):
             return
         self._physics.blit_debug()
-        self._nav_path.blit_debug()
+        if self.is_selected:
+            self._nav_path.blit_debug()
 
     def is_done(self):
         return self._physics.is_done() and self._moves == []
