@@ -1,5 +1,6 @@
 from math           import radians
-from pygame         import FULLSCREEN, Rect, SCALED
+from pygame         import DOUBLEBUF, FULLSCREEN, OPENGL, Rect, SCALED
+from pygame.display import get_desktop_sizes, get_driver, get_wm_info, Info, list_modes
 from pygame.display import set_caption, set_mode
 from pygame.draw    import arc  as draw_arc
 from pygame.draw    import line as draw_line
@@ -31,21 +32,74 @@ class Screen:
     def __init__(self):
         config = Config.singleton().load("screen.json")
         size   = (config["width"], config["height"])
+        if "caption" in config:
+            caption = config["caption"]
+        else:
+            caption = None
 
-        flags = 0
+        flags     = 0
+        flags_str = []
+        if "doublebuf" in config and config["doublebuf"] is True:
+            flags |= DOUBLEBUF
+            flags_str.append("DOUBLEBUF")
         if "fullscreen" in config and config["fullscreen"] is True:
             flags |= FULLSCREEN
+            flags_str.append("FULLSCREEN")
+        if "opengl" in config and config["opengl"] is True:
+            flags |= OPENGL
+            flags_str.append("OPENGL")
         if "scaled" in config and config["scaled"] is True:
             flags |= SCALED
-        self.surface = set_mode(size, flags)
+            flags_str.append("SCALED")
+
+        Screen.log(f"Screen:")
+        Screen.log(f"    Flags:   {', '.join(flags_str)}")
+        Screen.log(f"    Size:    {sz(size)}")
+        Screen.log(f"    Caption: {caption}")
+        Screen.log(f"    Available Modes:")
+        for w, h in list_modes():
+            Screen.log(f"        {w}x{h}")
+        Screen.log(f"    Available Desktop Sizes:")
+        for w, h in get_desktop_sizes():
+            Screen.log(f"        {w}x{h}")
+
+
+        self.surface = set_mode(size, flags, depth=8)
         rect         = self.surface.get_rect()
         self.size    = rect.size
-        if "caption" in config:
-            set_caption(config["caption"])
+        if caption is not None:
+            set_caption(caption)
         self._font = Font(None, 15)
-        Screen.log(f"Screen:")
-        Screen.log(f"    Size:    {sz(size)} → {sz(rect.size)}")
-        Screen.log(f"    Caption: {config['caption']}")
+
+        i = Info()
+        Screen.log(f"Display:")
+        Screen.log(f"    Backend:               {get_driver()}")
+        Screen.log(f"    Size:                  {i.current_w}x{i.current_h}")
+        Screen.log(f"    Hardware Acceleration: {i.hw}")
+        Screen.log(f"    Windowed:              {i.wm}")
+        if i.video_mem == 0:
+            video_mem_str = "Unknown"
+        else:
+            video_mem_str = "{i.video_mem}MB"
+        Screen.log(f"    Video Memory:          {video_mem_str}")
+        Screen.log(f"    Bit Size:              {i.bitsize} bits/pixel")
+        Screen.log(f"    Byte Size:             {i.bytesize} bytes/pixel")
+        Screen.log(f"    Masks:                 {i.masks}")
+        Screen.log(f"    Shifts:                {i.shifts}")
+        Screen.log(f"    Losses:                {i.losses}")
+        Screen.log(f"    Hardware Surface Acceleration:")
+        Screen.log(f"        Blitting:             {i.blit_hw}")
+        Screen.log(f"        Colorkey Blitting:    {i.blit_hw_CC}")
+        Screen.log(f"        Pixel alpha Blitting: {i.blit_hw_A}")
+        Screen.log(f"    Software Surface Acceleration:")
+        Screen.log(f"        Blitting:             {i.blit_sw}")
+        Screen.log(f"        Colorkey Blitting:    {i.blit_sw_CC}")
+        Screen.log(f"        Pixel alpha Blitting: {i.blit_sw_A}")
+
+        i = get_wm_info()
+        Screen.log(f"Windowing System:")
+        for k, v in i.items():
+            Screen.log(f"        {k}: {v}")
 
         self.blit_count = StatCounter()
 
