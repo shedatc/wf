@@ -37,7 +37,7 @@ class AnimationFactory:
         AnimationFactory.log(f"Version:     {version}")
         AnimationFactory.log(f"Format:      {format}")
 
-        if version != "1.0":
+        if version not in ["1.0", "1.1-dev"]:
             raise RuntimeError("Libresprite spritesheet version not supported")
         if format not in ["I8", "RGBA8888"]:
             raise RuntimeError("Libresprite spritesheet format not supported")
