@@ -56,11 +56,11 @@ class Entity(Sprite, Observable):
 
     def select(self):
         self.is_selected = True
-        self.set_animation_state("entity", True)
+        self.set_animation_state("selection", True)
 
     def unselect(self):
         self.is_selected = False
-        self.set_animation_state("entity", False)
+        self.set_animation_state("selection", False)
 
     def is_moving(self):
         return self._physics.is_translating()
