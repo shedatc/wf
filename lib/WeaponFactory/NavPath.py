@@ -50,13 +50,17 @@ class NavPath:
         a          = Arena.singleton()
         hop_square = a.square(self.hop)
         if not c.is_obstacle(hop_square):
-            return
+            return True
         if len(self.hops) == 0:
             self.log(f"Obstacle at destination {hop_square} ({self.hop}); stop here")
             self.hop = None
-            return
+            return True
         self.log(f"Obstacle at next hop {hop_square} ({self.hop}); renavigate")
-        c.find_path(self.entity_square(), self.destination_square())
+        hops = c.find_path(self.entity_square(), self.destination_square())
+        if hops is None:
+            return False
+        self.set(hops)
+        return True
 
     def entity_square(self):
         return Arena.singleton().square(self.entity.position)

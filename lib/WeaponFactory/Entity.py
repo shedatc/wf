@@ -37,6 +37,7 @@ class Entity(Sprite, Observable):
         self._physics    = Physics(self,
                                    speed=speed,
                                    orig_angle=orig_angle, angular_speed=angular_speed)
+        self._bubble     = None
         self._moves      = []
         self.is_selected = False
 
@@ -53,6 +54,10 @@ class Entity(Sprite, Observable):
 
     def log(self, msg):
         log_ex(msg, category="Entity", name=self.name)
+
+    def bubble(self, name):
+        self.animate("bubbles", animation_name=name, enable=True)
+        self._bubble = name
 
     def select(self):
         self.is_selected = True
@@ -106,7 +111,10 @@ class Entity(Sprite, Observable):
         if self._nav_path.is_done():
             return
 
-        self._nav_path.next_hop()
+        status = self._nav_path.next_hop()
+        # FIXME Find a better way to get navigation data
+        if not status:
+            self.bubble("Exclamation")
         if self._nav_path.is_done():
             Entity.log(self, f"next_hop: Destination {self.position} reached")
         else:
