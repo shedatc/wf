@@ -23,7 +23,8 @@ class Sprite:
             name             = animation_config["name"]
             select           = animation_config["select"]
             enable           = animation_config["enable"]
-            animation_player = AnimationPlayer(name, select=select, enable=enable)
+            is_loop          = animation_config["is_loop"]
+            animation_player = AnimationPlayer(name, select=select, enable=enable, is_loop=is_loop)
             if enable:
                 animation_player.show()
                 e = "enabled"
@@ -69,15 +70,19 @@ class Sprite:
         (ox, oy)      = offset
         self.position = (self.x + ox, self.y + oy)
 
-    def set_animation_state(self, name, enable):
-        self._animations[name]["enable"] = enable
-        player = self._animations[name]["animation_player"]
-        if enable:
-            player.resume()
-            player.show()
-        else:
-            player.pause()
-            player.hide()
+    def animate(self, player_name, animation_name=None, enable=None):
+        assert animation_name is not None or enable is not None
+        player = self._animations[player_name]["animation_player"]
+        if animation_name is not None:
+            player.select(animation_name)
+        if enable is not None:
+            if enable:
+                player.resume()
+                player.show()
+            else:
+                player.pause()
+                player.hide()
+            self._animations[player_name]["enable"] = enable
 
     def blit_debug_overlay(self):
         if not Config.singleton().must_log("Sprite"):

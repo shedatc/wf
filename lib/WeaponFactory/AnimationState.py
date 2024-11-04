@@ -25,6 +25,9 @@ class AnimationState:
     def __del__(self):
         EngineClock.singleton().unregister(self)
 
+    def set_loop(self, enable):
+        self._is_loop = enable 
+
     def rewind(self):
         AnimationState.log(f"Rewinding…")
         self.current_frame_index    = 0

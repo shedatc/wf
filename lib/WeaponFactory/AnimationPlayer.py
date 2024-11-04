@@ -7,11 +7,13 @@ class AnimationPlayer:
     def log(cls, msg):
         log_ex(msg, category=cls.__name__)
 
-    def __init__(self, group_name, select="Idle", enable=False):
+    def __init__(self, group_name, select="Idle", enable=False, is_loop=True):
         self._current = None
         self.visible  = False
 
         (self.surface, self.animations) = AnimationFactory.singleton().load(group_name)
+        for _, a in self.animations.items():
+            a.set_loop(is_loop)
         self.current = self.animations[select]
         if enable:
             self.current.resume()

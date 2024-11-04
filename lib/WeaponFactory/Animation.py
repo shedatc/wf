@@ -11,6 +11,10 @@ class Animation:
     def __repr__(self):
         return f"<Animation '{self.name}' at frame '{self._cf().name}'>"
 
+    def set_loop(self, enable):
+        self._state.set_loop(enable)
+        self._is_loop = enable 
+
     # Current Frame
     def _cf(self):
         return self._frames[self._state.current_frame_index]
@@ -31,4 +35,6 @@ class Animation:
         return self
 
     def blit_at(self, position):
+        if self._state.is_done():
+            return
         self._cf().blit_at(position)
