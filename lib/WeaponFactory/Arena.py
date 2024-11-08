@@ -1,12 +1,16 @@
 import pygame
 
-from pygame         import Rect
+from pygame         import Rect, Surface
 from pygame.display import set_mode
+from pygame.draw    import rect as draw_rect
 
 from .Assets  import Assets
 from .Compass import Compass
 from .Config  import Config
+from .Screen  import Screen
 from .Tilemap import Tilemap
+from .colors  import COLOR_GREEN, COLOR_RED
+from .debug   import DEBUG_COMPASS
 from .utils   import log_ex, sz
 
 OBSTACLE = 0
@@ -56,8 +60,25 @@ class Arena:
                         msg += ' '
             Arena.log(msg)
 
+    def _blit_debug_compass_obstacles(self, source_rect):
+        screen    = Screen.singleton()
+        obstacles = Surface(self.surface_rect.size)
+        obstacles.set_alpha(80)
+        for v in range(self.rect.height):
+            for u in range(self.rect.width):
+                if Compass.singleton().is_obstacle((u, v)):
+                    color = COLOR_RED
+                else:
+                    color = COLOR_GREEN
+                (x, y) = (u * self.square_size[0], v * self.square_size[1])
+                r = Rect((x, y), self.square_size)
+                draw_rect(obstacles, color, r)
+        screen.surface.blit(obstacles, (0, 0), source_rect)
+
     def blit(self, source_rect):
         self._tm.blit(source_rect)
+        if DEBUG_COMPASS:
+            self._blit_debug_compass_obstacles(source_rect)
 
     def __init__(self, name):
         assert Arena._singleton is None
