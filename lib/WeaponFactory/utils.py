@@ -44,3 +44,6 @@ def log_current_context():
 def sz(size):
     (w, h) = size
     return f"{w}x{h}"
+
+def sq(square, point):
+    return f"[{square[0]}, {square[1]}] ⇔ ({point[0]}, {point[1]})"

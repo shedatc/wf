@@ -137,12 +137,13 @@ class Engine:
 
         def tactical_navigate_to_mouse():
             a         = Arena.singleton()
+            c         = Compass.singleton()
             to_square = a.square( Mouse.world_point() )
-            if a.is_obstacle(to_square):
+            if c.is_obstacle(to_square):
                 return
             for entity in self.selected_entities:
                 from_square = a.square(entity.position)
-                hops        = Compass.singleton().find_path(from_square, to_square)
+                hops        = c.find_path(from_square, to_square)
                 if hops is None:
                     Engine.log(f"Navigation failed for {entity}")
                     entity.bubble("Error")
@@ -246,7 +247,7 @@ class Engine:
     def init_arena(self, name):
         a = Arena(name)
         Camera(a.surface_rect, a.square_size)
-        Compass(a.obstacles_matrix)
+        Compass( a.build_obstacles_matrix() )
 
     def init_scene(self):
         pass
@@ -335,7 +336,7 @@ class Engine:
                                           .screen_point(mouse_square_rect.topleft)
 
         # Show if the square is an obstacle or not.
-        is_obstacle = a.is_obstacle(a.square(mouse_position))
+        is_obstacle = Compass.singleton().is_obstacle(a.square(mouse_position))
         if is_obstacle:
             color = COLOR_RED
         else:

@@ -8,7 +8,7 @@ from .Config          import Config
 from .EngineClock     import EngineClock
 from .Screen          import Screen
 from .colors          import COLOR_BLUE
-from .utils           import log_ex
+from .utils           import log_ex, sq
 
 # A navigation path is a list of hops. A hop is a point in world coordinates.
 class NavPath:
@@ -52,14 +52,14 @@ class NavPath:
         if not c.is_obstacle(hop_square):
             return True
         if len(self.hops) == 0:
-            self.log(f"Obstacle at destination {hop_square} ({self.hop}); stop here")
+            self.log(f"Obstacle at destination {sq(hop_square, self.hop)}; stop here")
             self.hop = None
             return True
-        self.log(f"Obstacle at next hop {hop_square} ({self.hop}); renavigate")
+        self.log(f"Obstacle at next hop {sq(hop_square, self.hop)}; renavigate")
         hops = c.find_path(self.entity_square(), self.destination_square())
         if hops is None:
             return False
-        self.set(hops)
+        self.set( a.positions(hops) )
         return True
 
     def entity_square(self):

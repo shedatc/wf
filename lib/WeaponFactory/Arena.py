@@ -47,19 +47,6 @@ class Arena:
                             msg += f" {entity.name}"
                         Arena.log(msg)
 
-    def log_obstacles_matrix(self):
-        if not Config.singleton().must_log("Arena"):
-            return
-        Arena.log(f"Obstacles Matrix:")
-        for v in range(self.rect.height):
-            msg = ''
-            for u in range(self.rect.width):
-                    if self.obstacles_matrix[v][u] == OBSTACLE:
-                        msg += 'x'
-                    else:
-                        msg += ' '
-            Arena.log(msg)
-
     def _blit_debug_compass_obstacles(self, source_rect):
         screen    = Screen.singleton()
         obstacles = Surface(self.surface_rect.size)
@@ -119,14 +106,6 @@ class Arena:
             assert sv_width  == self.width,  "SV image width must match tilemap width"
             assert sv_height == self.height, "SV image height must match tilemap height"
 
-        # Obstacles:
-        self.obstacles_matrix = [[WALKABLE] * self.rect.width for _ in range(self.rect.height)]
-        for y in range(self.rect.height):
-            for x in range(self.rect.width):
-                if self._tm.is_obstacle(x, y):
-                    self.obstacles_matrix[y][x] = OBSTACLE
-        # self.log_obstacles_matrix()
-
         # Entities:
         self.entities_matrix = [[1] * self.rect.width for _ in range(self.rect.height)]
         for y in range(self.rect.height):
@@ -136,9 +115,13 @@ class Arena:
 
         Arena._singleton = self
 
-    def is_obstacle(self, square):
-        (x, y) = square
-        return self.obstacles_matrix[y][x] == OBSTACLE
+    def build_obstacles_matrix(self):
+        om = [[WALKABLE] * self.rect.width for _ in range(self.rect.height)]
+        for y in range(self.rect.height):
+            for x in range(self.rect.width):
+                if self._tm.is_obstacle(x, y):
+                    om[y][x] = OBSTACLE
+        return om
 
     # Return the point in world coordinates corresponding to the center of the
     # given square.
@@ -203,13 +186,10 @@ class Arena:
             raise AssertionError(f"Event not supported: {event}")
 
     def entity_spawned(self, entity, square):
-        Arena.log(f"Entity {entity.name} spawned at {square}")
-
         (x, y) = square
+        Arena.log(f"Entity {entity.name} spawned at [{x}, {y}]")
         self.entities_matrix[y][x].append(entity)
-        self.obstacles_matrix[y][x] = OBSTACLE
-        Compass.singleton().set_obstacle(square)
-        Arena.log(f"Obstacle at square {square}")
+        Compass.singleton().change(square, False) # obstacle
         self.log_entities_matrix()
 
     def entity_moved(self, entity, old_position, new_position):
@@ -223,17 +203,13 @@ class Arena:
         (ox, oy) = old_square
         self.entities_matrix[oy][ox].remove(entity)
         if (len(self.entities_matrix[oy][ox]) == 0):
-            self.obstacles_matrix[oy][ox] = WALKABLE
-            Compass.singleton().set_walkable(old_square)
-            Arena.log(f"No more obstacle at square {old_square}")
+            Compass.singleton().change(old_square, True) # walkable
 
         (nx, ny) = new_square
         self.entities_matrix[ny][nx].append(entity)
         assert len(self.entities_matrix[ny][nx]) == 1, "Stacking not allowed for now"
 
-        self.obstacles_matrix[ny][nx] = OBSTACLE
-        Compass.singleton().set_obstacle(new_square)
-        Arena.log(f"Obstacle at square {new_square}")
+        Compass.singleton().change(new_square, False) # obstacle
         self.log_entities_matrix()
 
     def get_square_properties(self, square):

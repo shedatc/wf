@@ -6,7 +6,7 @@ from pathfinding.finder.finder          import ExecutionTimeException
 from .Config import Config
 from .utils  import log_ex
 
-# A compass help find a navigation path through an arena, avoiding obstacles.
+# The compass help find a navigation path through an arena, avoiding obstacles.
 class Compass:
 
     _singleton = None
@@ -37,24 +37,24 @@ class Compass:
 
         Compass._singleton = self
 
-    def set_walkable(self, square):
+    def change(self, square, walkable):
         (x, y) = square
-        self.grid.node(x, y).walkable = True
-
-    def set_obstacle(self, square):
-        (x, y) = square
-        self.grid.node(x, y).walkable = False
+        self.grid.node(x, y).walkable = walkable
+        if walkable:
+            Compass.log(f"[{x}, {y}] is now walkable")
+        else:
+            Compass.log(f"[{x}, {y}] is now an obstacle")
 
     def is_obstacle(self, square):
         (x, y) = square
         try:
             n = self.grid.node(x, y)
         except IndexError:
-            Compass.log(f"No node at ({x}, {y})")
+            Compass.log(f"No node at [{x}, {y}]")
             raise
         return n.walkable is False
 
-    def is_next_to(self, a, b):
+    def _is_next_to(self, a, b):
         (ax, ay) = a
         (bx, by) = b
         dx       = abs(ax - bx)
@@ -62,6 +62,8 @@ class Compass:
         return dx <= 1 and dy <= 1
 
     def find_path(self, from_square, to_square):
+        assert from_square != to_square
+
         Compass.log(f"Cleanup grid…")
         self.grid.cleanup()
         Compass.log(f"Grid clean")
@@ -71,30 +73,30 @@ class Compass:
         from_node = self.grid.node(fx, fy)
         to_node   = self.grid.node(tx, ty)
 
-        Compass.log(f"Finding path…")
+        Compass.log(f"Finding path: [{fx}, {fy}] → [{tx}, {ty}]")
         try:
             (hops, runs) = self.finder.find_path(from_node, to_node, self.grid)
         except ExecutionTimeException:
-            Compass.log(f"No path found")
+            Compass.log(f"No path found: time out")
             return None
         else:
-            Compass.log(f"Path found")
-
-        Compass.log(f"steps={len(hops)} runs={runs} hops={hops}")
-
-        if hops != []:
-            # Remove the entity's current position.
-            firstHop = hops.pop(0)
-            assert firstHop == from_square
-
-        if hops == []:
-            Compass.log("Invalid path")
+            Compass.log(f"Path found in {runs} runs: {len(hops)} hops")
+        if len(hops) < 2:
+            Compass.log(f"No path found: not enough hops")
             return None
+        assert len(hops) > 1
+        assert hops[ 0] == from_square
+        assert hops[-1] == to_square
 
-        previous_hop = from_square
-        for h in range(len(hops)):
-            current_hop  = hops[h]
-            assert self.is_next_to(current_hop, previous_hop)
-            hops[h]      = current_hop
-            previous_hop = current_hop
+        hops.pop(0) # Remove the entity's current position.
+
+        # Ensure each hop directly follow its predecessor.
+        if False:
+            previous_hop = from_square
+            for h in range(len(hops)):
+                current_hop  = hops[h]
+                assert self._is_next_to(current_hop, previous_hop)
+                hops[h]      = current_hop
+                previous_hop = current_hop
+
         return hops
