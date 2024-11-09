@@ -224,8 +224,7 @@ class Arena:
         self.entities_matrix[oy][ox].remove(entity)
         if (len(self.entities_matrix[oy][ox]) == 0):
             self.obstacles_matrix[oy][ox] = WALKABLE
-            if False:
-                Compass.singleton().set_walkable(old_square)
+            Compass.singleton().set_walkable(old_square)
             Arena.log(f"No more obstacle at square {old_square}")
 
         (nx, ny) = new_square
