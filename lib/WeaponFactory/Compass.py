@@ -3,7 +3,8 @@ from pathfinding.core.grid              import Grid
 from pathfinding.finder.a_star          import AStarFinder
 from pathfinding.finder.finder          import ExecutionTimeException
 
-from .utils import log_ex
+from .Config import Config
+from .utils  import log_ex
 
 # A compass help find a navigation path through an arena, avoiding obstacles.
 class Compass:
@@ -26,10 +27,12 @@ class Compass:
     def __init__(self, obstacles_matrix):
         assert Compass._singleton is None
 
-        # FIXME Make time_limit configurable
+        config     = Config.singleton().load("compass.json")
+        time_limit = config["time_limit"]
+
         self.grid   = Grid(matrix=obstacles_matrix)
         self.finder = AStarFinder(diagonal_movement=DiagonalMovement.always,
-                                  time_limit=0.5)
+                                  time_limit=time_limit)
         Compass.log(f"Finder: {self.finder.__class__}")
 
         Compass._singleton = self
