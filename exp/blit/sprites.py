@@ -2,13 +2,14 @@ from operator import attrgetter
 
 from os import getcwd
 
+import pygame.image
+
 from pygame         import K_DOWN, K_ESCAPE, K_F1, K_LEFT, K_RIGHT, K_q, K_UP
 from pygame         import init, KEYUP, MOUSEBUTTONUP, QUIT, Rect
 from pygame.draw    import rect as draw_rect
 from pygame.display import flip, set_mode
 from pygame.event   import get  as events_get
 from pygame.font    import Font
-from pygame.image   import load as image_load
 from pygame.mouse   import get_pos     as mouse_pos
 from pygame.mouse   import set_visible as mouse_set_visible
 
@@ -48,6 +49,12 @@ def text(msg, position, color=BLACK, nl=False):
         if nl:
             text_y += 10
     Screen.singleton().screen_blit(text_surf, position)
+
+def image_load(path):
+    surface = pygame.image.load(path)
+    surface.convert()
+    surface.convert_alpha()
+    return surface
 
 class Screen:
 

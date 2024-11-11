@@ -2,9 +2,9 @@
 from os           import getenv
 from os.path      import exists as path_exists
 from os.path      import join   as path_join
-from pygame.image import load as image_load
 
 from .Config import Config
+from .image  import image_load
 from .utils  import log_ex
 
 class Assets:

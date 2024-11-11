@@ -1,14 +1,13 @@
 from json import loads as json_load
 
 from os.path import basename
-from os.path import join as path_join
 
-from pygame       import Rect
-from pygame.image import load as image_load
+from pygame import Rect
 
 from .Animation      import Animation
 from .AnimationFrame import AnimationFrame
 from .Assets         import Assets
+from .image          import image_load
 from .utils          import log_ex
 
 class AnimationFactory:
