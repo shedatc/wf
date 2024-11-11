@@ -8,9 +8,9 @@ class AnimationState:
         log_ex(msg, category=cls.__name__)
 
     def __init__(self, frames, is_loop):
-        self._is_loop            = is_loop
         self._last_frame_index   = len(frames) - 1
         self.current_frame_index = 0
+        self.is_loop             = is_loop
 
         self._duration  = frames[0].duration # Remaining duration of the current frame.
         self._durations = []                 # Store the duration of each frame.
@@ -24,9 +24,6 @@ class AnimationState:
 
     def __del__(self):
         EngineClock.singleton().unregister(self)
-
-    def set_loop(self, enable):
-        self._is_loop = enable 
 
     def rewind(self):
         AnimationState.log(f"Rewinding…")
@@ -44,12 +41,12 @@ class AnimationState:
         self.current_frame_index += 1
         if self.current_frame_index <= self._last_frame_index:
             self._duration = self._durations[self.current_frame_index]
-        elif self._is_loop: # and self.current_frame_index > self._last_frame_index
+        elif self.is_loop: # and self.current_frame_index > self._last_frame_index
             self.rewind()
         AnimationState.log(f"Now at frame {self.current_frame_index}/{self._last_frame_index}")
 
     def is_done(self):
-        return self.current_frame_index > self._last_frame_index and not self._is_loop
+        return self.current_frame_index > self._last_frame_index and not self.is_loop
 
     # Add time to the current frame. If adding more time than necessary to
     # finish it, use this time for the next frame, etc…

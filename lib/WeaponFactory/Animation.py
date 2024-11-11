@@ -4,7 +4,6 @@ class Animation:
 
     def __init__(self, name, frames, is_loop=True):
         self._frames  = frames
-        self._is_loop = is_loop
         self._state   = AnimationState(frames, is_loop)
         self.name     = name
 
@@ -12,15 +11,15 @@ class Animation:
         return f"<Animation '{self.name}' at frame '{self._cf().name}'>"
 
     def set_loop(self, enable):
-        self._state.set_loop(enable)
-        self._is_loop = enable 
+        self._state.is_loop = enable
 
     # Current Frame
     def _cf(self):
         return self._frames[self._state.current_frame_index]
 
+    # Get a copy of the animation but without its state.
     def copy(self):
-        return Animation(self.name, self._frames, is_loop=self._is_loop)
+        return Animation(self.name, self._frames, is_loop=self._state.is_loop)
 
     def rewind(self):
         self._state.rewind()
