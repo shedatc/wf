@@ -7,8 +7,6 @@ from pygame.event       import custom_type as custom_event_type
 
 from math import floor
 
-if False:
-    from .Drone          import Drone
 from .Arena             import Arena
 from .ArenaView         import ArenaView
 from .Camera            import Camera
