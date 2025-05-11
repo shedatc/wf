@@ -1,0 +1,196 @@
+#+TITLE: The Unité Handbook
+#+LINK: wikipedia  https:en.wikipedia.org/wiki/%s
+
+* Gameplay
+
+Unité is an arcade [[wikipedia:Real-time_strategy][real-time stategy game (RTS)]]. The player manage resources and
+build an army in order to defeat his opponent.
+
+The /arcade/ term is used to emphasis that Unité is a game of skill, which
+somewhat contrast with the common view on the RTS genre. For example, the user
+interface is kept limited on purpose.
+
+* Game Engine
+
+[[https://github.com/shedatc/wf][Weapon Factory]] is the underlying game engine. It is written in Python and is
+built on top of the following components:
+- [[https://pygame.org][Pygame]] for:
+  - rendering
+  - image support
+  - input (keyboard and mouse)
+- [[https://github.com/bitcraft/PyTMX][PyTMX]] ≥ 3.31, for tilemap support
+- [[https://github.com/brean/python-pathfindingpathfinding][pathfinding]] ≥ 1.0.1, for path finding
+
+** Rendering
+[[file:../lib/WeaponFactory/Screen.py::class Screen:][The screen]] is the surface corresponding onto things like sprites get rendered.
+It expose the primitives allowing to blit and draw things.
+
+Note that blit is avoided if the destination is out of the screen, i.e., if it
+is outside of [[file:../lib/WeaponFactory/Camera.py::class Camera][camera]]'s range.
+
+[[file:../lib/WeaponFactory/Camera.py::class Camera][The camera]] represents a portion of the screen. It follow that there's two
+coordinates systems:
+- screen coordinates
+- and world coordinates.
+
+Both systems have their origin in the top left corner. Passing from one system
+to the other is done throught the camera:
+- [[file:~/c/github/shedatc/wf/lib/WeaponFactory/Camera.py::def screen_point(][screen_point(world_point)]]
+- [[file:~/c/github/shedatc/wf/lib/WeaponFactory/Camera.py::def screen_rect(][screen_rect(world_rect)]]
+- [[file:~/c/github/shedatc/wf/lib/WeaponFactory/Camera.py::def world_point(][world_point(screen_point)]]
+- [[file:~/c/github/shedatc/wf/lib/WeaponFactory/Camera.py::def world_rect(][world_rect(screen_rect)]]
+
+** Sprites and Animations
+
+[[file:../lib/WeaponFactory/Animation.py::class Animation][An animation]] is an ordered list of [[file:../lib/WeaponFactory/AnimationFrame.py::class AnimationFrame][frames]]. To help debugging, a name must be
+given to each animation. An animation can be never ending (=is_loop is True=) or
+one shot (=is_loop is False=).
+
+[[file:../lib/WeaponFactory/AnimationState.py::class AnimationState][A state]] is bound to each animation. It tell what is the
+current frame and what to do when the last one is reached:
+- stop (=is_loop is False=)
+- or go back to the first one (=is_loop is True=).
+
+[[file:../lib/WeaponFactory/AnimationFrame.py::class AnimationFrame][A frame]] is a duration in milliseconds bound to a rectangle of pixels (rect)
+taken from a surface. To help debugging, a name must be given to each frame.
+
+[[file:../lib/WeaponFactory/AnimationFactory.py::class AnimationFactory][The animation factory]] is responsible for loading a group of animations from a
+spritesheet (see [[id:4f6d3675-2fb1-454e-85f8-e120b55d49b6][creating spritesheets]]). The animations share a common surface.
+
+[[file:../lib/WeaponFactory/AnimationPlayer.py::class AnimationPlayer][An animation player]] use the animation factory to load a group of animations. It
+then allow to select the animation to play, pause/resume it and hide/show it.
+
+[[file:../lib/WeaponFactory/Sprite.py::class Sprite][A sprite]] aggregate an ordered list of animation players. Each player is
+associated with:
+- an offset, relative to the sprite's position, telling where it must be blit
+- and a state enabled/disabled telling if it must be blit or not.
+
+[[file:../lib/WeaponFactory/SpriteFactory.py::class SpriteFactory][The sprite factory]] help keep track of created sprites.
+
+** Core
+Engine
+EngineClock
+
+** Entity
+
+[[file:../lib/WeaponFactory/Entity.py::class Entity][An entity]] is a sprite that obey [[file:../lib/WeaponFactory/Physics.py::class Physics][physics]] and have path finding capabilities via
+[[file:../lib/WeaponFactory/NavPath.py::class NavPath][navigation path]] and [[file:../lib/WeaponFactory/Compass.py::class Compass][the compass]].
+
+** Arena and Tilemap
+
+[[file:../lib/WeaponFactory/Arena.py::class Arena][The arena]] is the terrain where the game takes place. It is made of two types of
+information: rendering information and logic information.
+
+Rendering information are used to render things on screen when visible through
+the camera.
+
+Logic information are used by the game engine to, e.g., compute entities
+navigation path, etc…
+
+Both types of information are taken from the underlying [[file:../lib/WeaponFactory/Tilemap.py::class Tilemap][tilemap]]. The tiles and
+layers that make the tilemap are mostly rendering information but their
+properties are also used to carry logic information.
+
+The following tile properties are used:
+- =level= :: Give the level (altitude) to which the tile belong. 0 is the lowest
+  and 5 the highest.
+- =is_obstacle= :: Tell if entities can pass through the tile (false) or not
+  (true). See [[id:be2ad545-0cb5-41fc-bf33-79783044633b][Path Finding]].
+
+Each tile of the tilemap map to a square of the arena.
+
+A tile is made of 8 ⨉ 8 pixels. An isometric tile is made of 4 ⨉ 2 tiles as
+shown [[tile-vs-isometric-tile][below]]. It's a rectangle whose size is 32 ⨉ 16 pixels. The tile is the
+dotted red square (the size of a dot represents the size of a pixel) while the
+isometric tile is the whole image.
+
+#+CAPTION: Tile vs Isometric Tile
+#+NAME: tile-vs-isometric-tile
+[[file:isometric-tile.png]]
+
+Tilemaps are stored in TMX format and manipulated using [[https://github.com/bitcraft/PyTMX][PyTMX]].
+
+** Physics
+Physics
+Rotation
+Translation
+Vector
+
+** Path Finding
+:PROPERTIES:
+:ID:       be2ad545-0cb5-41fc-bf33-79783044633b
+:END:
+
+[[file:../lib/WeaponFactory/Arena.py::class Arena][The arena]]'s =is_obstacle= property is used to build the obstacles matrix fed
+into [[file:../lib/WeaponFactory/Compass.py::class Compass][the compass]].
+
+A [[file:../lib/WeaponFactory/NavPath.py::class NavPath][navigation path]] is an ordered list of hops to follow in order to reach a
+destination.
+
+** Input Handling
+Mouse
+InputHandler
+ModalInputHandler
+
+* Tools
+** Create Tilemaps with Tiled Map Editor
+
+The [[https://www.mapeditor.org/][Tiled Map Editor]] is used to build tilemaps. They are exported to TMX format
+and manipulated using [[https://github.com/bitcraft/PyTMX][PyTMX]].
+
+Tested with the following versions:
+- 1.11.0
+
+** Create Spritesheets with Libresprite
+:PROPERTIES:
+:ID:       4f6d3675-2fb1-454e-85f8-e120b55d49b6
+:END:
+:RESOURCES:
+- https://libresprite.github.io/
+:END:
+
+Using Libresprite to produce animations and export them as spritesheets.
+
+Source files are in =assets/animations/src/*.ase=.
+
+Use the /Export Sprite Sheet/ feature as follow:
+
+| Parameter                     | Value            | Notes                       |
+|-------------------------------+------------------+-----------------------------|
+| Sheet Type                    | Horizontal Strip |                             |
+| Padding                       | no               |                             |
+| Layers                        | Visible layers   |                             |
+| Frames                        | All frames       |                             |
+| Output File → Select File     | foo.png          |                             |
+| JSON Data → Select File       | foo.json         |                             |
+| JSON Data → Type              | Array            |                             |
+| JSON Data → Meta → Layers     | no               |                             |
+| JSON Data → Meta → Frame Tags | yes              | Used to name the animations |
+| Open generated sprite sheet   | no               |                             |
+
+Once exported, edit =foo.json= to adjust the meta → image property. It usually
+contains an absolute path to the underlying image. Remove the path to only leave
+the image name:
+
+: /path/to/foo.png → foo.png
+
+Tested with the following versions:
+- 1.0
+- 1.1-dev
+
+Formats: I8, RGBA8888
+
+** Create Isometric and Animated Sprites with Blender 3D
+:RESOURCES:
+- https://www.blender.org/
+:END:
+Using Blender 3D to produce isometric animated sprites and export them as
+spritesheets.
+*** Camera
+:RESOURCES:
+- https://www.blender3darchitect.com/architectural-visualization/create-true-isometric-camera-architecture/
+:END:
+
+Orthographic camera with (54.7°, 0°, 45°) rotation.
+Rotation(X) = degrees( atan( sqrt(2) ) ) = 54.7°
+*** Spritesheet
