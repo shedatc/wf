@@ -1,6 +1,5 @@
-import pygame
-
-from pygame import Rect
+from pygame         import Rect
+from pygame.display import get_surface
 
 from .utils import log_ex
 
@@ -20,7 +19,7 @@ class Camera:
     # Unit is the pixel.
     def __init__(self, surface_rect, steps):
         self.surface_rect = surface_rect                                          # pixels
-        self.rect         = Rect((0, 0), pygame.display.get_surface().get_size()) # pixels
+        self.rect         = Rect((0, 0), get_surface().get_size()) # pixels
 
         (self.horizontal_step, self.vertical_step) = steps # pixels
 

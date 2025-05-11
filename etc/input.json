@@ -50,9 +50,9 @@
                     "KEY_RIGHT":          "camera_right"
                 },
                 "released": {
-                    "KEY_F1":             "spawn_location_next",
+                    "KEY_F1":             "spawn_entity",
                     "KEY_F2":             "spawn_entity_type_next",
-                    "KEY_F3":             "spawn_entity",
+                    "KEY_F3":             "spawn_location_next",
                     "KEY_Q":              "quit",
                     "KEY_ESCAPE":         "quit",
                     "KEY_O":              "arena_view_toggle",
