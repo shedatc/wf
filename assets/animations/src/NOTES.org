@@ -1,0 +1,32 @@
+* Mechanoid
+:RESOURCES:
+- https://engvee.itch.io/animated-isometric-mechanoid
+:END:
+- Author :: Engvee, Huy Khôi
+
+FREE Animated Isometric Robot
+
+- Animated in 16 directions with 22.5 degree step - very smooth look
+- 7 animations: Switch battle mode; Fire Handgun / Rockets; Hit; PowerOff-On;
+  Idle; Walk;
+- Separate shadow layer to adjust shadow and sun positions to your map (shadow
+  sprite can be distorted/transformated according to sun direction)
+- 180x-, 256x-, x320p frame-size highly optimized RGBA4444 game-ready
+  spritesheets.
+
+Small tip: Poweroff/Walk/BattleMode animations can be played inverse like power
+on, walk back, switch from battle mode to idle, etc. (Laser and rockets are not
+included)
+
+Important! Very good practice is to dynamically load/preload/unload and cache
+single animations to prevent expensive memory usage. Optimizations are care of
+developers )
+
+Will be very handy for RPG, Tower Defence, RTS, Turn-by-turn battle games and
+other.
+
+Sprite pack can be used in both commercial and non-commercial projects. Number
+of projects is not limited, feel free. Also you can modify these sprites for
+your needs.
+
+3D Artist: In collaboration with Huy Khôi
