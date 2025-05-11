@@ -13,7 +13,7 @@ from .Config      import Config
 from .StatCounter import StatCounter
 from .colors      import COLOR_BLACK, COLOR_GREEN
 from .debug       import DEBUG_BLIT
-from .utils       import log_ex, sz
+from .utils       import must_log, log_ex, sz
 
 class Screen:
 
@@ -63,7 +63,6 @@ class Screen:
         for w, h in get_desktop_sizes():
             Screen.log(f"        {w}x{h}")
 
-
         self.surface = set_mode(size, flags, depth=8)
         rect         = self.surface.get_rect()
         self.size    = rect.size
@@ -96,10 +95,40 @@ class Screen:
         Screen.log(f"        Colorkey Blitting:    {i.blit_sw_CC}")
         Screen.log(f"        Pixel alpha Blitting: {i.blit_sw_A}")
 
-        i = get_wm_info()
-        Screen.log(f"Windowing System:")
-        for k, v in i.items():
-            Screen.log(f"        {k}: {v}")
+        if must_log(Screen.__name__):
+            # FIXME Calling the following code while screen logging is disabled
+            # trigger a SIGSEGV:
+            # #0  0x00007e260f94dab0 in PyDict_SetItem () from /usr/lib/libpython3.13.so.1.0
+            # #1  0x00007e260f9537df in PyDict_SetItemString () from /usr/lib/libpython3.13.so.1.0
+            # #2  0x00007e260f4f0c95 in ?? () from /usr/lib/python3.13/site-packages/pygame/display.cpython-313-x86_64-linux-gnu.so
+            # #3  0x00007e260f96022b in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #4  0x00007e260f95f82d in PyObject_Vectorcall () from /usr/lib/libpython3.13.so.1.0
+            # #5  0x00007e260f96ecd4 in _PyEval_EvalFrameDefault () from /usr/lib/libpython3.13.so.1.0
+            # #6  0x00007e260f9a5958 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #7  0x00007e260f95d3bc in _PyObject_MakeTpCall () from /usr/lib/libpython3.13.so.1.0
+            # #8  0x00007e260f96ecd4 in _PyEval_EvalFrameDefault () from /usr/lib/libpython3.13.so.1.0
+            # #9  0x00007e260f9a5958 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #10 0x00007e260f95d3bc in _PyObject_MakeTpCall () from /usr/lib/libpython3.13.so.1.0
+            # #11 0x00007e260f96ecd4 in _PyEval_EvalFrameDefault () from /usr/lib/libpython3.13.so.1.0
+            # #12 0x00007e260f9a5a40 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #13 0x00007e260f95d3bc in _PyObject_MakeTpCall () from /usr/lib/libpython3.13.so.1.0
+            # #14 0x00007e260f978788 in _PyEval_EvalFrameDefault () from /usr/lib/libpython3.13.so.1.0
+            # #15 0x00007e260fa41695 in PyEval_EvalCode () from /usr/lib/libpython3.13.so.1.0
+            # #16 0x00007e260fa7f433 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #17 0x00007e260fa7c81a in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #18 0x00007e260fa79f27 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #19 0x00007e260fa791e0 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #20 0x00007e260fa78ff3 in ?? () from /usr/lib/libpython3.13.so.1.0
+            # #21 0x00007e260fa77244 in Py_RunMain () from /usr/lib/libpython3.13.so.1.0
+            # #22 0x00007e260fa2e95c in Py_BytesMain () from /usr/lib/libpython3.13.so.1.0
+            # #23 0x00007e260f6376b5 in ?? () from /usr/lib/libc.so.6
+            # #24 0x00007e260f637769 in __libc_start_main () from /usr/lib/libc.so.6
+            # #25 0x0000570e3387f045 in _start ()
+
+            i = get_wm_info()
+            Screen.log(f"Windowing System:")
+            for k, v in i.items():
+                Screen.log(f"        {k}: {v}")
 
         self.blit_count = StatCounter()
 
@@ -145,6 +174,7 @@ class Screen:
     def screen_draw_rect(self, screen_rect, color=COLOR_BLACK, width=0):
         draw_rect(self.surface, color, screen_rect, width=width)
 
+    # FIXME Should avoid drawing things that are out of the screen surface.
     def draw_rect(self, world_rect, color=COLOR_BLACK, width=0):
         screen_rect        = world_rect.copy()
         screen_rect.center = Camera.singleton().screen_point(world_rect.center),

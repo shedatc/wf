@@ -7,8 +7,11 @@ from .Config import Config
 
 log_previous_time = None
 
+def must_log(category):
+    return category is None or Config.singleton().must_log(category)
+
 def log_ex(msg, category=None, name=None):
-    if category is not None and not Config.singleton().must_log(category):
+    if not must_log(category):
         return
 
     tokens = []
