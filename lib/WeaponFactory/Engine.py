@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from pygame             import Rect
+from pygame             import Rect, get_sdl_version
 from pygame             import init as pygame_init
 from pygame.display     import flip as display_flip
 from pygame.event       import custom_type as custom_event_type
@@ -44,8 +44,6 @@ class Engine:
     def __init__(self, profiling=False):
         assert Engine._singleton is None
 
-        # FIXME Log things like SDL version, etc…
-
         Engine.log(f"Profiling: {profiling}")
         if profiling:
             import cProfile
@@ -55,6 +53,12 @@ class Engine:
             self.profile = None
 
         pygame_init()
+
+        # FIXME The following code trigger a SIGSEGV.
+        if False:
+            major, minor, hotfix = get_sdl_version()
+            Engine.log(f"SDL Version: {major}.{minor}.{hotfix}")
+
         self.main_menu = MainMenu()
 
         Engine._singleton = self
