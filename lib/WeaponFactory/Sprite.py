@@ -24,7 +24,8 @@ class Sprite:
             select           = animation_config["select"]
             enable           = animation_config["enable"]
             is_loop          = animation_config["is_loop"]
-            animation_player = AnimationPlayer(name, select=select, enable=enable, is_loop=is_loop)
+            animation_player = AnimationPlayer(name, select=select, enable=enable,
+                                               is_loop=is_loop)
             if enable:
                 animation_player.show()
                 e = "enabled"

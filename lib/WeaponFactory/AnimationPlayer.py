@@ -27,12 +27,15 @@ class AnimationPlayer:
         self.visible = False
         return self
 
-    def select(self, name):
+    def select(self, name, rewind=False):
         orig_name = None
         if self._current is not None:
             orig_name = self.current.name
             self._current.pause()
-        self.current = self.animations[name].rewind().resume()
+        self.current = self.animations[name]
+        if rewind:
+            self.current.rewind()
+        self.current.resume()
         if orig_name is None:
             AnimationPlayer.log(f"Now playing animation '{name}'")
         else:

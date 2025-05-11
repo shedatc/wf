@@ -1,7 +1,7 @@
 {
     "animations": [
-        { "offset": [0, -50], "name": "bubbles",   "select": "Error",    "enable": false, "is_loop": false },
         { "offset": [0, 0],   "name": "selection", "select": "Selected", "enable": false, "is_loop": true  },
-        { "offset": [0, -23], "name": "mechanoid", "select": "Idle@0",    "enable": true,  "is_loop": true  }
+        { "offset": [0, -23], "name": "mechanoid", "select": "Idle@0",    "enable": true,  "is_loop": true  },
+        { "offset": [0, -55], "name": "bubbles",   "select": "Error",    "enable": false, "is_loop": false }
     ]
 }

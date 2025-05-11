@@ -33,13 +33,14 @@ class Entity(Sprite, Observable):
 
         self.log(f"Speed: {speed} px/ms")
 
-        self._nav_path   = NavPath(self)
-        self._physics    = Physics(self,
-                                   speed=speed,
-                                   orig_angle=orig_angle, angular_speed=angular_speed)
-        self._bubble     = None
-        self._moves      = []
-        self.is_selected = False
+        self._nav_path = NavPath(self)
+        self._physics  = Physics(self, speed=speed, orig_angle=orig_angle,
+                                 angular_speed=angular_speed)
+
+        self._bubble             = None
+        self._moves              = []
+        self._previous_animation = None
+        self.is_selected         = False
 
         EngineClock.singleton().register(self).resume(self)
 
@@ -123,7 +124,44 @@ class Entity(Sprite, Observable):
             self._look_at(nh)
             self._jump_to(nh)
 
+    def _pick_animation(self):
+        valid_orientations = (
+            0,
+            22.5,
+            45,
+            67.5,
+            90,
+            112.5,
+            135,
+            157.5,
+            180,
+            202.5,
+            225,
+            247.5,
+            270,
+            292.5,
+            315,
+            337.5,
+        )
+        orientation         = self._physics.orientation()
+        nearest_orientation = min(valid_orientations, key=lambda o: abs(o - orientation))
+        Entity.log(self, f"Orientation: {orientation:.2f}° ≈ {nearest_orientation}°")
+
+
+        # if self._physics.is_translating():
+        if len(self._moves) == 0:
+            animation_name = "Idle"
+        else:
+            animation_name = "Walk"
+        animation_name += f"@{nearest_orientation}"
+
+        if self._previous_animation != animation_name:
+            self.animate("mechanoid", animation_name, enable=True)
+            self._previous_animation = animation_name
+
     def next_move(self):
+        self._pick_animation()
+
         if not self._physics.is_done():
             return
 
