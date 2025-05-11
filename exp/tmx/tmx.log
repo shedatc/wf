@@ -1,0 +1,543 @@
+pygame 2.4.0 (SDL 2.30.0, Python 3.11.7)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Screen Size:      800x600 pixels
+Filename:         ./test.tmx
+Version:          1.10
+Tiled Version:    1.10.2
+Orientation:      orthogonal
+Render Order:     right-down
+Map:              12x12 tiles
+Tile:             8x8 pixels
+Background Color: None
+Layer Count:      4
+Layers:
+    Underground:
+        Index:   0
+        Visible: True
+        Opacity: 1.0 Alpha: 255
+        Tiles:
+        Tile Count: 48
+    Ground:
+        Index:   1
+        Visible: True
+        Opacity: 1.0 Alpha: 255
+        Tiles:
+        Tile Count: 96
+    foo:
+        Index:   2
+        Visible: True
+        Opacity: 0.31 Alpha: 79
+        Layer Properties:
+            layer: foo
+        Tiles:
+            [3, 3]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [3:3][layer]: foo
+                [3:3][is_obstacle]: True
+                [3:3][layer]: foo -> fake
+            [4, 3]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [4:3][layer]: foo
+                [4:3][is_obstacle]: True
+                [4:3][layer]: foo -> fake
+            [5, 3]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:3][layer]: foo
+                [5:3][is_obstacle]: True
+                [5:3][layer]: foo -> fake
+            [6, 3]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:3][layer]: foo
+                [6:3][is_obstacle]: True
+                [6:3][layer]: foo -> fake
+            [7, 3]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:3][layer]: foo
+                [7:3][is_obstacle]: True
+                [7:3][layer]: foo -> fake
+            [8, 3]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [8:3][layer]: foo
+                [8:3][is_obstacle]: True
+                [8:3][layer]: foo -> fake
+            [3, 4]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [3:4][layer]: foo
+                [3:4][is_obstacle]: True
+                [3:4][layer]: foo -> fake
+            [4, 4]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [4:4][layer]: foo
+                [4:4][is_obstacle]: True
+                [4:4][layer]: foo -> fake
+            [5, 4]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:4][layer]: foo
+                [5:4][is_obstacle]: True
+                [5:4][layer]: foo -> fake
+            [6, 4]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:4][layer]: foo
+                [6:4][is_obstacle]: True
+                [6:4][layer]: foo -> fake
+            [7, 4]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:4][layer]: foo
+                [7:4][is_obstacle]: True
+                [7:4][layer]: foo -> fake
+            [8, 4]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [8:4][layer]: foo
+                [8:4][is_obstacle]: True
+                [8:4][layer]: foo -> fake
+            [3, 5]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [3:5][layer]: foo
+                [3:5][is_obstacle]: True
+                [3:5][layer]: foo -> fake
+            [4, 5]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [4:5][layer]: foo
+                [4:5][is_obstacle]: True
+                [4:5][layer]: foo -> fake
+            [5, 5]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:5][layer]: foo
+                [5:5][is_obstacle]: True
+                [5:5][layer]: foo -> fake
+            [6, 5]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:5][layer]: foo
+                [6:5][is_obstacle]: True
+                [6:5][layer]: foo -> fake
+            [7, 5]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:5][layer]: foo
+                [7:5][is_obstacle]: True
+                [7:5][layer]: foo -> fake
+            [8, 5]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [8:5][layer]: foo
+                [8:5][is_obstacle]: True
+                [8:5][layer]: foo -> fake
+            [3, 6]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [3:6][layer]: foo
+                [3:6][is_obstacle]: True
+                [3:6][layer]: foo -> fake
+            [4, 6]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [4:6][layer]: foo
+                [4:6][is_obstacle]: True
+                [4:6][layer]: foo -> fake
+            [5, 6]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:6][layer]: foo
+                [5:6][is_obstacle]: True
+                [5:6][layer]: foo -> fake
+            [6, 6]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:6][layer]: foo
+                [6:6][is_obstacle]: True
+                [6:6][layer]: foo -> fake
+            [7, 6]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:6][layer]: foo
+                [7:6][is_obstacle]: True
+                [7:6][layer]: foo -> fake
+            [8, 6]
+                GID: 25
+                Tile Properties:
+                    id: 36
+                    is_obstacle: True
+                    layer: fake
+                    width: 8
+                    height: 8
+                    frames: []
+                [8:6][layer]: foo
+                [8:6][is_obstacle]: True
+                [8:6][layer]: foo -> fake
+        Tile Count: 24
+    bar:
+        Index:   3
+        Visible: True
+        Opacity: 0.6 Alpha: 153
+        Layer Properties:
+            layer: bar
+        Tiles:
+            [5, 1]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:1][layer]: bar
+                [5:1][is_obstacle]: False
+            [6, 1]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:1][layer]: bar
+                [6:1][is_obstacle]: False
+            [7, 1]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:1][layer]: bar
+                [7:1][is_obstacle]: False
+            [5, 2]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:2][layer]: bar
+                [5:2][is_obstacle]: False
+            [6, 2]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:2][layer]: bar
+                [6:2][is_obstacle]: False
+            [7, 2]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:2][layer]: bar
+                [7:2][is_obstacle]: False
+            [5, 3]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:3][layer]: fake -> bar
+                [5:3][is_obstacle]: True -> False
+            [6, 3]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:3][layer]: fake -> bar
+                [6:3][is_obstacle]: True -> False
+            [7, 3]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:3][layer]: fake -> bar
+                [7:3][is_obstacle]: True -> False
+            [5, 4]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:4][layer]: fake -> bar
+                [5:4][is_obstacle]: True -> False
+            [6, 4]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:4][layer]: fake -> bar
+                [6:4][is_obstacle]: True -> False
+            [7, 4]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:4][layer]: fake -> bar
+                [7:4][is_obstacle]: True -> False
+            [5, 5]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:5][layer]: fake -> bar
+                [5:5][is_obstacle]: True -> False
+            [6, 5]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:5][layer]: fake -> bar
+                [6:5][is_obstacle]: True -> False
+            [7, 5]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:5][layer]: fake -> bar
+                [7:5][is_obstacle]: True -> False
+            [5, 6]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:6][layer]: fake -> bar
+                [5:6][is_obstacle]: True -> False
+            [6, 6]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:6][layer]: fake -> bar
+                [6:6][is_obstacle]: True -> False
+            [7, 6]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:6][layer]: fake -> bar
+                [7:6][is_obstacle]: True -> False
+            [5, 7]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [5:7][layer]: bar
+                [5:7][is_obstacle]: False
+            [6, 7]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [6:7][layer]: bar
+                [6:7][is_obstacle]: False
+            [7, 7]
+                GID: 26
+                Tile Properties:
+                    id: 4
+                    is_obstacle: False
+                    width: 8
+                    height: 8
+                    frames: []
+                [7:7][layer]: bar
+                [7:7][is_obstacle]: False
+        Tile Count: 21
+[0, 0]@3 GID: 0
+[0, 0]@2 GID: 0
+[0, 0]@1 GID: 0
+[0, 0]@0 GID: 0
